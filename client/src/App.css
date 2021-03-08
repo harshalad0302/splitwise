@@ -1,0 +1,75 @@
+
+
+
+body {
+    width: auto;
+    height: auto;
+}
+
+ .header {
+  
+padding: 5px;
+    width: auto;
+    background: #5bc5a7;
+    border-bottom: 1px solid #48be9d;
+    color: #fff;
+    text-shadow: 0 -1px 0 #39a385;
+    box-shadow: 0 0 3px rgb(0 0 0 / 50%);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+
+.color
+{
+    background: #5bc5a7; 
+    border: 0;
+
+}
+.main_class_create_group
+{
+    align-items: center;
+    align-content: center;
+}
+
+.color:hover{
+    background: #33aa88; 
+}
+
+
+.zero_margin
+{
+    margin: 0px;
+    padding: 0px;
+}
+
+
+.header_image {
+    height: 40px;
+    
+}
+
+
+.input_for_profile {
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+   
+  }
+  
+  .input_for_profile:focus {
+    outline: none;
+  }
+
+
+  .Edit_button {     
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden; 
+    outline:none;
+    color: rgb(68, 56, 236);       
+}
