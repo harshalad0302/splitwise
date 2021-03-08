@@ -103,7 +103,6 @@ class Login extends Component {
                     <br></br>
                     <br></br>
                     <button onClick={this.SubmitLogin}>Login</button>
-
                     {this.state.auth_flag && <div>{this.state.error_message} </div>}
 
                     <br></br>

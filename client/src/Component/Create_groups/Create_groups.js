@@ -26,6 +26,10 @@ class Create_groups extends Component {
                     <input type="text"></input>
                     <br />
                     <br />
+
+                    <input type="text"></input>
+                    <br />
+                    <br />
                     <button>SAVE</button>
                     <br />
                     <br />
