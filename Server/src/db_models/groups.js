@@ -13,11 +13,8 @@ const groups = sequelize.define('groups', {
     group_name: {
         type: DataTypes.STRING
         // allowNull defaults to true
-    },
-    group_creater_UID: {
-        type: DataTypes.INTEGER
-        // allowNull defaults to true
     }
+   
    
 },
 

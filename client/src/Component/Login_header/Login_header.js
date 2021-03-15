@@ -31,6 +31,10 @@ class Login_header extends Component {
        this.props.dispatch(remove_user())
 
     }
+    HomeOnClick =(e)=>
+    {
+        this.props.props.history.push("/dashboard")
+    }
 
     render() {
 
@@ -41,7 +45,9 @@ class Login_header extends Component {
                         <div >
                             <img src={logo_image} className="header_image" />
                         </div>
-  
+                            <div>
+                            <button onClick={this.HomeOnClick}>Home</button>
+                            </div>
                             <div className="dropdown">
                                 <button className="btn btn-secondary dropdown-toggle color"  type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                    {this.props.user.name_user}
