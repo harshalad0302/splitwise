@@ -5,6 +5,8 @@ import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
+import * as AutosuggestHighlightMatch from 'autosuggest-highlight/match';
+import * as AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 //connection to global store
 const connection_to_redux = (state) => {
 
@@ -14,15 +16,46 @@ const connection_to_redux = (state) => {
 }
 
 
+
 class Create_groups extends Component {
 
+    
     state = {
         emailid_of_members: [],
         group_name: "",
         error_flag: false,
-        error_message: ""
+        error_message: "",
+        all_emailid: []
 
     }
+
+    componentDidMount = async (e) => {
+        //get the data from backend and put in the array for suggestion
+
+        const data = {
+            UID: this.props.user.UID_user
+        }
+
+        //send to backend
+
+        const email_id_array_all=await axios.post('http://localhost:3002/get_all_email', data)
+       // console.log("email_id_array_all is --------",email_id_array_all.data[2].emailid)
+       console.log("email_id_array_all is --------",email_id_array_all.data.emailid)
+       let temp_array=[]
+       for(var i=0;i<email_id_array_all.data.length;i++)
+       {
+                 temp_array.push(email_id_array_all.data[i])
+       }
+       
+        
+        this.setState(()=>({
+            languall_emailidage:temp_array
+        }))
+
+        console.log("this .state is -------",this.state.all_emailid)
+    }
+
+
 
     handelOnClick() {
         this.setState({
@@ -31,6 +64,8 @@ class Create_groups extends Component {
 
         })
     }
+
+
     HandelOnChange(e, index) {
         this.state.emailid_of_members[index] = e.target.value
         this.setState({
@@ -93,32 +128,31 @@ class Create_groups extends Component {
         }
 
         else {
-          
-           
+
+
             const data = {
                 emailid_of_members: this.state.emailid_of_members,
                 length: this.state.emailid_of_members.length,
-                owner:this.props.user.name_user,
-                group_name:this.state.group_name
+                owner: this.props.user.name_user,
+                owner_id: this.props.user.UID_user,
+                group_name: this.state.group_name
             }
 
-           
-           
-         const response_create_group = await axios.post('http://localhost:3002/Create_group', data)
 
-         if(response_create_group.data.group_name_already_p_f==="F")
-         {
-             this.setState({
-                error_flag: true,
-                error_message: <div>
-                    <h4>{response_create_group.data.error_messgae}</h4>
-                </div>
-             })
-         }
-         if(response_create_group.data.group_name_already_p_f==="S")
-         {
-            this.props.history.push("/dashboard")
-         }
+
+            const response_create_group = await axios.post('http://localhost:3002/Create_group', data)
+
+            if (response_create_group.data.group_name_already_p_f === "F") {
+                this.setState({
+                    error_flag: true,
+                    error_message: <div>
+                        <h4>{response_create_group.data.error_messgae}</h4>
+                    </div>
+                })
+            }
+            if (response_create_group.data.group_name_already_p_f === "S") {
+                this.props.history.push("/dashboard")
+            }
 
 
         }

@@ -2547,6 +2547,13 @@
     "postcss" "^7.0.32"
     "postcss-value-parser" "^4.1.0"
 
+"autosuggest-highlight@^3.1.1":
+  "integrity" "sha512-MQ6GNIGMMZbeA5FlBLXXgkZEthysCdYNkMV4MahB2/qB/9cwBnVsePUPnIqkMuzjzclTtDa67xln7cgLDu2f/g=="
+  "resolved" "https://registry.npmjs.org/autosuggest-highlight/-/autosuggest-highlight-3.1.1.tgz"
+  "version" "3.1.1"
+  dependencies:
+    "diacritic" "0.0.2"
+
 "aws-sign2@~0.7.0":
   "integrity" "sha1-tG6JCTSpWR8tL2+G1+ap8bP+dqg="
   "resolved" "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz"
@@ -4170,6 +4177,11 @@
   dependencies:
     "address" "^1.0.1"
     "debug" "^2.6.0"
+
+"diacritic@0.0.2":
+  "integrity" "sha1-/CqIe1pbwKCoVPthTHwvIJBh7gQ="
+  "resolved" "https://registry.npmjs.org/diacritic/-/diacritic-0.0.2.tgz"
+  "version" "0.0.2"
 
 "diff-sequences@^26.6.2":
   "integrity" "sha512-Mv/TDa3nZ9sbc5soK+OoA74BsS3mL37yixCvUAQkiuA4Wz6YtwP/K47n2rv2ovzHZvoiQeA5FTQOschKkEwB0Q=="

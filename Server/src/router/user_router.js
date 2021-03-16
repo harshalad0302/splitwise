@@ -2,6 +2,7 @@ const express = require("express");
 const sequelize = require('../db/connection.js');
 const users = require('../db_models/users');
 const groups = require('../db_models/groups');
+const expensenses = require('../db_models/expensenses');
 const invitations = require('../db_models/invitations');
 const router = new express.Router();
 const { QueryTypes, where } = require('sequelize');
@@ -181,15 +182,18 @@ router.post('/Create_group', async (req, res) => {
       invitations.create({ UID: UID_for_group_member.UID, invite_from_group_id: created_group_id.groupID })
     }
 
+    //put the owner in the group
+    invitations.create({ UID: req.body.owner_id, invite_from_group_id: created_group_id.groupID,accept:"ACCEPT" })
+
     //sending response to frontend
     result_group_name = {
       group_name_already_p_f: "S"
-     
+
     }
 
     res.status(200).send(result_group_name);
 
-  
+
   }
 
 
@@ -198,91 +202,183 @@ router.post('/Create_group', async (req, res) => {
 
 router.post('/dashboard_req', async (req, res) => {
 
-  const count_invitations= await invitations.count(
-    {where:{
-      UID:req.body.UID,
-      accept:"NA"
-    }}
-    )
-
-  const invitations_array=await invitations.findAll({attributes:['invite_from_group_id'],where:{UID:req.body.UID,accept:"NA"} } )
-  
-  var group_names =[]
-  var group_ids=[]
-
-for(var i=0;i<count_invitations;i++)
-{
- 
-   group_names.push(await groups.findOne({attributes:['group_name'],where:{groupID:invitations_array[i].dataValues.invite_from_group_id} }))
-   group_ids.push(invitations_array[i])
-}
-
-//count already accepted 
-const count_invitations_accepted= await invitations.count(
-  {where:{
-    UID:req.body.UID,
-    accept:"ACCEPT"
-  }}
+  const count_invitations = await invitations.count(
+    {
+      where: {
+        UID: req.body.UID,
+        accept: "NA"
+      }
+    }
   )
-//get invitation id for accpted 
-const invitations_array_accepted=await invitations.findAll({attributes:['invite_from_group_id'],where:{UID:req.body.UID,accept:"ACCEPT"} } )
 
-//temp array
-var group_names_accpeted =[]
-var group_ids_accepted=[]
+  const invitations_array = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "NA" } })
 
-//pushing values in them
-for(var i=0;i<count_invitations_accepted;i++)
-{
- 
-  group_names_accpeted.push(await groups.findOne({attributes:['group_name'],where:{groupID:invitations_array_accepted[i].dataValues.invite_from_group_id} }))
-  group_ids_accepted.push(invitations_array_accepted[i])
-}
+  var group_names = []
+  var group_ids = []
 
-result_data ={
-  group_ids:group_ids,
-  group_ids_accepted:group_ids_accepted,
-  group_names:group_names,
-  group_names_accpeted:group_names_accpeted,
-  count_invitations:count_invitations,
-  count_invitations_accepted:count_invitations_accepted
-}
+  for (var i = 0; i < count_invitations; i++) {
 
-res.status(200).send(result_data);
+    group_names.push(await groups.findOne({ attributes: ['group_name'], where: { groupID: invitations_array[i].dataValues.invite_from_group_id } }))
+    group_ids.push(invitations_array[i])
+  }
+
+  //count already accepted 
+  const count_invitations_accepted = await invitations.count(
+    {
+      where: {
+        UID: req.body.UID,
+        accept: "ACCEPT"
+      }
+    }
+  )
+  //get invitation id for accpted 
+  const invitations_array_accepted = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "ACCEPT" } })
+
+  //temp array
+  var group_names_accpeted = []
+  var group_ids_accepted = []
+
+  //pushing values in them
+  for (var i = 0; i < count_invitations_accepted; i++) {
+
+    group_names_accpeted.push(await groups.findOne({ attributes: ['group_name'], where: { groupID: invitations_array_accepted[i].dataValues.invite_from_group_id } }))
+    group_ids_accepted.push(invitations_array_accepted[i])
+  }
+
+  result_data = {
+    group_ids: group_ids,
+    group_ids_accepted: group_ids_accepted,
+    group_names: group_names,
+    group_names_accpeted: group_names_accpeted,
+    count_invitations: count_invitations,
+    count_invitations_accepted: count_invitations_accepted
+  }
+
+  res.status(200).send(result_data);
 });
 
 //dashboard_reject_req
 
 router.post('/dashboard_reject_req', async (req, res) => {
 
- console.log("data is ",req.body)
+  console.log("data is ", req.body)
 
   //update in table 
 
-  console.log("req.body.current_UID is ",req.body.current_UID)
-  console.log("req.body.group_ids_to_be_rejected is ",req.body.group_ids_to_be_rejected)
 
- await  invitations.update({
+
+  await invitations.update({
     accept: "REJECT"
-   }, {
-    where: { UID:req.body.current_UID  ,
-       invite_from_group_id:req.body.group_ids_to_be_rejected}
-   })
-   res.status(200)
- 
+  }, {
+    where: {
+      UID: req.body.current_UID,
+      invite_from_group_id: req.body.group_ids_to_be_rejected
+    }
+  })
+  res.status(200)
+
 });
 
 
 router.post('/dashboard_accept_req', async (req, res) => {
 
-  await  invitations.update({
+  await invitations.update({
     accept: "ACCEPT"
-   }, {
-    where: { UID:req.body.current_UID  ,
-       invite_from_group_id:req.body.accepted_group_id}
-   })
+  }, {
+    where: {
+      UID: req.body.current_UID,
+      invite_from_group_id: req.body.accepted_group_id
+    }
+  })
 
-   res.status(200)
- });
+  res.status(200)
+});
+
+//get_users_in_group
+
+router.post('/get_users_in_group', async (req, res) => {
+
+  console.log("this is we are getting-----", req.body)
+
+  const UID = req.body.current_UID
+  const Group_ID = req.body.group_id
+  const group_name = req.body.group_name
+
+  //get all the UID who have accepted the invitation of this group
+
+const UID_accepeted_invitation = await invitations.findAll({ attributes: ['UID'], where: { invite_from_group_id: Group_ID, accept: "ACCEPT" } })
+
+ 
+  //get the count 
+
+  const count_no_of_members = await invitations.count(
+    {
+      where: {
+        invite_from_group_id: Group_ID,
+        accept: "ACCEPT"
+      }
+    }
+  )
+
+  //temp array
+  var UID_of_members = []
+  var Name_of_members = []
+  //pushing values in them
+  for (var i = 0; i < count_no_of_members; i++) {
+    UID_of_members.push(UID_accepeted_invitation[i])
+    Name_of_members.push(await users.findOne({ attributes: ['name'], where: { UID: UID_accepeted_invitation[i].dataValues.UID } }) )
+  }
+
+//also display the expenses of the group on page
+
+const expense_ids_for_this_group = await expensenses.findAll({ attributes: ['expen_ID'], where: { expense_of_Group_ID: Group_ID} })
+const expense_amount_for_this_group=await expensenses.findAll({ attributes: ['amount'], where: { expense_of_Group_ID: Group_ID} })
+const expense_description=await expensenses.findAll({ attributes: ['description'], where: { expense_of_Group_ID: Group_ID} })
+const expense_paid_by_UID=await expensenses.findAll({ attributes: ['paid_by_UID'], where: { expense_of_Group_ID: Group_ID} })
+
+//get the name of user who paid
+
+let user_name_who_paid=[]
+
+for(var i=0;i<expense_paid_by_UID.length;i++)
+{
+  
+  user_name_who_paid.push(await users.findOne({ attributes: ['name'], where: { UID:expense_paid_by_UID[i].dataValues.paid_by_UID} }))
+}
+
+
+
+//assign and sent
+result_data={
+  UID_of_members:UID_of_members,
+  Name_of_members:Name_of_members,
+  count_no_of_members:count_no_of_members,
+  expense_ids_for_this_group:expense_ids_for_this_group,
+  expense_amount_for_this_group:expense_amount_for_this_group,
+  expense_description:expense_description,
+  expense_paid_by_UID:expense_paid_by_UID,
+  user_name_who_paid:user_name_who_paid
+
+}
+
+  res.status(200).send(result_data);
+
+
+});
+
+//get_all_email
+router.post('/get_all_email', async (req, res) => {
+
+  const all_emails = await users.findAll({ attributes: ['emailid']})
+  res.status(200).send(all_emails);
+});
+
+
+router.post('/Expense_add', async (req, res) => {
+console.log("data we are getting in backend is ",req.body)
+//adding data to the table
+await expensenses.create(req.body, { fields: ["paid_by_UID", "expense_of_Group_ID", "amount","currency","description"] });
+  res.status(200);
+});
 
 module.exports = router

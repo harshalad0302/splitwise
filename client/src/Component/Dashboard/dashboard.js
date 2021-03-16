@@ -102,6 +102,20 @@ class dashboard extends Component {
 
     }
 
+
+    GotoGroup_on_click =(index)=>{
+
+      
+        this.props.history.push({
+            pathname: '/group_page',
+          
+            state: { group_name: this.state.User_is_part_of_group[index],
+                group_id:this.state.User_is_part_of_group_id[index]
+             }
+          })
+
+    }
+
     render() {
 
 
@@ -127,10 +141,10 @@ class dashboard extends Component {
                     <h2>my groups </h2>
                     {
                         this.state.User_is_part_of_group &&
-                        this.state.User_is_part_of_group.map((user, i) => {
+                        this.state.User_is_part_of_group.map((user, index) => {
                             return (
-                                <div key={i}>
-                                    <input value={user} readOnly="readonly" />
+                                <div key={index}>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button>
                                 </div>
                             )
                         })
