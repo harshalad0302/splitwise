@@ -40,16 +40,16 @@ class Create_groups extends Component {
 
         const email_id_array_all=await axios.post('http://localhost:3002/get_all_email', data)
        // console.log("email_id_array_all is --------",email_id_array_all.data[2].emailid)
-       console.log("email_id_array_all is --------",email_id_array_all.data.emailid)
+      // console.log("email_id_array_all is --------",email_id_array_all.data[1].emailid)
        let temp_array=[]
        for(var i=0;i<email_id_array_all.data.length;i++)
        {
-                 temp_array.push(email_id_array_all.data[i])
+                 temp_array.push(email_id_array_all.data[i].emailid)
        }
        
         
         this.setState(()=>({
-            languall_emailidage:temp_array
+            all_emailid:temp_array
         }))
 
         console.log("this .state is -------",this.state.all_emailid)

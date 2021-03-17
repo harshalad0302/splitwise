@@ -27,10 +27,12 @@ class group_page extends Component {
             description: "",
             error_flag: false,
             error_message: "",
-            expenses_of_this_group:undefined,
-            expense_amount_of_this_group:undefined,
-            expense_paid_by_uid_of_this_group:undefined,
-            name_of_user_who_paid:undefined
+            expenses_of_this_group: undefined,
+            expense_amount_of_this_group: undefined,
+            expense_paid_by_uid_of_this_group: undefined,
+            name_of_user_who_paid: undefined,
+            group_bal_users_get:undefined,
+            group_bal_users_ows:undefined
         };
         this.showModal = this.showModal.bind(this);
         this.hideModal = this.hideModal.bind(this);
@@ -46,7 +48,6 @@ class group_page extends Component {
 
     componentDidMount = async (e) => {
 
-       
         const data = {
             group_name: this.props.history.location.state.group_name,
             group_id: this.props.history.location.state.group_id,
@@ -55,13 +56,14 @@ class group_page extends Component {
 
         const get_users_in_group = await axios.post('http://localhost:3002/get_users_in_group', data)
 
-      
         let array_users_in_group = []
         let array_users_in_group_id = []
         let expenses_of_the_group = []
-        let expenses_paid_by_UID=[]
-        let expense_amount=[]
-        let name_of_user_who_paid_for_this=[]
+        let expenses_paid_by_UID = []
+        let expense_amount = []
+        let name_of_user_who_paid_for_this = []
+        let group_bal_users_get_temp=[]
+        let group_bal_users_ows_temp=[]
 
         for (var i = 0; i < get_users_in_group.data.count_no_of_members; i++) {
             array_users_in_group.push(get_users_in_group.data.Name_of_members[i].name)
@@ -71,8 +73,7 @@ class group_page extends Component {
 
 
         //load the arrays to display
-        for(var i=0;i<get_users_in_group.data.expense_ids_for_this_group.length;i++)
-        {
+        for (var i = 0; i < get_users_in_group.data.expense_ids_for_this_group.length; i++) {
             expenses_of_the_group.push(get_users_in_group.data.expense_description[i].description)
             expenses_paid_by_UID.push(get_users_in_group.data.expense_paid_by_UID[i].paid_by_UID)
             expense_amount.push(get_users_in_group.data.expense_amount_for_this_group[i].amount)
@@ -80,19 +81,52 @@ class group_page extends Component {
         }
 
 
+        for(var i=0;i<get_users_in_group.data.arr_expense_gets.length;i++)
+        {
+           
+            if(get_users_in_group.data.arr_expense_gets[i].amount_gets!==null)
+            {
+                group_bal_users_get_temp.push({UID:get_users_in_group.data.arr_expense_gets[i].UID,name:get_users_in_group.data.arr_expense_gets[i].name.name,amount_gets:get_users_in_group.data.arr_expense_gets[i].amount_gets})
+            }
+            
+        }
+        console.log("group_bal_users_get_temp is ",group_bal_users_get_temp)
+        //to display the balence of the groups
+       // console.log("get_users_in_group.arr_expense_gets is ",get_users_in_group.data.arr_expense_gets[1])
+        console.log("get_users_in_group.arr_expense_ows is ",get_users_in_group.data.arr_expenses_ows.length)
+        console.log("get_users_in_group.arr_expense_ows is ",get_users_in_group.data.arr_expenses_ows)
+
+        for(var i=0;i<get_users_in_group.data.arr_expenses_ows.length;i++)
+        {
+           
+           // console.log("get_users_in_group.data.arr_expenses_ows--",get_users_in_group.data.arr_expenses_ows[i].amount_ows)
+            if(get_users_in_group.data.arr_expenses_ows[i].amount_ows!==null)
+            {
+                group_bal_users_ows_temp.push({UID:get_users_in_group.data.arr_expenses_ows[i].UID ,name:get_users_in_group.data.arr_expenses_ows[i].name.name,amount_ows:get_users_in_group.data.arr_expenses_ows[i].amount_ows})
+            }
+            
+        }
+
+
+        console.log("group_bal_users_ows_temp is ",group_bal_users_ows_temp)
+
         //now setting a state
         this.setState(() => ({
+            group_bal_users_ows:group_bal_users_ows_temp,
+            group_bal_users_get:group_bal_users_get_temp,
             users_in_group: array_users_in_group,
             user_id_in_group: array_users_in_group_id,
-            expenses_of_this_group:expenses_of_the_group,
-            expense_amount_of_this_group:expense_amount,
-            expense_paid_by_uid_of_this_group:expenses_paid_by_UID,
-            name_of_user_who_paid:name_of_user_who_paid_for_this
+            expenses_of_this_group: expenses_of_the_group,
+            expense_amount_of_this_group: expense_amount,
+            expense_paid_by_uid_of_this_group: expenses_paid_by_UID,
+            name_of_user_who_paid: name_of_user_who_paid_for_this
 
         }))
 
-        
-      
+    
+
+
+
     }
 
     HandelCurrencyOnChange = (e) => {
@@ -132,7 +166,7 @@ class group_page extends Component {
             })
         }
         else {
-          
+
             //send data to backend 
             this.hideModal()
             const response_Expense_add = axios.post('http://localhost:3002/Expense_add', data)
@@ -202,17 +236,48 @@ class group_page extends Component {
                         <h2>Group Expenses</h2>
                         <h4>Expenses........amount.......................paid by</h4>
                         {
-                            this.state.expenses_of_this_group && 
+                            this.state.expenses_of_this_group &&
                             this.state.expenses_of_this_group.map((expense, index) => {
                                 return (
                                     <div key={index}>
-                                    <input value={expense} readOnly="readonly" /> <input value={this.state.expense_amount_of_this_group[index]} readOnly="readonly" /> <input value={this.state.name_of_user_who_paid[index]} readOnly="readonly" /> 
+                                        <input value={expense} readOnly="readonly" /> <input value={this.state.expense_amount_of_this_group[index]} readOnly="readonly" /> <input value={this.state.name_of_user_who_paid[index]} readOnly="readonly" />
                                     </div>
                                 )
                             })
-                            
+
+                        }
+                        
+
+                    </div>
+                    <div>
+                        <h2>Group Balance</h2>
+                        {
+                            //group_bal_users_get
+                            this.state.group_bal_users_get &&
+                            this.state.group_bal_users_get.map((data, index) => {
+                                return (
+                                    <div key={index}>
+                                        <input value={data.name} readOnly="readonly" /><label>Amount gets </label>  <input value={data.amount_gets} readOnly="readonly" />
+                                    </div>
+                                )
+                            })
+
                         }
                       
+                    </div>
+                    <div>
+                    {
+                        //group_bal_users_ows
+                        this.state.group_bal_users_ows &&
+                        this.state.group_bal_users_ows.map((data, index) => {
+                            return (
+                                <div key={index}>
+                                    <input value={data.name} readOnly="readonly" /><label>Amount ows </label>  <input value={data.amount_ows} readOnly="readonly" />
+                                </div>
+                            )
+                        })
+
+                    }
                     </div>
 
                 </div>
