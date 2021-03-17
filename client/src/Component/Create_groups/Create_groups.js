@@ -39,8 +39,7 @@ class Create_groups extends Component {
         //send to backend
 
         const email_id_array_all=await axios.post('http://localhost:3002/get_all_email', data)
-       // console.log("email_id_array_all is --------",email_id_array_all.data[2].emailid)
-      // console.log("email_id_array_all is --------",email_id_array_all.data[1].emailid)
+      
        let temp_array=[]
        for(var i=0;i<email_id_array_all.data.length;i++)
        {
@@ -52,7 +51,7 @@ class Create_groups extends Component {
             all_emailid:temp_array
         }))
 
-        console.log("this .state is -------",this.state.all_emailid)
+
     }
 
 
@@ -81,10 +80,6 @@ class Create_groups extends Component {
     handelRemoveOnClick(index) {
 
         this.state.emailid_of_members.splice(index, 1)
-
-
-        console.log(this.state.emailid_of_members, "$$$$")
-
         this.setState({
             emailid_of_members: this.state.emailid_of_members
 

@@ -70,29 +70,7 @@ class signup extends Component {
                   
                 }
 
-
-                //validation to check field is empty
-
-
-                // if((this.state.name==="")||(this.state.emailid==="")||(this.state.password===""))
-                // {
-                //    this.setState({
-                //     auth_flag :true,
-                //     error_message : <div>
-                //     <h2 >The following errors occurred:</h2>
-                //     <ul list-style-position="inside" >
-                //     <li>First name can't be blank</li>
-                //     <li>Email address can't be blank</li>
-                //     <li>Password is too short (minimum is 8 characters)</li>
-                //     <li>Please enter a valid email address.</li>
-                //     </ul>
-                //     </div>
-                //    })
-
-                // }
-                
-
-               // console.log("-----------------------",data)
+         
 
 
             const response =  await axios.post('http://localhost:3002/signup',data)

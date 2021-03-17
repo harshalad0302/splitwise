@@ -24,13 +24,13 @@ router.post('/signup', async (req, res) => {
   else {
     const found_data = await users.findOne({ where: { emailid: req.body.emailid } });
     if (found_data === null) {
-      console.log('Not found!');
+   
       //inserting data
       await users.create(req.body, { fields: ["name", "emailid", "password"] });
 
       const data_after_insert = await users.findOne({ where: { emailid: req.body.emailid } });
 
-      console.log("data after insert", data_after_insert)
+
 
       result = {
         auth_flag_email: "S",
@@ -115,7 +115,7 @@ router.post('/Login', async (req, res) => {
 router.post('/profile', async (req, res) => {
 
 
-  console.log("-----------", req.body.emailid);
+ 
 
   if (req.body.emailid !== "") {
     await users.update({ emailid: req.body.emailid },
@@ -172,8 +172,7 @@ router.post('/Create_group', async (req, res) => {
     for (var i = 0; i < req.body.length; i++) {
       //get the UID
       var UID_for_group_member = await users.findOne({ where: { emailid: req.body.emailid_of_members[i] } })
-      // console.log("UID is ------",UID_for_group_member.UID)
-      // console.log("invite_from_group_id is ------",created_group_id.groupID)
+    
       invitations.create({ UID: UID_for_group_member.UID, invite_from_group_id: created_group_id.groupID })
     }
 
@@ -256,7 +255,7 @@ router.post('/dashboard_req', async (req, res) => {
 
 router.post('/dashboard_reject_req', async (req, res) => {
 
-  console.log("data is ", req.body)
+
 
   //update in table 
 
@@ -344,7 +343,7 @@ const arr_expenses_ows=[]
 
     for(var i=0;i<count_no_of_members;i++)
     {
-      //console.log("UID_of_members [] ",UID_of_members[i].dataValues.UID)
+    
       let amount_this_UID_ows=await personal_expenditure_ows.sum('amount_ows',{where:{UID:UID_of_members[i].dataValues.UID}} )
       let amount_this_UID_gets=await personal_expenditure_get.sum('amount_gets',{where:{UID:UID_of_members[i].dataValues.UID}} )
       let name_of_UID=await users.findOne({ attributes: ['name'], where: { UID: UID_of_members[i].dataValues.UID} })
@@ -354,8 +353,7 @@ const arr_expenses_ows=[]
 
     }
 
-    console.log("arr_expense is ",arr_expense_gets)
-    console.log("arr_expense_ows is ",arr_expenses_ows)
+   
 
 //assign and sent
 result_data={
@@ -389,7 +387,7 @@ router.post('/get_all_email', async (req, res) => {
 
 router.post('/Expense_add', async (req, res) => {
 
-console.log("data we are getting ",req.body)
+
 await expensenses.create(req.body, { fields: ["paid_by_UID", "expense_of_Group_ID", "amount","currency","description"] });
 //get the expense id of latest inserted transction 
 const expense_id_of_inserted_transcation=await expensenses.max('expen_ID')
@@ -406,13 +404,12 @@ const no_of_members=await invitations.count(
 const UID_in_group=await invitations.findAll({ attributes: ['UID'], where: { invite_from_group_id: req.body.expense_of_Group_ID ,  accept: "ACCEPT"} })
 const each_split=req.body.amount/no_of_members
 const amount_owner_gets=each_split*(no_of_members-1)
-console.log("each_split is ",each_split)
-console.log("no_of_members is ",no_of_members)
+
 
 for(var i=0;i<no_of_members;i++)
 {
 
-  console.log("UID_in_group are ",UID_in_group[i].dataValues.UID)
+
   
   if(UID_in_group[i].dataValues.UID!==req.body.paid_by_UID)
   {

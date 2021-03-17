@@ -99,12 +99,11 @@ class profile extends Component {
         }
       
       
-        console.log("-------------Inside save giving this data to post",data);
+    
         const response_save = await axios.post('http://localhost:3002/profile', data)
 
         if (response_save.data.auth_flag_edit === "S") {
-           
-           // console.log("------------------------",response_save.data.updated_state)
+         
             this.props.dispatch(add_user(response_save.data.updated_state))
             this.props.history.push("/dashboard")
           

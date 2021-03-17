@@ -6,9 +6,7 @@ import config_store from './Store/config_store'
 
 const store = config_store()
 
-// store.subscribe(() => {
-//   console.log(store.getState())
-// })
+
 
 //App Component
 class App extends Component {

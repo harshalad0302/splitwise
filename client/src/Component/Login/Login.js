@@ -59,8 +59,7 @@ class Login extends Component {
 
             //Redux dispath
             this.props.dispatch(add_user(response_login.data))
-          //  console.log("---------------------",response_login.data.phone_number)
-           // console.log(this.state)
+     
             this.props.history.push("/dashboard")
             this.setState({
                 auth_flag: false

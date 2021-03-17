@@ -36,6 +36,11 @@ class Login_header extends Component {
         this.props.props.history.push("/dashboard")
     }
 
+
+    submitMyGroups=(e)=>
+    {
+        this.props.props.history.push("/group_invite")
+    }
     render() {
 
 
@@ -55,7 +60,9 @@ class Login_header extends Component {
                                 <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <a className="dropdown-item" onClick={this.submitYourAccount}>Your Account</a>
                                     <a className="dropdown-item" onClick={this.submitCreateGroup} >Create a Group</a>
+                                    <a className="dropdown-item" onClick={this.submitMyGroups} >MyGroups</a>
                                     <a className="dropdown-item" onClick={this.submitLogout}>Logout</a>
+                                    
                                 </div>
                             </div>
                         

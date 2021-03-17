@@ -14,7 +14,7 @@ const connection_to_redux = (state) => {
 
 
 
-class dashboard extends Component {
+class group_invite extends Component {
 
     state = {
         invites_from_group: undefined,
@@ -54,7 +54,7 @@ class dashboard extends Component {
            group_ids_invite:group_ids
        }))
 
-      // console.log("----------------",this.state.group_ids[1])
+
 
 //displaying accepted groups
 
@@ -64,13 +64,13 @@ class dashboard extends Component {
 
     handelRejecteOnClick =  (index) => 
     {
-    //   //  console.log("----------------", this.state.invites_from_group[index])
+
       const data={
         group_to_be_rejeceted:this.state.invites_from_group[index],
         group_ids_to_be_rejected:this.state.group_ids_invite[index],
         current_UID:this.props.user.UID_user
       }
-      console.log("data to be sent is ",data)
+
      const rejected_group =  axios.post('http://localhost:3002/dashboard_reject_req', data)
       
       this.state.invites_from_group.splice(index,1)
@@ -84,9 +84,7 @@ class dashboard extends Component {
 
     handelAcceptOnClick =async(index)=>
     {
-        console.log("accepting request for ",this.state.invites_from_group[index])
-
-        console.log("accepting req for this group id ---",this.state.group_ids_invite[index])
+        
 
         //sending this to backed to get inserted
 
@@ -144,7 +142,7 @@ class dashboard extends Component {
                         this.state.User_is_part_of_group.map((user, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.GotoGroup_on_click(index)}>Leave Group</button>
                                 </div>
                             )
                         })
@@ -158,4 +156,4 @@ class dashboard extends Component {
 }
 
 
-export default connect(connection_to_redux)(dashboard);
+export default connect(connection_to_redux)(group_invite);

@@ -90,16 +90,14 @@ class group_page extends Component {
             }
             
         }
-        console.log("group_bal_users_get_temp is ",group_bal_users_get_temp)
+
         //to display the balence of the groups
-       // console.log("get_users_in_group.arr_expense_gets is ",get_users_in_group.data.arr_expense_gets[1])
-        console.log("get_users_in_group.arr_expense_ows is ",get_users_in_group.data.arr_expenses_ows.length)
-        console.log("get_users_in_group.arr_expense_ows is ",get_users_in_group.data.arr_expenses_ows)
+      
 
         for(var i=0;i<get_users_in_group.data.arr_expenses_ows.length;i++)
         {
            
-           // console.log("get_users_in_group.data.arr_expenses_ows--",get_users_in_group.data.arr_expenses_ows[i].amount_ows)
+          
             if(get_users_in_group.data.arr_expenses_ows[i].amount_ows!==null)
             {
                 group_bal_users_ows_temp.push({UID:get_users_in_group.data.arr_expenses_ows[i].UID ,name:get_users_in_group.data.arr_expenses_ows[i].name.name,amount_ows:get_users_in_group.data.arr_expenses_ows[i].amount_ows})
@@ -108,7 +106,7 @@ class group_page extends Component {
         }
 
 
-        console.log("group_bal_users_ows_temp is ",group_bal_users_ows_temp)
+
 
         //now setting a state
         this.setState(() => ({
