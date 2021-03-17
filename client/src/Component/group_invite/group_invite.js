@@ -30,21 +30,21 @@ class group_invite extends Component {
         }
      
        
-       const dashborad_req = await axios.post('http://localhost:3002/dashboard_req', data)
+       const group_invite_req = await axios.post('http://localhost:3002/group_page_invite', data)
         const group_names=[]
         const group_ids=[]
         const group_name_accepted=[]
         const group_id_accepted=[]
-       for(var i=0;i<dashborad_req.data.count_invitations;i++)
+       for(var i=0;i<group_invite_req.data.count_invitations;i++)
        {
-        group_names.push(dashborad_req.data.group_names[i].group_name)
-        group_ids.push(dashborad_req.data.group_ids[i].invite_from_group_id)
+        group_names.push(group_invite_req.data.group_names[i].group_name)
+        group_ids.push(group_invite_req.data.group_ids[i].invite_from_group_id)
        }
 
-       for(var i=0;i<dashborad_req.data.count_invitations_accepted;i++)
+       for(var i=0;i<group_invite_req.data.count_invitations_accepted;i++)
        {
-        group_name_accepted.push(dashborad_req.data.group_names_accpeted[i].group_name)
-        group_id_accepted.push(dashborad_req.data.group_ids_accepted[i].invite_from_group_id)
+        group_name_accepted.push(group_invite_req.data.group_names_accpeted[i].group_name)
+        group_id_accepted.push(group_invite_req.data.group_ids_accepted[i].invite_from_group_id)
        }
 
        this.setState(()=>({
@@ -56,7 +56,7 @@ class group_invite extends Component {
 
 
 
-//displaying accepted groups
+
 
 
     }
@@ -71,7 +71,7 @@ class group_invite extends Component {
         current_UID:this.props.user.UID_user
       }
 
-     const rejected_group =  axios.post('http://localhost:3002/dashboard_reject_req', data)
+     const rejected_group =  axios.post('http://localhost:3002/group_invite_reject_req', data)
       
       this.state.invites_from_group.splice(index,1)
 
@@ -94,7 +94,7 @@ class group_invite extends Component {
             current_UID:this.props.user.UID_user
         }
 
-        const response_accepted_group_req=axios.post('http://localhost:3002/dashboard_accept_req', data)
+        const response_accepted_group_req=axios.post('http://localhost:3002/group_invite_accept_req', data)
 
 
 
@@ -112,6 +112,13 @@ class group_invite extends Component {
              }
           })
 
+    }
+
+
+    OnClickLeaveGroup=(index)=>
+    {
+
+        console.log("On leave is submitted for ")
     }
 
     render() {
@@ -142,7 +149,7 @@ class group_invite extends Component {
                         this.state.User_is_part_of_group.map((user, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.GotoGroup_on_click(index)}>Leave Group</button>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)}>Leave Group</button>
                                 </div>
                             )
                         })

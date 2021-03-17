@@ -144,7 +144,7 @@ class group_page extends Component {
     OnClickSaveandSplit = async (e) => {
 
         //get the values in one object
-        // { fields: ["paid_by_UID", "expense_of_Group_ID", "amount","currency","description"] });
+
         const data = {
             paid_by_UID: this.props.user.UID_user,
             expense_of_Group_ID: this.props.history.location.state.group_id,

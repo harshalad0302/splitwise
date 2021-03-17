@@ -41,6 +41,10 @@ class Login_header extends Component {
     {
         this.props.props.history.push("/group_invite")
     }
+    submitRecentActivities=(e)=>
+    {
+        this.props.props.history.push("/recent_activities")
+    }
     render() {
 
 
@@ -61,7 +65,9 @@ class Login_header extends Component {
                                     <a className="dropdown-item" onClick={this.submitYourAccount}>Your Account</a>
                                     <a className="dropdown-item" onClick={this.submitCreateGroup} >Create a Group</a>
                                     <a className="dropdown-item" onClick={this.submitMyGroups} >MyGroups</a>
+                                    <a className="dropdown-item" onClick={this.submitRecentActivities} >Recent Activities</a>
                                     <a className="dropdown-item" onClick={this.submitLogout}>Logout</a>
+                               
                                     
                                 </div>
                             </div>
