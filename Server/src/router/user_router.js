@@ -4,12 +4,14 @@ const users = require('../db_models/users');
 const groups = require('../db_models/groups');
 const expensenses = require('../db_models/expensenses');
 const invitations = require('../db_models/invitations');
+const recentactivities = require('../db_models/recentactivities')
 const router = new express.Router();
 const { QueryTypes, where } = require('sequelize');
 const { Sequelize } = require('sequelize');
 const personal_expenditure_get = require('../db_models/personal_expenditure_get');
 const personal_expenditure_ows = require('../db_models/personal_expenditure_ows');
 const { findAll } = require("../db_models/users");
+const { Json } = require("sequelize");
 
 router.post('/signup', async (req, res) => {
 
@@ -49,6 +51,7 @@ router.post('/signup', async (req, res) => {
 
 
       result = {
+        auth_flag_email: "F",
         auth_flag_email: "Femail_already",
         error_message: "Email id is already present"
       }
@@ -156,6 +159,7 @@ router.post('/profile', async (req, res) => {
 router.post('/Create_group', async (req, res) => {
 
   const found_group_name = await groups.findOne({ where: { group_name: req.body.group_name } });
+
   if (found_group_name !== null) {
     result_group_name = {
       group_name_already_p_f: "F",
@@ -170,11 +174,32 @@ router.post('/Create_group', async (req, res) => {
     await groups.create({ group_name: req.body.group_name })
     //get the group_id from the inserted value
     const created_group_id = await groups.findOne({ where: { group_name: req.body.group_name } });
+
+    //--------------------------
+    let owner = req.body.owner
+    let group_name_this = req.body.group_name
+    let activity = "user " + JSON.stringify(owner) + "created a group " + JSON.stringify(group_name_this)
+    //adding in recent activity 
+    await recentactivities.create({ GroupID: created_group_id.groupID, groupname: req.body.group_name, activity: activity, UID: req.body.owner_id, date_time: Sequelize.fn('NOW') })
+    //--------------------------
     for (var i = 0; i < req.body.length; i++) {
       //get the UID
       var UID_for_group_member = await users.findOne({ where: { emailid: req.body.emailid_of_members[i] } })
-
       invitations.create({ UID: UID_for_group_member.UID, invite_from_group_id: created_group_id.groupID })
+      let name_of_user_invited = await users.findOne({ attributes: ['name'], where: { UID: UID_for_group_member.UID } })
+      //--------------------------
+      //recent activity sent invitation to 
+      let invite_activity = "user " + JSON.stringify(req.body.owner) + " sent group invite of " + JSON.stringify(req.body.group_name) + " to " + JSON.stringify(name_of_user_invited.name)
+
+
+      await recentactivities.create({
+        GroupID: created_group_id.groupID,
+        groupname: req.body.group_name,
+        activity: invite_activity,
+        UID: req.body.owner_id,
+        date_time: Sequelize.fn('NOW')
+      })
+      //--------------------------
     }
 
     //put the owner in the group
@@ -286,7 +311,25 @@ router.post('/group_invite_accept_req', async (req, res) => {
     }
   })
 
-  res.status(200)
+  //---------------------
+  //add to recent activitiies
+  let activity_insert = "user " + JSON.stringify(req.body.current_UID_name) + " joined the group " + JSON.stringify(req.body.accepted_group_name)
+  console.log("activity_insert --------", activity_insert)
+
+  await recentactivities.create({
+    GroupID: req.body.accepted_group_id,
+    groupname: req.body.accepted_group_name,
+    activity: activity_insert,
+    UID: req.body.current_UID,
+    date_time: Sequelize.fn('NOW')
+  })
+
+
+  //---------------------
+  result = {
+    acceped_for_group: req.body.accepted_group_id
+  }
+  res.status(200).send(result)
 });
 
 //get_users_in_group
@@ -390,6 +433,21 @@ router.post('/Expense_add', async (req, res) => {
   await expensenses.create(req.body, { fields: ["paid_by_UID", "expense_of_Group_ID", "amount", "currency", "description"] });
   //get the expense id of latest inserted transction 
   const expense_id_of_inserted_transcation = await expensenses.max('expen_ID')
+  //--------------------
+  //Recent activity
+  let recent_activity_expense_added = "user " + JSON.stringify(req.body.name_of_UID_paid) + " added the new expense " + JSON.stringify(req.body.description) + " of " + JSON.stringify(req.body.amount) + "USD in the group " + JSON.stringify(req.body.name_of_group_ID)
+ 
+  await recentactivities.create({
+    GroupID: req.body.expense_of_Group_ID,
+    groupname: req.body.name_of_group_ID,
+    activity: recent_activity_expense_added,
+    UID: req.body.paid_by_UID,
+    date_time: Sequelize.fn('NOW')
+  })
+
+
+  //--------------------
+
   //get the number of members in the group
 
   const no_of_members = await invitations.count(
@@ -404,10 +462,7 @@ router.post('/Expense_add', async (req, res) => {
   const each_split = req.body.amount / no_of_members
   const amount_owner_gets = each_split * (no_of_members - 1)
 
-
   for (var i = 0; i < no_of_members; i++) {
-
-
 
     if (UID_in_group[i].dataValues.UID !== req.body.paid_by_UID) {
       await personal_expenditure_get.create({ UID: req.body.paid_by_UID, GroupID: req.body.expense_of_Group_ID, amount_gets: each_split, amount_gets_from_UID: UID_in_group[i].dataValues.UID, expen_ID: expense_id_of_inserted_transcation })
@@ -518,22 +573,22 @@ router.post('/Show_deatils', async (req, res) => {
 
   for (var i = 0; i < amount_ows_combined_with_user.length; i++) {
     //get user name
-    let user_name=await users.findOne({attributes:['name'],where:{UID:amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID}})
+    let user_name = await users.findOne({ attributes: ['name'], where: { UID: amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID } })
     combined_ows.push({
-      UID:amount_ows_combined_with_user[i].dataValues.UID,
-      GroupID:amount_ows_combined_with_user[i].dataValues.GroupID,
-      amount_ows_to_UID:amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID,
-      name_of_amount_ows_to_UID:user_name.dataValues.name,
-      amount_ows:amount_ows_combined_with_user[i].dataValues.amount_ows
+      UID: amount_ows_combined_with_user[i].dataValues.UID,
+      GroupID: amount_ows_combined_with_user[i].dataValues.GroupID,
+      amount_ows_to_UID: amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID,
+      name_of_amount_ows_to_UID: user_name.dataValues.name,
+      amount_ows: amount_ows_combined_with_user[i].dataValues.amount_ows
 
-    
+
     })
   }
 
   //similarly for gets
   let array_group_specific_tran_gets = []
   const data_gets = await personal_expenditure_get.findAll({ attributes: ['amount_gets', 'amount_gets_from_UID', 'expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
-  
+
   for (var i = 0; i < data_gets.length; i++) {
     //get the details of expense
     let expense_detail = await expensenses.findOne({ attributes: ['currency', 'description', 'date', 'amount'], where: { expense_of_Group_ID: req.body.Group_ID, expen_ID: data_gets[i].dataValues.expen_ID } })
@@ -557,15 +612,15 @@ router.post('/Show_deatils', async (req, res) => {
   const amount_gets_combined_with_user = await personal_expenditure_get.findAll({ attributes: ['UID', 'GroupID', 'amount_gets_from_UID', [Sequelize.fn('sum', Sequelize.col('amount_gets')), 'amount_gets']], group: ['amount_gets_from_UID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
   for (var i = 0; i < amount_gets_combined_with_user.length; i++) {
     //get user name
-    let user_name=await users.findOne({attributes:['name'],where:{UID:amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID}})
+    let user_name = await users.findOne({ attributes: ['name'], where: { UID: amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID } })
     combined_gets.push({
-      UID:amount_gets_combined_with_user[i].dataValues.UID,
-      GroupID:amount_gets_combined_with_user[i].dataValues.GroupID,
-      amount_gets_from_UID:amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID,
-      name_of_amount_gets_from_UID:user_name.dataValues.name,
-      amount_gets:amount_gets_combined_with_user[i].dataValues.amount_gets
+      UID: amount_gets_combined_with_user[i].dataValues.UID,
+      GroupID: amount_gets_combined_with_user[i].dataValues.GroupID,
+      amount_gets_from_UID: amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID,
+      name_of_amount_gets_from_UID: user_name.dataValues.name,
+      amount_gets: amount_gets_combined_with_user[i].dataValues.amount_gets
 
-    
+
     })
   }
 
@@ -573,12 +628,127 @@ router.post('/Show_deatils', async (req, res) => {
     array_group_specific_tran: array_group_specific_tran,
     combined_ows: combined_ows,
     array_group_specific_tran_gets: array_group_specific_tran_gets,
-    combined_gets:combined_gets
-  
+    combined_gets: combined_gets
+
 
   }
 
   res.status(200).send(result);
 });
+
+
+//response_users_to_show
+router.post('/response_users_to_show', async (req, res) => {
+
+  console.log("length is ", req.body.length)
+
+  let user_names = []
+
+  for (var i = 0; i < req.body.length; i++) {
+    user_names.push(await users.findOne({ attributes: ['name', 'UID'], where: { UID: req.body[i] } }))
+  }
+
+  result = {
+
+    user_names: user_names
+  }
+
+  res.status(200).send(result);
+
+});
+
+//Settle_req
+
+router.post('/Settle_req', async (req, res) => {
+
+  //delete data from gets table
+
+  await personal_expenditure_get.destroy({ where: { UID: req.body.UID_of_login, GroupID: req.body.GroupID, amount_gets_from_UID: req.body.other_UID } })
+  await personal_expenditure_ows.destroy({ where: { UID: req.body.UID_of_login, GroupID: req.body.GroupID, amount_ows_to_UID: req.body.other_UID } })
+
+  //-----------------
+  //recent activity
+
+  let settle_activity="user "+JSON.stringify(req.body.name_of_UID_login)+"settle up with "+JSON.stringify(req.body.name_of_other_UID)+" for group "+JSON.stringify(req.body.GroupID_name)
+  await recentactivities.create({
+    GroupID: req.body.GroupID,
+    groupname: req.body.GroupID_name,
+    activity: settle_activity,
+    UID: req.body.UID_of_login,
+    date_time: Sequelize.fn('NOW')
+  })
+ // -----------------
+
+ 
+  res.status(200);
+
+});
+
+//leave_group
+router.post('/leave_group', async (req, res) => {
+  //first check if everything is settel 
+  const count_gets = await personal_expenditure_get.count({
+    where: {
+      UID: req.body.UID,
+      GroupID: req.body.group_id
+    }
+  })
+
+
+  const count_ows = await personal_expenditure_ows.count(
+    {
+      where: {
+        UID: req.body.UID,
+        GroupID: req.body.group_id
+      }
+    }
+  )
+
+
+
+
+  if (count_gets === 0 && count_ows === 0) {
+    console.log("Inside")
+    result = {
+      flag_settle: "S"
+
+    }
+    //user can leave the group
+    invitations.destroy({
+      where: {
+        invite_from_group_id: req.body.group_id,
+        UID: req.body.UID,
+        accept: "ACCEPT"
+      }
+    })
+
+    //-------------recent activity
+
+    let activity_left="user "+JSON.stringify(req.body.UID_name)+" left the group "+JSON.stringify(req.body.group_name)
+
+    await recentactivities.create({
+      GroupID: req.body.group_id,
+      groupname: req.body.group_name,
+      activity: activity_left,
+      UID: req.body.UID,
+      date_time: Sequelize.fn('NOW')
+    })
+//----------------------
+  }
+  else {
+    result = {
+      flag_settle: "F",
+      count_ows: count_ows,
+      count_gets: count_gets
+
+    }
+  }
+
+
+  console.log("result is ", result)
+  res.status(200).send(result);
+
+});
+
 
 module.exports = router

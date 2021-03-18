@@ -22,6 +22,7 @@ class show_details extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            show: false,
             UID: this.props.history.location.state.UID,
             name: this.props.history.location.state.name,
             Group_ID: this.props.history.location.state.Group_Id,
@@ -29,12 +30,23 @@ class show_details extends Component {
             amount_gets: this.props.history.location.state.amount_gets,
             amount_ows: this.props.history.location.state.amount_ows,
             amount_gets_combined: undefined,
-            amount_ows_combined: undefined
+            amount_ows_combined: undefined,
+            User_names: undefined
+
 
         }
-
+        this.showModal = this.showModal.bind(this);
+        this.hideModal = this.hideModal.bind(this);
 
     }
+    showModal = () => {
+        this.setState({ show: true });
+    };
+
+    hideModal = () => {
+        this.setState({ show: false });
+    };
+
 
     componentDidMount = async (e) => {
 
@@ -49,14 +61,17 @@ class show_details extends Component {
         }
         const response_backend_show_details = await axios.post('http://localhost:3002/Show_deatils', data)
 
+        let temp_UIDs_involved = []
         let amount_gets_combined_temp = []
         for (var i = 0; i < response_backend_show_details.data.combined_gets.length; i++) {
             amount_gets_combined_temp.push({ amountgets: response_backend_show_details.data.combined_gets[i].amount_gets, amount_gets_from: response_backend_show_details.data.combined_gets[i].name_of_amount_gets_from_UID, amount_gets_from_UID: response_backend_show_details.data.combined_gets[i].amount_gets_from_UID })
+            temp_UIDs_involved.push({ UID: response_backend_show_details.data.combined_gets[i].amount_gets_from_UID })
         }
 
         let amount_ows_combined_temp = []
         for (var i = 0; i < response_backend_show_details.data.combined_ows.length; i++) {
             amount_ows_combined_temp.push({ amountowes: response_backend_show_details.data.combined_ows[i].amount_ows, amount_ows_to: response_backend_show_details.data.combined_ows[i].name_of_amount_ows_to_UID, amount_ows_to_UID: response_backend_show_details.data.combined_ows[i].amount_ows_to_UID })
+            temp_UIDs_involved.push({ UID: response_backend_show_details.data.combined_ows[i].amount_ows_to_UID })
         }
 
         //set the state
@@ -65,8 +80,40 @@ class show_details extends Component {
             amount_ows_combined: amount_ows_combined_temp
         }))
 
-        console.log("------------", this.state.amount_ows_combined)
 
+        const UIDs = [...new Set(temp_UIDs_involved.map(temp_UIDs_involved => temp_UIDs_involved.UID))]
+
+        const response_users_to_show = await axios.post('http://localhost:3002/response_users_to_show', UIDs)
+
+        let User_names_temp = []
+
+        for (var i = 0; i < response_users_to_show.data.user_names.length; i++) {
+
+            User_names_temp.push({ UID: response_users_to_show.data.user_names[i].UID, name: response_users_to_show.data.user_names[i].name })
+        }
+
+        this.setState(() => ({
+            User_names: User_names_temp
+
+        }))
+
+    }
+
+    Settle_with_this_click=async(data)=>{
+
+        //console.log("settle is clicked for ",data)
+        this.hideModal()
+        const data_to_settle={
+            UID_of_login:this.props.user.UID_user,
+            name_of_UID_login:this.props.user.name_user,
+            other_UID:data.UID,
+            GroupID:this.props.history.location.state.Group_Id,
+            GroupID_name:this.props.history.location.state.Group_name,
+            name_of_other_UID:data.name
+        }
+
+        const response_from_settle=await axios.post('http://localhost:3002/Settle_req', data_to_settle)
+        
     }
 
     render() {
@@ -87,7 +134,7 @@ class show_details extends Component {
                         this.state.amount_gets_combined.map((data, index) => {
                             return (
                                 <div key={index}>
-                                    <label>{data.amount_gets_from} owes you </label> <input value={data.amountgets} readOnly="readonly"></input>
+                                    <label>{data.amount_gets_from} owes you </label> <label>{data.amountgets}$</label>
                                 </div>
                             )
                         })
@@ -102,13 +149,32 @@ class show_details extends Component {
                         this.state.amount_ows_combined.map((data, index) => {
                             return (
                                 <div key={index}>
-                                    <label>you owes {data.amount_ows_to} </label> <input value={data.amountowes} readOnly="readonly"></input>
+                                    <label>you owes {data.amount_ows_to} </label> <label>{data.amountowes}$</label>
                                 </div>
                             )
                         })
                     }
                 </div>
-                <button>Settle Up</button>
+                <button onClick={this.showModal}>Settle Up</button>
+                <div>
+                    <Modal show={this.state.show} handleClose={this.hideModal}>
+                        <div>
+                            {
+
+                                this.state.User_names &&
+                                this.state.User_names.map((data, index) => {
+                                    return (
+                                        <div key={index}>
+                                        <label>Settle up with</label>
+                                          <input type="text" value={data.name} readOnly="readonly"></input> <button onClick={() =>this.Settle_with_this_click(data)}>Settle</button>
+                                        </div>
+                                    )
+                                })
+
+                            }
+                        </div>
+                    </Modal>
+                </div>
             </div>
 
         )

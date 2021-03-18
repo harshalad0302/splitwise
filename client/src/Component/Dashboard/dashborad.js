@@ -108,11 +108,11 @@ class dashborad extends Component {
                     <Login_header props={this.props} />
                 </div>
                 <h2>Dashboard</h2>
-                <label>Amount {this.state.name} gets</label> <input type="text" value={this.state.amount_this_uid_gets} readOnly="readonly" />
+                <label>Amount {this.state.name} gets</label> <label>{this.state.amount_this_uid_gets}$</label> 
                 <br />
-                <label>Amount {this.state.name} owes</label> <input type="text" value={this.state.amount_this_uid_ows} readOnly="readonly" />
+                <label>Amount {this.state.name} owes</label> <label>{this.state.amount_this_uid_ows}$</label>
                 <br />
-                <label>Total Balance  </label> <input type="text" value={this.state.total} readOnly="readonly" />
+                <label>Total Balance  </label> <label>{this.state.total}$</label>
                 <br />
                <h3>Details</h3>
 
@@ -133,8 +133,8 @@ class dashborad extends Component {
                                     </tr>
                                     <tr>
                                         <td>{data.Group_name}</td>
-                                        <td>{data.amount_gets ? data.amount_gets : 0}</td>
-                                        <td>{data.amount_ows}</td>
+                                        <td>{data.amount_gets ? data.amount_gets : 0}$</td>
+                                        <td>{data.amount_ows ? data.amount_ows:0}$</td>
                                         <td><button onClick={() =>this.show_details_click(data)}>Show details</button></td>
                                       
                                     </tr>

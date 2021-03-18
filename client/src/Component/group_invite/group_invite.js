@@ -20,7 +20,9 @@ class group_invite extends Component {
         invites_from_group: undefined,
          group_ids_invite:undefined,
          User_is_part_of_group:undefined,
-         User_is_part_of_group_id:undefined
+         User_is_part_of_group_id:undefined,
+         auth_flag :false,
+         error_message:""
     }
 
 
@@ -85,18 +87,17 @@ class group_invite extends Component {
     handelAcceptOnClick =async(index)=>
     {
         
-
         //sending this to backed to get inserted
-
         const data={
             accepted_group_name:this.state.invites_from_group[index],
             accepted_group_id:this.state.group_ids_invite[index],
-            current_UID:this.props.user.UID_user
+            current_UID:this.props.user.UID_user,
+            current_UID_name:this.props.user.name_user
         }
 
         const response_accepted_group_req=axios.post('http://localhost:3002/group_invite_accept_req', data)
-
-
+        this.state.invites_from_group.splice(index,1)
+        this.forceUpdate()
 
     }
 
@@ -115,10 +116,37 @@ class group_invite extends Component {
     }
 
 
-    OnClickLeaveGroup=(index)=>
+    OnClickLeaveGroup= async (index)=>
     {
 
-        console.log("On leave is submitted for ")
+        // console.log("----------",this.state.User_is_part_of_group_id[index])
+        // console.log("----------",this.state.User_is_part_of_group[index])
+        //sending data to leav group api
+        const data={
+            group_name:this.state.User_is_part_of_group[index],
+            group_id:this.state.User_is_part_of_group_id[index],
+            UID:this.props.user.UID_user,
+            UID_name:this.props.user.name_user
+        }
+
+        const response_leave_group= await axios.post('http://localhost:3002/leave_group', data)
+        console.log(response_leave_group.data)
+        if(response_leave_group.data.flag_settle==="S")
+        {
+            //user can leave the group
+            this.state.User_is_part_of_group.splice(index,1)
+            this.forceUpdate()
+        }
+        if(response_leave_group.data.flag_settle==="F")
+        {
+            this.setState({
+                auth_flag :true,
+                error_message : <div>
+                <label><b>User has not settled up the expenses in this group! cant leave before that</b></label>
+                </div>
+               })
+        }
+      
     }
 
     render() {
@@ -129,6 +157,10 @@ class group_invite extends Component {
             <div>
                 <div className="App">
                     <Login_header props={this.props} />
+                    <div>
+                    <br/>
+                    <label><b>Invites from </b></label>
+                    </div>
 
                     {
                         this.state.invites_from_group &&
@@ -143,7 +175,8 @@ class group_invite extends Component {
                     }
 
                     <div>
-                    <h2>my groups </h2>
+                    <br/>
+                    <label><b>My groups  </b></label>
                     {
                         this.state.User_is_part_of_group &&
                         this.state.User_is_part_of_group.map((user, index) => {
@@ -155,7 +188,7 @@ class group_invite extends Component {
                         })
                     }
                     </div>
-
+                    {this.state.auth_flag && <div>{this.state.error_message} </div>}
                 </div>
             </div>
         )

@@ -147,7 +147,9 @@ class group_page extends Component {
 
         const data = {
             paid_by_UID: this.props.user.UID_user,
+            name_of_UID_paid:this.props.user.name_user,
             expense_of_Group_ID: this.props.history.location.state.group_id,
+            name_of_group_ID:this.props.history.location.state.group_name,
             amount: this.state.currency,
             currency: "USD",
             description: this.state.description
@@ -163,17 +165,18 @@ class group_page extends Component {
                 </div>
             })
         }
+        
         else {
-
-            //send data to backend 
             this.hideModal()
-            const response_Expense_add = axios.post('http://localhost:3002/Expense_add', data)
-
-
+        
+            //send data to backend 
+            
+            const response_Expense_add = await axios.post('http://localhost:3002/Expense_add', data)
+           
         }
 
 
-
+           
 
 
     }
@@ -231,14 +234,16 @@ class group_page extends Component {
                 <div>
 
                     <div>
-                        <h2>Group Expenses</h2>
-                        <h4>Expenses........amount.......................paid by</h4>
+                    <br/>
+                      <label><b>Group expenses</b></label>
+                      <br/>
+                        
                         {
                             this.state.expenses_of_this_group &&
                             this.state.expenses_of_this_group.map((expense, index) => {
                                 return (
                                     <div key={index}>
-                                        <input value={expense} readOnly="readonly" /> <input value={this.state.expense_amount_of_this_group[index]} readOnly="readonly" /> <input value={this.state.name_of_user_who_paid[index]} readOnly="readonly" />
+                                <label>{this.state.expense_amount_of_this_group[index]} $ paid by  </label> <label>{this.state.name_of_user_who_paid[index]}</label>  <label> for {expense}</label>
                                     </div>
                                 )
                             })
@@ -248,14 +253,14 @@ class group_page extends Component {
 
                     </div>
                     <div>
-                        <h2>Group Balance</h2>
+                    <label><b>Group Balance</b></label>
                         {
                             //group_bal_users_get
                             this.state.group_bal_users_get &&
                             this.state.group_bal_users_get.map((data, index) => {
                                 return (
                                     <div key={index}>
-                                        <input value={data.name} readOnly="readonly" /><label>Amount gets </label>  <input value={data.amount_gets} readOnly="readonly" />
+                                        <input value={data.name} readOnly="readonly" /><label>Amount gets ---</label> <label>{data.amount_gets} $</label>
                                     </div>
                                 )
                             })
@@ -270,7 +275,7 @@ class group_page extends Component {
                         this.state.group_bal_users_ows.map((data, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={data.name} readOnly="readonly" /><label>Amount owes </label>  <input value={data.amount_ows} readOnly="readonly" />
+                                    <input value={data.name} readOnly="readonly" /><label>Amount owes ---</label>  <label>{data.amount_ows} $</label>
                                 </div>
                             )
                         })
