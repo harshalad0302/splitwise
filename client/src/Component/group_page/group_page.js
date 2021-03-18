@@ -270,7 +270,7 @@ class group_page extends Component {
                         this.state.group_bal_users_ows.map((data, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={data.name} readOnly="readonly" /><label>Amount ows </label>  <input value={data.amount_ows} readOnly="readonly" />
+                                    <input value={data.name} readOnly="readonly" /><label>Amount owes </label>  <input value={data.amount_ows} readOnly="readonly" />
                                 </div>
                             )
                         })

@@ -9,6 +9,7 @@ const { QueryTypes, where } = require('sequelize');
 const { Sequelize } = require('sequelize');
 const personal_expenditure_get = require('../db_models/personal_expenditure_get');
 const personal_expenditure_ows = require('../db_models/personal_expenditure_ows');
+const { findAll } = require("../db_models/users");
 
 router.post('/signup', async (req, res) => {
 
@@ -463,7 +464,7 @@ router.post('/dashboard_display', async (req, res) => {
 
   }
 
-  console.log("group_names_and_id is ", group_wise_data)
+
 
   //send the data to frontend
   result_dashboard = {
@@ -482,24 +483,102 @@ router.post('/dashboard_display', async (req, res) => {
 //Show_deatils
 
 router.post('/Show_deatils', async (req, res) => {
-    console.log("Received data is ",req.body)
+
   let array_group_specific_tran = []
 
   //get the data
 
-  const data_of_ows=await personal_expenditure_ows.findAll({ attributes: ['amount_ows','amount_ows_to_UID','expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
+  const data_of_ows = await personal_expenditure_ows.findAll({ attributes: ['amount_ows', 'amount_ows_to_UID', 'expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
 
-  console.log("data_of_ows is ",data_of_ows[0].dataValues)
-  //console.log("there are ",count_the_tran_of_ows)
   for (var i = 0; i < data_of_ows.length; i++) {
 
     //get the details of expense
-    //let expense_detail=await expensenses.findOne({attributes:['']})
-    array_group_specific_tran.push({name:req.body.name,UID:req.body.UID,amount_ows:data_of_ows[i].dataValues.amount_ows,amount_ows_to_UID:data_of_ows[i].dataValues.amount_ows_to_UID,expen_ID:data_of_ows[i].dataValues.expen_ID})
+    let expense_detail = await expensenses.findOne({ attributes: ['currency', 'description', 'date', 'amount'], where: { expense_of_Group_ID: req.body.Group_ID, expen_ID: data_of_ows[i].dataValues.expen_ID } })
+    let name_of_UId_who_gets_amount = await users.findOne({ attributes: ['name'], where: { UID: data_of_ows[i].dataValues.amount_ows_to_UID } })
+    array_group_specific_tran.push({
+      name: req.body.name,
+      UID: req.body.UID,
+      amount_ows: data_of_ows[i].dataValues.amount_ows,
+      amount_ows_to_UID: data_of_ows[i].dataValues.amount_ows_to_UID,
+      amount_ows_to_name: name_of_UId_who_gets_amount.dataValues.name,
+      expen_ID: data_of_ows[i].dataValues.expen_ID,
+      expense_currency: expense_detail.dataValues.currency,
+      expense_description: expense_detail.dataValues.description,
+      expense_date: expense_detail.dataValues.date,
+      expense_amount: expense_detail.dataValues.amount
+
+    })
 
   }
 
+  //user specific data ows
+  let combined_ows = []
+  const amount_ows_combined_with_user = await personal_expenditure_ows.findAll({ attributes: ['UID', 'GroupID', 'amount_ows_to_UID', [Sequelize.fn('sum', Sequelize.col('amount_ows')), 'amount_ows']], group: ['amount_ows_to_UID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
 
+
+  for (var i = 0; i < amount_ows_combined_with_user.length; i++) {
+    //get user name
+    let user_name=await users.findOne({attributes:['name'],where:{UID:amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID}})
+    combined_ows.push({
+      UID:amount_ows_combined_with_user[i].dataValues.UID,
+      GroupID:amount_ows_combined_with_user[i].dataValues.GroupID,
+      amount_ows_to_UID:amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID,
+      name_of_amount_ows_to_UID:user_name.dataValues.name,
+      amount_ows:amount_ows_combined_with_user[i].dataValues.amount_ows
+
+    
+    })
+  }
+
+  //similarly for gets
+  let array_group_specific_tran_gets = []
+  const data_gets = await personal_expenditure_get.findAll({ attributes: ['amount_gets', 'amount_gets_from_UID', 'expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
+  
+  for (var i = 0; i < data_gets.length; i++) {
+    //get the details of expense
+    let expense_detail = await expensenses.findOne({ attributes: ['currency', 'description', 'date', 'amount'], where: { expense_of_Group_ID: req.body.Group_ID, expen_ID: data_gets[i].dataValues.expen_ID } })
+    let name_of_UId_from_whom_gets_amount = await users.findOne({ attributes: ['name'], where: { UID: data_gets[i].dataValues.amount_gets_from_UID } })
+    array_group_specific_tran_gets.push({
+      name: req.body.name,
+      UID: req.body.UID,
+      amount_gets: data_gets[i].dataValues.amount_gets,
+      amount_gets_from_UID: data_gets[i].dataValues.amount_gets_from_UID,
+      amount_gets_from_name: name_of_UId_from_whom_gets_amount.dataValues.name,
+      expen_ID: data_gets[i].dataValues.expen_ID,
+      expense_currency: expense_detail.dataValues.currency,
+      expense_description: expense_detail.dataValues.description,
+      expense_date: expense_detail.dataValues.date,
+      expense_amount: expense_detail.dataValues.amount
+
+    })
+
+  }
+  let combined_gets = []
+  const amount_gets_combined_with_user = await personal_expenditure_get.findAll({ attributes: ['UID', 'GroupID', 'amount_gets_from_UID', [Sequelize.fn('sum', Sequelize.col('amount_gets')), 'amount_gets']], group: ['amount_gets_from_UID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
+  for (var i = 0; i < amount_gets_combined_with_user.length; i++) {
+    //get user name
+    let user_name=await users.findOne({attributes:['name'],where:{UID:amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID}})
+    combined_gets.push({
+      UID:amount_gets_combined_with_user[i].dataValues.UID,
+      GroupID:amount_gets_combined_with_user[i].dataValues.GroupID,
+      amount_gets_from_UID:amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID,
+      name_of_amount_gets_from_UID:user_name.dataValues.name,
+      amount_gets:amount_gets_combined_with_user[i].dataValues.amount_gets
+
+    
+    })
+  }
+
+  result = {
+    array_group_specific_tran: array_group_specific_tran,
+    combined_ows: combined_ows,
+    array_group_specific_tran_gets: array_group_specific_tran_gets,
+    combined_gets:combined_gets
+  
+
+  }
+
+  res.status(200).send(result);
 });
 
 module.exports = router

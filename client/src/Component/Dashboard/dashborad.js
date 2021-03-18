@@ -110,7 +110,7 @@ class dashborad extends Component {
                 <h2>Dashboard</h2>
                 <label>Amount {this.state.name} gets</label> <input type="text" value={this.state.amount_this_uid_gets} readOnly="readonly" />
                 <br />
-                <label>Amount {this.state.name} ows</label> <input type="text" value={this.state.amount_this_uid_ows} readOnly="readonly" />
+                <label>Amount {this.state.name} owes</label> <input type="text" value={this.state.amount_this_uid_ows} readOnly="readonly" />
                 <br />
                 <label>Total Balance  </label> <input type="text" value={this.state.total} readOnly="readonly" />
                 <br />
@@ -127,7 +127,7 @@ class dashborad extends Component {
                                     <tr>
                                         <th>Group Name</th>
                                         <th>Amount gets</th>
-                                        <th>Amount ows</th>
+                                        <th>Amount owes</th>
                                         <th></th>
                                    
                                     </tr>
