@@ -11,6 +11,7 @@ import group_page from './group_page/group_page'
 import Create_groups from './Create_groups/Create_groups'
 import dashboard from './Dashboard/dashborad'
 import recent_activities from './Recent_activities/recent_activities'
+import show_details from './Show_details/show_details'
 
 //Create a Main Component
 class Main extends Component {
@@ -26,6 +27,7 @@ class Main extends Component {
             <Route path="/group_page" component={group_page}/> 
             <Route path="/dashboard" component={dashboard}/> 
             <Route path="/Create_groups" component={Create_groups}/> 
+            <Route path="/show_details" component={show_details}/> 
             <Route path="/recent_activities" component={recent_activities}/> 
             
             </BrowserRouter>

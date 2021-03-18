@@ -421,7 +421,7 @@ router.post('/Expense_add', async (req, res) => {
 
 
 router.post('/dashboard_display', async (req, res) => {
-  res.status(200);
+
 
   //get how much this UID ows
 
@@ -442,23 +442,23 @@ router.post('/dashboard_display', async (req, res) => {
   )
 
   //get those two groups
-  let group_wise_data= []
+  let group_wise_data = []
   const group_id_user_part_of = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "ACCEPT" } })
-  
+
   for (var i = 0; i < group_id_user_part_of.length; i++) {
 
     let group_name = await groups.findOne({ attributes: ['group_name'], where: { groupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
-      //check if user get anything from this group
-    let amount_get_for_this_group=await personal_expenditure_get.sum('amount_gets' ,{where :{UID:req.body.UID,GroupID:group_id_user_part_of[i].dataValues.invite_from_group_id}})
-    
+    //check if user get anything from this group
+    let amount_get_for_this_group = await personal_expenditure_get.sum('amount_gets', { where: { UID: req.body.UID, GroupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
+
     //check if user ows to any group
-    let amount_ows_to_this_group=await personal_expenditure_ows.sum('amount_ows',{where :{UID:req.body.UID,GroupID:group_id_user_part_of[i].dataValues.invite_from_group_id}})
+    let amount_ows_to_this_group = await personal_expenditure_ows.sum('amount_ows', { where: { UID: req.body.UID, GroupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
 
-    let name_of_user=await users.findOne({ attributes: ['name'], where: { UID: req.body.UID } })
-   
-    
+    let name_of_user = await users.findOne({ attributes: ['name'], where: { UID: req.body.UID } })
 
-    group_wise_data.push({ UID: req.body.UID, name:name_of_user.dataValues.name, Group_ID: group_id_user_part_of[i].dataValues.invite_from_group_id, group_name: group_name.dataValues.group_name ,amount_gets_from_this_group:amount_get_for_this_group,amount_ows_to_this_group:amount_ows_to_this_group })
+
+
+    group_wise_data.push({ UID: req.body.UID, name: name_of_user.dataValues.name, Group_ID: group_id_user_part_of[i].dataValues.invite_from_group_id, group_name: group_name.dataValues.group_name, amount_gets_from_this_group: amount_get_for_this_group, amount_ows_to_this_group: amount_ows_to_this_group })
 
 
   }
@@ -469,11 +469,36 @@ router.post('/dashboard_display', async (req, res) => {
   result_dashboard = {
     amount_this_UID_gets: amount_this_UID_gets,
     amount_this_UID_ows: amount_this_UID_ows,
-    group_wise_data:group_wise_data
-    
+    group_wise_data: group_wise_data
+
   }
 
   res.status(200).send(result_dashboard);
+
+});
+
+
+
+//Show_deatils
+
+router.post('/Show_deatils', async (req, res) => {
+    console.log("Received data is ",req.body)
+  let array_group_specific_tran = []
+
+  //get the data
+
+  const data_of_ows=await personal_expenditure_ows.findAll({ attributes: ['amount_ows','amount_ows_to_UID','expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
+
+  console.log("data_of_ows is ",data_of_ows[0].dataValues)
+  //console.log("there are ",count_the_tran_of_ows)
+  for (var i = 0; i < data_of_ows.length; i++) {
+
+    //get the details of expense
+    //let expense_detail=await expensenses.findOne({attributes:['']})
+    array_group_specific_tran.push({name:req.body.name,UID:req.body.UID,amount_ows:data_of_ows[i].dataValues.amount_ows,amount_ows_to_UID:data_of_ows[i].dataValues.amount_ows_to_UID,expen_ID:data_of_ows[i].dataValues.expen_ID})
+
+  }
+
 
 });
 

@@ -4,6 +4,7 @@ import axios from 'axios';
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
+import show_details from '../../Component/Show_details/show_details'
 
 
 //connection to global store
@@ -26,6 +27,7 @@ class dashborad extends Component {
             name: this.props.user.name_user,
             total: 0,
             group_wise_balence: undefined
+           
         }
 
 
@@ -78,6 +80,23 @@ class dashborad extends Component {
 
     }
 
+    show_details_click=(data)=>{
+   
+        //sending props to show detail page 
+        this.props.history.push({
+            pathname: '/show_details',
+            state: { UID:data.UID,
+                name:data.name,
+                Group_Id:data.Group_Id,
+                Group_name:data.Group_name,
+                amount_gets:data.amount_gets,
+                amount_ows:data.amount_ows
+             }
+          })
+
+         
+    }
+
     render() {
 
 
@@ -109,11 +128,15 @@ class dashborad extends Component {
                                         <th>Group Name</th>
                                         <th>Amount gets</th>
                                         <th>Amount ows</th>
+                                        <th></th>
+                                   
                                     </tr>
                                     <tr>
                                         <td>{data.Group_name}</td>
                                         <td>{data.amount_gets ? data.amount_gets : 0}</td>
                                         <td>{data.amount_ows}</td>
+                                        <td><button onClick={() =>this.show_details_click(data)}>Show details</button></td>
+                                      
                                     </tr>
                                 </table>
                             </div>
@@ -122,6 +145,7 @@ class dashborad extends Component {
 
                 }
 
+              
             </div>
 
         )
