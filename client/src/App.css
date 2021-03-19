@@ -1,10 +1,30 @@
 
 
-
 body {
     width: auto;
     height: auto;
 }
+
+
+
+.background_img {
+background-image:url("../src/Assests/Img/homepage.png");
+background-repeat: no-repeat;
+background-size: auto;
+border: 2px solid rgb(74, 202, 181);
+padding: 25px;
+height: 100vh;
+width: auto;
+}
+.background {
+  background-repeat: no-repeat;
+  background-size: auto;
+  border: 2px solid rgb(74, 202, 181);
+  padding: 25px;
+  height: 100vh;
+  width: auto;
+  }
+  
 
  .header {
   
@@ -50,6 +70,9 @@ padding: 5px;
     
 }
 
+.header_image_landing{
+  height: 60px;
+}
 
 .input_for_profile {
     border-top-style: hidden;
@@ -74,6 +97,40 @@ padding: 5px;
     color: rgb(68, 56, 236);       
 }
 
+
+.right_corner {
+ 
+  width: fit-content;
+  position: fixed;
+  top: 40px;
+  right:30px;
+}
+
+.button_Login {
+  background-color: #33aa88; 
+  border: none;
+  color: white;
+  padding: 10px 60px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.button_signUp {
+  background-color: #FF652f; 
+  border: none;
+  color: white;
+  padding: 10px 60px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
 body {
     font-family: Helvetica, sans-serif;
   }

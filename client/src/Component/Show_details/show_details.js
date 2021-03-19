@@ -7,7 +7,7 @@ import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import Modal from '../../Component/Modal/Modal'
 
-
+import backendServer from '../../../src/WebConfig';
 
 const connection_to_redux = (state) => {
 
@@ -59,7 +59,7 @@ class show_details extends Component {
             amount_gets: this.props.history.location.state.amount_gets,
             amount_ows: this.props.history.location.state.amount_ows
         }
-        const response_backend_show_details = await axios.post('http://localhost:3002/Show_deatils', data)
+        const response_backend_show_details = await axios.post(`${backendServer}/Show_deatils`, data)
 
         let temp_UIDs_involved = []
         let amount_gets_combined_temp = []
@@ -83,7 +83,7 @@ class show_details extends Component {
 
         const UIDs = [...new Set(temp_UIDs_involved.map(temp_UIDs_involved => temp_UIDs_involved.UID))]
 
-        const response_users_to_show = await axios.post('http://localhost:3002/response_users_to_show', UIDs)
+        const response_users_to_show = await axios.post(`${backendServer}/response_users_to_show`, UIDs)
 
         let User_names_temp = []
 
@@ -112,7 +112,7 @@ class show_details extends Component {
             name_of_other_UID:data.name
         }
 
-        const response_from_settle=await axios.post('http://localhost:3002/Settle_req', data_to_settle)
+        const response_from_settle=await axios.post(`${backendServer}/Settle_req`, data_to_settle)
         
     }
 
@@ -158,6 +158,9 @@ class show_details extends Component {
                 <button onClick={this.showModal}>Settle Up</button>
                 <div>
                     <Modal show={this.state.show} handleClose={this.hideModal}>
+                    <div>
+                    
+                    </div>
                         <div>
                             {
 

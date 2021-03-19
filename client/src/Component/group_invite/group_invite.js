@@ -3,6 +3,7 @@ import '../../App.css';
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import axios from 'axios';
+import backendServer from '../../../src/WebConfig';
 
 
 const connection_to_redux = (state) => {
@@ -22,7 +23,8 @@ class group_invite extends Component {
          User_is_part_of_group:undefined,
          User_is_part_of_group_id:undefined,
          auth_flag :false,
-         error_message:""
+         error_message:"",
+         filtered_array:undefined
     }
 
 
@@ -32,7 +34,7 @@ class group_invite extends Component {
         }
      
        
-       const group_invite_req = await axios.post('http://localhost:3002/group_page_invite', data)
+       const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
         const group_names=[]
         const group_ids=[]
         const group_name_accepted=[]
@@ -73,7 +75,7 @@ class group_invite extends Component {
         current_UID:this.props.user.UID_user
       }
 
-     const rejected_group =  axios.post('http://localhost:3002/group_invite_reject_req', data)
+     const rejected_group =  axios.post(`${backendServer}/group_invite_reject_req`, data)
       
       this.state.invites_from_group.splice(index,1)
 
@@ -95,7 +97,7 @@ class group_invite extends Component {
             current_UID_name:this.props.user.name_user
         }
 
-        const response_accepted_group_req=axios.post('http://localhost:3002/group_invite_accept_req', data)
+        const response_accepted_group_req=axios.post(`${backendServer}/group_invite_accept_req`, data)
         this.state.invites_from_group.splice(index,1)
         this.forceUpdate()
 
@@ -129,7 +131,7 @@ class group_invite extends Component {
             UID_name:this.props.user.name_user
         }
 
-        const response_leave_group= await axios.post('http://localhost:3002/leave_group', data)
+        const response_leave_group= await axios.post(`${backendServer}/leave_group`, data)
         console.log(response_leave_group.data)
         if(response_leave_group.data.flag_settle==="S")
         {
@@ -149,6 +151,19 @@ class group_invite extends Component {
       
     }
 
+    OnChangSerachBar= (e)=>{
+        const value_serach=e.target.value
+      const filtered=this.state.User_is_part_of_group.filter((group)=>{
+          return group.includes(value_serach)
+      })
+
+      this.setState(()=>({
+        filtered_array:filtered
+    }))
+  
+  
+    }
+
     render() {
 
 
@@ -160,9 +175,11 @@ class group_invite extends Component {
                     <div>
                     <br/>
                     <label><b>Invites from </b></label>
+                    <div> {this.state.invite_from_group_id ? "":"You have zero invites right now"}</div>
                     </div>
 
                     {
+                       
                         this.state.invites_from_group &&
                         this.state.invites_from_group.map((invite, index) => {
                             return (
@@ -176,8 +193,16 @@ class group_invite extends Component {
 
                     <div>
                     <br/>
+                   
+                    <br/>
                     <label><b>My groups  </b></label>
+                    <div>
+                    <input type="text" placeholder="search for group" onChange={this.OnChangSerachBar}></input>
+                    <br/>
+                    <br/>
+                    </div>
                     {
+                        !this.state.filtered_array &&
                         this.state.User_is_part_of_group &&
                         this.state.User_is_part_of_group.map((user, index) => {
                             return (
@@ -186,6 +211,21 @@ class group_invite extends Component {
                                 </div>
                             )
                         })
+
+                        
+                    }
+                    {
+                        this.state.filtered_array &&
+                        this.state.filtered_array &&
+                        this.state.filtered_array.map((user, index) => {
+                            return (
+                                <div key={index}>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)}>Leave Group</button>
+                                </div>
+                            )
+                        })
+
+                        
                     }
                     </div>
                     {this.state.auth_flag && <div>{this.state.error_message} </div>}

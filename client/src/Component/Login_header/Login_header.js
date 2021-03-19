@@ -5,7 +5,7 @@ import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import { connect } from 'react-redux';
 import { remove_user } from '../../Actions/user_action'
-
+import backendServer from '../../../src/WebConfig';
 
 const connection_to_redux = (state) => {
 

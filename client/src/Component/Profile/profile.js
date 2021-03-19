@@ -6,7 +6,7 @@ import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
-
+import backendServer from '../../../src/WebConfig';
 
 const connection_to_redux = (state) => {
 
@@ -100,7 +100,7 @@ class profile extends Component {
       
       
     
-        const response_save = await axios.post('http://localhost:3002/profile', data)
+        const response_save = await axios.post(`${backendServer}/profile`, data)
 
         if (response_save.data.auth_flag_edit === "S") {
          
@@ -157,8 +157,8 @@ class profile extends Component {
                         <input type="password" className="input_for_profile" name="password" placeholder="*******" />
                         <button id="id_password" className="Edit_button">Edit</button>
                     </div>
-
-                    <select className="custom-select mr-sm-2" id="inlineFormCustomSelect" >
+                    <label><b>Currency</b></label>
+                    <select >
                     <option defaultValue>USD</option>
                     <option value="1">KWD</option>
                     <option value="2">BHD</option>

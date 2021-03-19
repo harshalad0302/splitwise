@@ -4,7 +4,7 @@ import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import axios from 'axios';
 import Modal from '../../Component/Modal/Modal'
-
+import backendServer from '../../../src/WebConfig';
 
 const connection_to_redux = (state) => {
 
@@ -31,8 +31,8 @@ class group_page extends Component {
             expense_amount_of_this_group: undefined,
             expense_paid_by_uid_of_this_group: undefined,
             name_of_user_who_paid: undefined,
-            group_bal_users_get:undefined,
-            group_bal_users_ows:undefined
+            group_bal_users_get: undefined,
+            group_bal_users_ows: undefined
         };
         this.showModal = this.showModal.bind(this);
         this.hideModal = this.hideModal.bind(this);
@@ -54,7 +54,7 @@ class group_page extends Component {
             current_UID: this.props.user.UID_user
         }
 
-        const get_users_in_group = await axios.post('http://localhost:3002/get_users_in_group', data)
+        const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data)
 
         let array_users_in_group = []
         let array_users_in_group_id = []
@@ -62,8 +62,8 @@ class group_page extends Component {
         let expenses_paid_by_UID = []
         let expense_amount = []
         let name_of_user_who_paid_for_this = []
-        let group_bal_users_get_temp=[]
-        let group_bal_users_ows_temp=[]
+        let group_bal_users_get_temp = []
+        let group_bal_users_ows_temp = []
 
         for (var i = 0; i < get_users_in_group.data.count_no_of_members; i++) {
             array_users_in_group.push(get_users_in_group.data.Name_of_members[i].name)
@@ -81,28 +81,24 @@ class group_page extends Component {
         }
 
 
-        for(var i=0;i<get_users_in_group.data.arr_expense_gets.length;i++)
-        {
-           
-            if(get_users_in_group.data.arr_expense_gets[i].amount_gets!==null)
-            {
-                group_bal_users_get_temp.push({UID:get_users_in_group.data.arr_expense_gets[i].UID,name:get_users_in_group.data.arr_expense_gets[i].name.name,amount_gets:get_users_in_group.data.arr_expense_gets[i].amount_gets})
+        for (var i = 0; i < get_users_in_group.data.arr_expense_gets.length; i++) {
+
+            if (get_users_in_group.data.arr_expense_gets[i].amount_gets !== null) {
+                group_bal_users_get_temp.push({ UID: get_users_in_group.data.arr_expense_gets[i].UID, name: get_users_in_group.data.arr_expense_gets[i].name.name, amount_gets: get_users_in_group.data.arr_expense_gets[i].amount_gets })
             }
-            
+
         }
 
         //to display the balence of the groups
-      
 
-        for(var i=0;i<get_users_in_group.data.arr_expenses_ows.length;i++)
-        {
-           
-          
-            if(get_users_in_group.data.arr_expenses_ows[i].amount_ows!==null)
-            {
-                group_bal_users_ows_temp.push({UID:get_users_in_group.data.arr_expenses_ows[i].UID ,name:get_users_in_group.data.arr_expenses_ows[i].name.name,amount_ows:get_users_in_group.data.arr_expenses_ows[i].amount_ows})
+
+        for (var i = 0; i < get_users_in_group.data.arr_expenses_ows.length; i++) {
+
+
+            if (get_users_in_group.data.arr_expenses_ows[i].amount_ows !== null) {
+                group_bal_users_ows_temp.push({ UID: get_users_in_group.data.arr_expenses_ows[i].UID, name: get_users_in_group.data.arr_expenses_ows[i].name.name, amount_ows: get_users_in_group.data.arr_expenses_ows[i].amount_ows })
             }
-            
+
         }
 
 
@@ -110,8 +106,8 @@ class group_page extends Component {
 
         //now setting a state
         this.setState(() => ({
-            group_bal_users_ows:group_bal_users_ows_temp,
-            group_bal_users_get:group_bal_users_get_temp,
+            group_bal_users_ows: group_bal_users_ows_temp,
+            group_bal_users_get: group_bal_users_get_temp,
             users_in_group: array_users_in_group,
             user_id_in_group: array_users_in_group_id,
             expenses_of_this_group: expenses_of_the_group,
@@ -121,11 +117,14 @@ class group_page extends Component {
 
         }))
 
-    
+
 
 
 
     }
+
+
+
 
     HandelCurrencyOnChange = (e) => {
 
@@ -141,15 +140,17 @@ class group_page extends Component {
         })
     }
 
+  
+
     OnClickSaveandSplit = async (e) => {
 
         //get the values in one object
 
-        const data = {
+        let data = {
             paid_by_UID: this.props.user.UID_user,
-            name_of_UID_paid:this.props.user.name_user,
+            name_of_UID_paid: this.props.user.name_user,
             expense_of_Group_ID: this.props.history.location.state.group_id,
-            name_of_group_ID:this.props.history.location.state.group_name,
+            name_of_group_ID: this.props.history.location.state.group_name,
             amount: this.state.currency,
             currency: "USD",
             description: this.state.description
@@ -165,18 +166,16 @@ class group_page extends Component {
                 </div>
             })
         }
-        
+
         else {
             this.hideModal()
-        
-            //send data to backend 
-            
-            const response_Expense_add = await axios.post('http://localhost:3002/Expense_add', data)
-           
+            const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data)
+            this.props.history.push("/group_invite")
+
         }
 
 
-           
+
 
 
     }
@@ -208,14 +207,25 @@ class group_page extends Component {
                     </div>
                     <br />
                     <br />
-                    <Modal show={this.state.show} handleClose={this.hideModal}>
+                    <Modal show={this.state.show} handleClose={this.hideModal}  >
                         <h2>Add expenses</h2>
                         <br />
-                        <label>Amount:</label>
+                        <label><b>Amount:</b></label>
                         <br />
                         <input type="number" onChange={this.HandelCurrencyOnChange}></input>
                         <br />
-                        <label>Description:</label>
+                        <label><b>Currency</b></label>
+                        <br />
+                        <select >
+                            <option defaultValue>USD</option>
+                            <option value="1">KWD</option>
+                            <option value="2">BHD</option>
+                            <option value="3">GBP</option>
+                            <option value="4">EUR</option>
+                            <option value="5">CAD</option>
+                        </select>
+                        <br />
+                        <label><b>Description:</b></label>
                         <br />
                         <input type="text" onChange={this.HandelDescriptionOnChange}></input>
                         <br />
@@ -234,26 +244,26 @@ class group_page extends Component {
                 <div>
 
                     <div>
-                    <br/>
-                      <label><b>Group expenses</b></label>
-                      <br/>
-                        
+                        <br />
+                        <label><b>Group expenses</b></label>
+                        <br />
+
                         {
                             this.state.expenses_of_this_group &&
                             this.state.expenses_of_this_group.map((expense, index) => {
                                 return (
                                     <div key={index}>
-                                <label>{this.state.expense_amount_of_this_group[index]} $ paid by  </label> <label>{this.state.name_of_user_who_paid[index]}</label>  <label> for {expense}</label>
+                                        <label>{this.state.expense_amount_of_this_group[index]} $ paid by  </label> <label>{this.state.name_of_user_who_paid[index]}</label>  <label> for {expense}</label>
                                     </div>
                                 )
                             })
 
                         }
-                        
+
 
                     </div>
                     <div>
-                    <label><b>Group Balance</b></label>
+                        <label><b>Group Balance</b></label>
                         {
                             //group_bal_users_get
                             this.state.group_bal_users_get &&
@@ -266,21 +276,21 @@ class group_page extends Component {
                             })
 
                         }
-                      
+
                     </div>
                     <div>
-                    {
-                        //group_bal_users_ows
-                        this.state.group_bal_users_ows &&
-                        this.state.group_bal_users_ows.map((data, index) => {
-                            return (
-                                <div key={index}>
-                                    <input value={data.name} readOnly="readonly" /><label>Amount owes ---</label>  <label>{data.amount_ows} $</label>
-                                </div>
-                            )
-                        })
+                        {
+                            //group_bal_users_ows
+                            this.state.group_bal_users_ows &&
+                            this.state.group_bal_users_ows.map((data, index) => {
+                                return (
+                                    <div key={index}>
+                                        <input value={data.name} readOnly="readonly" /><label>Amount owes ---</label>  <label>{data.amount_ows} $</label>
+                                    </div>
+                                )
+                            })
 
-                    }
+                        }
                     </div>
 
                 </div>

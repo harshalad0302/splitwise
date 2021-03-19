@@ -5,7 +5,7 @@ import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
-
+import backendServer from '../../../src/WebConfig';
 
 
 const connection_to_redux = (state) => {
@@ -33,9 +33,9 @@ class recent_activities extends Component {
     }
 
     //sending data to backend
-    const get_response_recentactivities = await axios.post('http://localhost:3002/recent_activities', data)
+    const get_response_recentactivities = await axios.post(`${backendServer}/recent_activities`, data)
 
-        console.log("-------------- get_response_recentactivities---",get_response_recentactivities.data.array_recent_act)
+     
         let temp_recent_activities=[]
         for(var i=0;i<get_response_recentactivities.data.array_recent_act.length;i++)
         {
@@ -66,8 +66,6 @@ class recent_activities extends Component {
                     <h2>Recent Activities</h2>
                     <div>
                     {
-
-                        
                         this.state.Array_recent &&
                         this.state.Array_recent.map((data, index) => {
                             return (

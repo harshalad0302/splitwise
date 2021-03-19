@@ -5,6 +5,7 @@ import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
+import backendServer from '../../../src/WebConfig'
 import * as AutosuggestHighlightMatch from 'autosuggest-highlight/match';
 import * as AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 //connection to global store
@@ -38,7 +39,7 @@ class Create_groups extends Component {
 
         //send to backend
 
-        const email_id_array_all=await axios.post('http://localhost:3002/get_all_email', data)
+        const email_id_array_all=await axios.post(`${backendServer}/get_all_email`, data)
       
        let temp_array=[]
        for(var i=0;i<email_id_array_all.data.length;i++)
@@ -135,7 +136,7 @@ class Create_groups extends Component {
 
 
 
-            const response_create_group = await axios.post('http://localhost:3002/Create_group', data)
+            const response_create_group = await axios.post(`${backendServer}/Create_group`, data)
 
             if (response_create_group.data.group_name_already_p_f === "F") {
                 this.setState({

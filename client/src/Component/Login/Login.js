@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
-
+import backendServer from '../../../src/WebConfig';
 
 //connection to global store
 const connection_to_redux = (state) => {
@@ -51,7 +51,7 @@ class Login extends Component {
             emailid: this.state.emailid,
             password: this.state.password
         }
-        const response_login = await axios.post('http://localhost:3002/Login', data)
+        const response_login = await axios.post(`${backendServer}/Login`, data)
 
 
         if (response_login.data.auth_flag_email_login === "S") {
@@ -116,8 +116,3 @@ class Login extends Component {
 
 export default connect(connection_to_redux)(Login);
 
-// const mapStateToProps = (state) => {
-//     return state;
-//   }
- 
-// export default connect(mapStateToProps)(Login);

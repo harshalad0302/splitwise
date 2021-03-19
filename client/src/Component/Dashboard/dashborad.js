@@ -3,6 +3,8 @@ import '../../App.css';
 import axios from 'axios';
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
+import backendServer from '../../../src/WebConfig'
+
 import { add_user } from '../../Actions/user_action'
 import show_details from '../../Component/Show_details/show_details'
 
@@ -41,7 +43,7 @@ class dashborad extends Component {
             name: this.props.user.name_user
         }
 
-        const response_dashboard = await axios.post('http://localhost:3002/dashboard_display', data)
+        const response_dashboard = await axios.post(`${backendServer}/dashboard_display`, data)
 
 
         if (response_dashboard.data.amount_this_UID_ows !== null) {
@@ -110,7 +112,7 @@ class dashborad extends Component {
                 <div>
                     <Login_header props={this.props} />
                 </div>
-                <h2>Dashboard</h2>
+                <h2 data-testid="Dashboard">Dashboard</h2>
                 <label>Amount {this.state.name} gets =</label> <label>{this.state.amount_this_uid_gets}$</label> 
                 <br />
                 <label>Amount {this.state.name} owes =</label> <label>{this.state.amount_this_uid_ows}$</label>

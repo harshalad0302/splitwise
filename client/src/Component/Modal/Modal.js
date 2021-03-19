@@ -1,5 +1,5 @@
 import '../../../src/App.css';
-
+import backendServer from '../../../src/WebConfig';
 const Modal = ({ handleClose, show, children }) => {
   const showHideClassName = show ? "modal display-block" : "modal display-none";
 
