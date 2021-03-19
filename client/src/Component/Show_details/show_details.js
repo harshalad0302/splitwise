@@ -155,7 +155,7 @@ class show_details extends Component {
                         })
                     }
                 </div>
-                <button onClick={this.showModal}>Settle Up</button>
+                <button onClick={this.showModal} className="button_Login">Settle Up</button>
                 <div>
                     <Modal show={this.state.show} handleClose={this.hideModal}>
                     <div>

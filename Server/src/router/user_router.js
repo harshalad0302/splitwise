@@ -12,6 +12,8 @@ const personal_expenditure_get = require('../db_models/personal_expenditure_get'
 const personal_expenditure_ows = require('../db_models/personal_expenditure_ows');
 const { findAll } = require("../db_models/users");
 const { Json } = require("sequelize");
+const sharp = require('sharp');
+const multer = require('multer');
 
 router.post('/signup', async (req, res) => {
 
@@ -113,13 +115,19 @@ router.post('/Login', async (req, res) => {
 });
 
 
+const upload = multer({
+
+})
+
+
+router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
 
 
-router.post('/profile', async (req, res) => {
-
-
-
+if (req.file) {
+  await users.update({ profile_photo: await (await sharp(req.file.buffer).resize(420, 240).toBuffer()).toString('base64') },
+    { where: { UID: req.body.UID } })
+}
 
   if (req.body.emailid !== "") {
     await users.update({ emailid: req.body.emailid },

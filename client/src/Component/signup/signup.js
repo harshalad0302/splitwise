@@ -70,8 +70,6 @@ class signup extends Component {
         }
 
 
-
-
         const response = await axios.post(`${backendServer}/signup`, data)
 
         if (response.data.auth_flag_email === "S") {
@@ -115,28 +113,28 @@ class signup extends Component {
 
         return (
             <div>
-                <div className="background">
+               
                 <HomeHeader props={this.props}/>
-                </div>
-                <h1>Registration</h1>
+               
+                
                 <br></br>
                
-                <label>Name   :</label>
+                <label><b>Name   :</b></label>
                 <br></br>
                 <input onChange = {this.nameChangeHandler} type="text" />
                 <br></br>
                 <br></br>
-                <label>Email ID   :</label>
+                <label><b>Email ID   :</b></label>
                 <br></br>
                 <input onChange = {this.Email_idChangeHandler} type="text" />
                 <br></br>
                 <br></br>
-                <label>Password   :</label>
+                <label><b>Password   :</b></label>
                 <br></br>
                 <input onChange = {this.passwordChangeHandler} type="password" />
                 <br></br>
                 <br></br>
-                <button onClick={this.submitSignUp}>SignUp</button>
+                <button className="button_signUp" onClick={this.submitSignUp} >SignUp</button>
                 {this.state.auth_flag && <div>{this.state.error_message} </div>}
                 <div>
            

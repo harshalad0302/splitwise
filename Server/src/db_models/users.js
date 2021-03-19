@@ -25,6 +25,10 @@ const users = sequelize.define('users', {
     phone_number: {
         type: DataTypes.STRING
         // allowNull defaults to true
+    },
+    
+    profile_photo:{
+        type:DataTypes.BLOB
     }
    
 },

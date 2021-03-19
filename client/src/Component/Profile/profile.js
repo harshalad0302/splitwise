@@ -27,7 +27,8 @@ class profile extends Component {
             UID:"",
             phone_number: "",
             password: "",
-            auth_flag_update:""
+            auth_flag_update:"",
+            file:""
          
         }
 
@@ -91,32 +92,57 @@ class profile extends Component {
 
       
         e.preventDefault();
-        const data = {
-            name: this.state.name,
-            emailid: this.state.emailid,
-            phone_number: this.state.phone_number,
-            UID: this.props.user.UID_user
-        }
-      
-      
-    
-        const response_save = await axios.post(`${backendServer}/profile`, data)
 
-        if (response_save.data.auth_flag_edit === "S") {
+        let formData = new FormData()
+
+        formData.append('u_avatar', this.state.file)
+        formData.append('name', this.state.name)
+        formData.append('emailid', this.state.emailid)
+        formData.append('phone_number', this.state.phone_number)
+        formData.append('UID', this.props.user.UID_user)
+
+        console.log("formData ---------",formData.get('u_avatar'))
+
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        }
+
+        // const data = {
+        //     name: this.state.name,
+        //     emailid: this.state.emailid,
+        //     phone_number: this.state.phone_number,
+        //     UID: this.props.user.UID_user
+        // }
+      
+            // send the form data to get uploaded
+          //  user = (await axios.post('http://localhost:3000/updateprofile', formData, config)).data
+    
+        const response_save = (await axios.post(`${backendServer}/profile`, formData,config)).data
+
+
+       // console.log("response_save --------",response_save.auth_flag_edit)
+        if (response_save.auth_flag_edit === "S") {
          
-            this.props.dispatch(add_user(response_save.data.updated_state))
+            this.props.dispatch(add_user(response_save.updated_state))
             this.props.history.push("/dashboard")
           
-
-            
         }
       
     }
 
+    FileOnChange=(e)=>{
+
+        this.setState({
+
+            file:e.target.files[0]
+        })
+
+    }
+
 
     render() {
-
-      
 
         return (
             <div>
@@ -125,7 +151,8 @@ class profile extends Component {
 
                     <h2>Profile</h2>
                     <div>
-                        <input type="file" name="filetag" />
+                        <input type="file" name="filetag" onChange={this.FileOnChange} />
+
                         <br></br>
                         <br></br>
                         <img src="" className="rounded mx-auto d-block" name="imagetag"></img>

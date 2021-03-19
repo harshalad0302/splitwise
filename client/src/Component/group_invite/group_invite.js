@@ -184,7 +184,7 @@ class group_invite extends Component {
                         this.state.invites_from_group.map((invite, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={invite} readOnly="readonly" /><button onClick={ () => this.handelAcceptOnClick(index)}>Accept</button> <button onClick={ () => this.handelRejecteOnClick(index)}>reject</button>
+                                    <input value={invite} readOnly="readonly" /><button onClick={ () => this.handelAcceptOnClick(index)} className="button_Login">Accept</button> <button onClick={ () => this.handelRejecteOnClick(index)} className="button_signUp">reject</button>
                                 </div>
                             )
                         })
@@ -207,7 +207,7 @@ class group_invite extends Component {
                         this.state.User_is_part_of_group.map((user, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)}>Leave Group</button>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}className="button_Login">Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)} className="button_signUp">Leave Group</button>
                                 </div>
                             )
                         })

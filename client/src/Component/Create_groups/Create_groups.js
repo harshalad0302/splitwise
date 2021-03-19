@@ -187,7 +187,7 @@ class Create_groups extends Component {
 
 
                     <input type="text" value={this.props.user.name_user} readOnly="readonly"></input> <input type="text" value={this.props.user.emailid_user} readOnly="readonly"></input>
-                    <button onClick={(e) => this.handelOnClick(e)}>+ Add Members</button>
+                    <button onClick={(e) => this.handelOnClick(e)} className="button_Login">+ Add Members</button>
                     <br />
                     {
                         this.state.emailid_of_members.map((emailid_of_members, index) => {
@@ -196,14 +196,14 @@ class Create_groups extends Component {
                                 <div key={index}>
                                     <br />
                                     <input value={emailid_of_members} onChange={(e) => this.HandelOnChange(e, index)} />
-                                    <button onClick={() => this.handelRemoveOnClick(index)}>Remove Member</button>
+                                    <button onClick={() => this.handelRemoveOnClick(index)} className="button_signUp">Remove Member</button>
                                 </div>
                             )
                         })
                     }
                     <br />
                     <br />
-                    <button onClick={this.handelSaveOnClick} >SAVE</button>
+                    <button onClick={this.handelSaveOnClick} className="button_Login" >SAVE</button>
                     <br />
                     <br />
                     <input type="file" name="filetag" />

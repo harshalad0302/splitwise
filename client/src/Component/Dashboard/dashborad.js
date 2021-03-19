@@ -141,7 +141,7 @@ class dashborad extends Component {
                                         <td>{data.Group_name}</td>
                                         <td>{data.amount_gets ? data.amount_gets : 0}$</td>
                                         <td>{data.amount_ows ? data.amount_ows:0}$</td>
-                                        <td><button onClick={() =>this.show_details_click(data)}>Show details</button></td>
+                                        <td><button onClick={() =>this.show_details_click(data)}className="button_signUp">Show details</button></td>
                                       
                                     </tr>
                                     </tbody>

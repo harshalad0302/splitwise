@@ -55,7 +55,7 @@ class Login_header extends Component {
                             <img src={logo_image} className="header_image" />
                         </div>
                             <div>
-                            <button onClick={this.HomeOnClick}>Home</button>
+                            <button onClick={this.HomeOnClick} className="button_signUp">Dashboard</button>
                             </div>
                             <div className="dropdown">
                                 <button className="btn btn-secondary dropdown-toggle color"  type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

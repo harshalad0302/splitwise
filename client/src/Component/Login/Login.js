@@ -4,6 +4,7 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
 import backendServer from '../../../src/WebConfig';
+import HomeHeader from '../HomeHeader/HomeHeader'
 
 //connection to global store
 const connection_to_redux = (state) => {
@@ -87,21 +88,24 @@ class Login extends Component {
         return (
 
             <div>
+            <div>
+            <HomeHeader props={this.props}/>
+            </div>
 
                 <div className="App">
-                    <h1>Splitwise</h1>
+                  
                     <br></br>
-                    <label>Email address   :</label>
+                    <label><b>Email address   :</b></label>
                     <br></br>
                     <input onChange={this.EmailChangeHandler} type="text" />
                     <br></br>
                     <br></br>
-                    <label>Password   :</label>
+                    <label><b> Password   :</b></label>
                     <br></br>
                     <input onChange={this.passwordChangeHandle} type="password" />
                     <br></br>
                     <br></br>
-                    <button onClick={this.SubmitLogin}>Login</button>
+                    <button onClick={this.SubmitLogin} className="button_signUp" >Login</button>
                     {this.state.auth_flag && <div>{this.state.error_message} </div>}
 
                     <br></br>

@@ -230,16 +230,16 @@ class group_page extends Component {
                         <input type="text" onChange={this.HandelDescriptionOnChange}></input>
                         <br />
                         <br />
-                        <button type="button" onClick={this.OnClickSaveandSplit}>
+                        <button type="button" onClick={this.OnClickSaveandSplit} className="button_Login">
                             Save and Split
                     </button>
                         <br />
-                        <br />
+                        
                         {this.state.error_flag && <div>{this.state.error_message} </div>}
-                        <br />
+                      
                         <br />
                     </Modal>
-                    <button onClick={this.showModal} >Add expenses</button>
+                    <button onClick={this.showModal} className="button_signUp">Add expenses</button>
                 </div>
                 <div>
 

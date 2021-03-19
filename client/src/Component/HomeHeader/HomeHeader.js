@@ -40,9 +40,9 @@ class HomeHeader extends Component {
                 <div className="color">
                     <img src={logo_image} className="header_image_landing" />
                     <div id="Login_button" className="right_corner">
-                        <button className="button_Login" onClick={this.submitLogin}>Login</button>
+                        <button className="button_Login" onClick={this.submitLogin}>LoginPage</button>
                    &nbsp;
-                    <button className="button_signUp" onClick={this.submitSignup}>SignUp</button>
+                    <button className="button_signUp" onClick={this.submitSignup}>SignUpPage</button>
                     </div>
                 </div>
 
