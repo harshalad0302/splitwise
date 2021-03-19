@@ -436,7 +436,7 @@ router.post('/Expense_add', async (req, res) => {
   //--------------------
   //Recent activity
   let recent_activity_expense_added = "user " + JSON.stringify(req.body.name_of_UID_paid) + " added the new expense " + JSON.stringify(req.body.description) + " of " + JSON.stringify(req.body.amount) + "USD in the group " + JSON.stringify(req.body.name_of_group_ID)
- 
+
   await recentactivities.create({
     GroupID: req.body.expense_of_Group_ID,
     groupname: req.body.name_of_group_ID,
@@ -669,7 +669,7 @@ router.post('/Settle_req', async (req, res) => {
   //-----------------
   //recent activity
 
-  let settle_activity="user "+JSON.stringify(req.body.name_of_UID_login)+"settle up with "+JSON.stringify(req.body.name_of_other_UID)+" for group "+JSON.stringify(req.body.GroupID_name)
+  let settle_activity = "user " + JSON.stringify(req.body.name_of_UID_login) + "settle up with " + JSON.stringify(req.body.name_of_other_UID) + " for group " + JSON.stringify(req.body.GroupID_name)
   await recentactivities.create({
     GroupID: req.body.GroupID,
     groupname: req.body.GroupID_name,
@@ -677,9 +677,9 @@ router.post('/Settle_req', async (req, res) => {
     UID: req.body.UID_of_login,
     date_time: Sequelize.fn('NOW')
   })
- // -----------------
+  // -----------------
 
- 
+
   res.status(200);
 
 });
@@ -724,7 +724,7 @@ router.post('/leave_group', async (req, res) => {
 
     //-------------recent activity
 
-    let activity_left="user "+JSON.stringify(req.body.UID_name)+" left the group "+JSON.stringify(req.body.group_name)
+    let activity_left = "user " + JSON.stringify(req.body.UID_name) + " left the group " + JSON.stringify(req.body.group_name)
 
     await recentactivities.create({
       GroupID: req.body.group_id,
@@ -733,7 +733,7 @@ router.post('/leave_group', async (req, res) => {
       UID: req.body.UID,
       date_time: Sequelize.fn('NOW')
     })
-//----------------------
+    //----------------------
   }
   else {
     result = {
@@ -746,6 +746,68 @@ router.post('/leave_group', async (req, res) => {
 
 
   console.log("result is ", result)
+  res.status(200).send(result);
+
+});
+
+//recent_activities
+
+router.post('/recent_activities', async (req, res) => {
+
+
+  //first get user is part of which all groups
+  const Group_IDS_user_part_of = await invitations.findAll({
+    attributes: ['invite_from_group_id'],
+    where: {
+      UID: req.body.UID,
+      accept: "ACCEPT"
+    }
+  })
+
+  let Group_ids_user_belongTo = []
+
+  for (var i = 0; i < Group_IDS_user_part_of.length; i++) {
+    Group_ids_user_belongTo.push({ Group_Id: Group_IDS_user_part_of[i].dataValues.invite_from_group_id })
+  }
+  console.log("Group_ids_user_belongTo is ", Group_ids_user_belongTo)
+  //get the data from table
+
+  let array_recent_act = []
+  let data_from_recent_activities = []
+  for (var i = 0; i < Group_ids_user_belongTo.length; i++) {
+    //get the data 
+    data_from_recent_activities = await recentactivities.findAll({
+      where: {
+        UID: req.body.UID,
+        GroupID: Group_ids_user_belongTo[i].Group_Id
+      }
+    })
+
+  }
+
+  for (var i = 0; i < data_from_recent_activities.length; i++) {
+    array_recent_act.push({
+      UID:data_from_recent_activities[i].dataValues.UID,
+      name:req.body.name,
+      GroupName:data_from_recent_activities[i].dataValues.groupname,
+      Activity:data_from_recent_activities[i].dataValues.activity,
+      id:data_from_recent_activities[i].dataValues.id,
+      date:data_from_recent_activities[i].dataValues.date_time
+    })
+  }
+
+ 
+
+  //sort the array
+
+  array_recent_act.sort((a, b) => (a.id < b.id) ? 1 : -1)
+
+
+  result = {
+
+    array_recent_act:array_recent_act
+  }
+
   res.status(200).send(result);
 
 });

@@ -97,6 +97,9 @@ class dashborad extends Component {
          
     }
 
+ 
+  
+
     render() {
 
 
@@ -108,11 +111,11 @@ class dashborad extends Component {
                     <Login_header props={this.props} />
                 </div>
                 <h2>Dashboard</h2>
-                <label>Amount {this.state.name} gets</label> <label>{this.state.amount_this_uid_gets}$</label> 
+                <label>Amount {this.state.name} gets =</label> <label>{this.state.amount_this_uid_gets}$</label> 
                 <br />
-                <label>Amount {this.state.name} owes</label> <label>{this.state.amount_this_uid_ows}$</label>
+                <label>Amount {this.state.name} owes =</label> <label>{this.state.amount_this_uid_ows}$</label>
                 <br />
-                <label>Total Balance  </label> <label>{this.state.total}$</label>
+                <label>Total Balance  = </label> <label>{this.state.total}$</label>
                 <br />
                <h3>Details</h3>
 
@@ -123,7 +126,8 @@ class dashborad extends Component {
                     this.state.group_wise_balence.map((data, index) => {
                         return (
                             <div key={index}>
-                                <table>
+                                <table id="students">
+                                <tbody>
                                     <tr>
                                         <th>Group Name</th>
                                         <th>Amount gets</th>
@@ -138,6 +142,7 @@ class dashborad extends Component {
                                         <td><button onClick={() =>this.show_details_click(data)}>Show details</button></td>
                                       
                                     </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         )

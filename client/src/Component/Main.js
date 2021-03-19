@@ -12,7 +12,9 @@ import Create_groups from './Create_groups/Create_groups'
 import dashboard from './Dashboard/dashborad'
 import recent_activities from './Recent_activities/recent_activities'
 import show_details from './Show_details/show_details'
-import DatatablePage from '../../src/Component/DatatablePage'
+import temp from './Temp/temp'
+
+
 
 //Create a Main Component
 class Main extends Component {
@@ -30,8 +32,9 @@ class Main extends Component {
             <Route path="/Create_groups" component={Create_groups}/> 
             <Route path="/show_details" component={show_details}/> 
             <Route path="/recent_activities" component={recent_activities}/> 
+            <Route path="/temp" component={temp}/> 
           
-            <Route path="/DatatablePage" component={DatatablePage}/> 
+          
             </BrowserRouter>
             </div>
 
