@@ -1,29 +1,40 @@
 
-const { sequelize, DataTypes } = require('../db/connection');
+// const { sequelize, DataTypes } = require('../db/connection');
+// const groups = sequelize.define('groups', {
+//     // Model attributes are defined here
+//     groupID: {
+//         type: DataTypes.INTEGER,
+//         allowNull: false,
+//         primaryKey: true,
+//         autoIncrement: true
+//     },
+//     group_name: {
+//         type: DataTypes.STRING
+//         // allowNull defaults to true
+//     }
+   
+   
+// },
 
+//     {
+//         tableName : 'groups',
+//         timestamps : false
+//     }
+// );
 
-const groups = sequelize.define('groups', {
-    // Model attributes are defined here
+// module.exports = groups;
+
+const mongoose = require('mongoose')
+const GroupSchema = new mongoose.Schema({
     groupID: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
+        type: Number
     },
     group_name: {
-        type: DataTypes.STRING
-        // allowNull defaults to true
+        type: String
     }
-   
-   
-},
+}, {
+    timestamps: true
+})
 
-    {
-        tableName : 'groups',
-        timestamps : false
-    }
-
-
-);
-
-module.exports = groups;
+const groups = mongoose.model('groups', GroupSchema)
+module.exports = groups

@@ -25,7 +25,7 @@ app.use(user_router);
 
 
 app.listen(3002, (req, res) => {
-  console.log('running on port 3000');
+  console.log('running on port 3002');
 });
 
 module.exports =app;

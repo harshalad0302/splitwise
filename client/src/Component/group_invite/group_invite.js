@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import Login_header from '../Login_header/Login_header'
+import Login_header from '../Login_header/login_header'
 import { connect } from 'react-redux';
 import axios from 'axios';
 import backendServer from '../../../src/WebConfig';
@@ -175,7 +175,7 @@ class group_invite extends Component {
                     <div>
                     <br/>
                     <label><b>Invites from </b></label>
-                    <div> {this.state.invite_from_group_id ? "":"You have zero invites right now"}</div>
+                    <div > {this.state.invite_from_group_id ? "":"You have zero invites right now"}</div>
                     </div>
 
                     {
@@ -216,11 +216,10 @@ class group_invite extends Component {
                     }
                     {
                         this.state.filtered_array &&
-                        this.state.filtered_array &&
                         this.state.filtered_array.map((user, index) => {
                             return (
                                 <div key={index}>
-                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)}>Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)}>Leave Group</button>
+                                    <input value={user} readOnly="readonly" /> <button onClick={() =>this.GotoGroup_on_click(index)} className="button_Login">Go to group</button> <button onClick={() =>this.OnClickLeaveGroup(index)} className="button_signUp">Leave Group</button>
                                 </div>
                             )
                         })
@@ -228,7 +227,7 @@ class group_invite extends Component {
                         
                     }
                     </div>
-                    {this.state.auth_flag && <div>{this.state.error_message} </div>}
+                    {this.state.auth_flag && <div className="error_div">{this.state.error_message} </div>}
                 </div>
             </div>
         )

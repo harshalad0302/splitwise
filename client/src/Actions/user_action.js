@@ -6,8 +6,9 @@
 export const add_user = ({
     name = "",
     emailid = "",
-    UID="",
-    phone_number=""
+    UID = "",
+    phone_number = "",
+    profile_photo = ""
 
 
 } = {}) => {
@@ -15,10 +16,11 @@ export const add_user = ({
     return {
         type: 'add_user',
         user: {
-            name_user: name,
-            emailid_user: emailid,
-            phone_number_user:phone_number,
-            UID_user:UID
+            name,
+            emailid,
+            phone_number,
+            UID,
+            profile_photo
 
 
         }
@@ -31,10 +33,11 @@ export const remove_user = () => {
     return {
         type: 'remove_user',
         user: {
-            name_user: "",
-            emailid_user: "",
-            UID:"",
-            phone_number:""
+            name: "",
+            emailid: "",
+            UID: "",
+            phone_number: "",
+            profile_photo: ""
         }
     }
 

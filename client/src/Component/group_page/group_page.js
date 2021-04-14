@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import Login_header from '../Login_header/Login_header'
+import Login_header from '../Login_header/login_header'
+import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import Modal from '../../Component/Modal/Modal'
+import Modal from 'react-modal'
 import backendServer from '../../../src/WebConfig';
-
+import avatar_image from '../../Assests/Img/avatar.png'
+import Bill_Logo from '../../Assests/Img/bill_logo.PNG'
+import save_by from '../../Assests/Img/save_by.PNG'
 const connection_to_redux = (state) => {
 
     return {
@@ -13,124 +16,109 @@ const connection_to_redux = (state) => {
     }
 }
 
+const customStyles = {
+    content: {
+        top: '40%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)'
 
+    }
+};
 
 class group_page extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
-            show: false,
-            users_in_group: undefined,
-            user_id_in_group: undefined,
-            currency: 0,
+            group_name: this.props.location.state.group_name,
+            showModal: false,
+            groupID: this.props.location.state.groupID,
+            // group_member_details: undefined,
+            group_expenses_details: undefined,
+            UID: this.props.user.UID,
+            name: this.props.user.name,
             description: "",
-            error_flag: false,
-            error_message: "",
-            expenses_of_this_group: undefined,
-            expense_amount_of_this_group: undefined,
-            expense_paid_by_uid_of_this_group: undefined,
-            name_of_user_who_paid: undefined,
-            group_bal_users_get: undefined,
-            group_bal_users_ows: undefined
-        };
-        this.showModal = this.showModal.bind(this);
-        this.hideModal = this.hideModal.bind(this);
+            amount: "",
+            comment: "",
+            details_of_each_individual_owes_gets: undefined,
+            auth_flag: false,
+            error_message: ""
+
+        }
+        this.handleOpenModal = this.handleOpenModal.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
+
     }
 
-    showModal = () => {
-        this.setState({ show: true });
-    };
+    handleOpenModal() {
+        this.setState({ showModal: true });
+    }
 
-    hideModal = () => {
-        this.setState({ show: false });
-    };
+    handleCloseModal() {
+        this.setState({ showModal: false });
+    }
+
+    update = async (e) => {
+        //add same thing as component did mount
+
+    }
 
     componentDidMount = async (e) => {
 
         const data = {
-            group_name: this.props.history.location.state.group_name,
-            group_id: this.props.history.location.state.group_id,
-            current_UID: this.props.user.UID_user
+            group_name: this.props.location.state.group_name,
+            groupID: this.props.location.state.groupID,
+            current_UID: this.props.user.UID
         }
-
         const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data)
+        //  const get_expenses_of_group = await axios.post(`${backendServer}/get_expenses_of_group`, data)
+        var options = { year: 'numeric', month: 'long', day: 'numeric' }
 
-        let array_users_in_group = []
-        let array_users_in_group_id = []
-        let expenses_of_the_group = []
-        let expenses_paid_by_UID = []
-        let expense_amount = []
-        let name_of_user_who_paid_for_this = []
-        let group_bal_users_get_temp = []
-        let group_bal_users_ows_temp = []
+        let exepense_details = []
+        let details_of_each_individual_owes_gets_temp = []
 
-        for (var i = 0; i < get_users_in_group.data.count_no_of_members; i++) {
-            array_users_in_group.push(get_users_in_group.data.Name_of_members[i].name)
-            array_users_in_group_id.push(get_users_in_group.data.UID_of_members[i].UID)
+        for (var i = 0; i < get_users_in_group.data.group_expenses_details.length; i++) {
+            var date_value = new Date(get_users_in_group.data.group_expenses_details[i].date_time).toLocaleDateString([], options);
+            exepense_details.push({
+                Expense_date: date_value,
+                amount: get_users_in_group.data.group_expenses_details[i].amount,
+                description: get_users_in_group.data.group_expenses_details[i].description,
+                paid_by: get_users_in_group.data.group_expenses_details[i].name_of_UID_who_paid
+            })
         }
 
+        for (var i = 0; i < get_users_in_group.data.details_of_each_individual_owes_gets.length; i++) {
+            let amount_gets = 0
+            let amount_owes = 0
 
-
-        //load the arrays to display
-        for (var i = 0; i < get_users_in_group.data.expense_ids_for_this_group.length; i++) {
-            expenses_of_the_group.push(get_users_in_group.data.expense_description[i].description)
-            expenses_paid_by_UID.push(get_users_in_group.data.expense_paid_by_UID[i].paid_by_UID)
-            expense_amount.push(get_users_in_group.data.expense_amount_for_this_group[i].amount)
-            name_of_user_who_paid_for_this.push(get_users_in_group.data.user_name_who_paid[i].name)
-        }
-
-
-        for (var i = 0; i < get_users_in_group.data.arr_expense_gets.length; i++) {
-
-            if (get_users_in_group.data.arr_expense_gets[i].amount_gets !== null) {
-                group_bal_users_get_temp.push({ UID: get_users_in_group.data.arr_expense_gets[i].UID, name: get_users_in_group.data.arr_expense_gets[i].name.name, amount_gets: get_users_in_group.data.arr_expense_gets[i].amount_gets })
+            if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets.length !== 0) {
+                amount_gets = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets[0].amount_gets
             }
 
-        }
-
-        //to display the balence of the groups
-
-
-        for (var i = 0; i < get_users_in_group.data.arr_expenses_ows.length; i++) {
-
-
-            if (get_users_in_group.data.arr_expenses_ows[i].amount_ows !== null) {
-                group_bal_users_ows_temp.push({ UID: get_users_in_group.data.arr_expenses_ows[i].UID, name: get_users_in_group.data.arr_expenses_ows[i].name.name, amount_ows: get_users_in_group.data.arr_expenses_ows[i].amount_ows })
+            if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows.length !== 0) {
+                amount_owes = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows[0].amount_ows
             }
+            details_of_each_individual_owes_gets_temp.push(
+                {
+                    UID: get_users_in_group.data.details_of_each_individual_owes_gets[i].UID,
+                    name: get_users_in_group.data.details_of_each_individual_owes_gets[i].name.name,
+                    amount_gets: amount_gets,
+                    amount_ows: amount_owes
+                }
+            )
 
         }
 
 
-
-
-        //now setting a state
         this.setState(() => ({
-            group_bal_users_ows: group_bal_users_ows_temp,
-            group_bal_users_get: group_bal_users_get_temp,
-            users_in_group: array_users_in_group,
-            user_id_in_group: array_users_in_group_id,
-            expenses_of_this_group: expenses_of_the_group,
-            expense_amount_of_this_group: expense_amount,
-            expense_paid_by_uid_of_this_group: expenses_paid_by_UID,
-            name_of_user_who_paid: name_of_user_who_paid_for_this
-
+            // group_member_details: get_users_in_group.data.details_of_group_members,
+            group_expenses_details: exepense_details,
+            details_of_each_individual_owes_gets: details_of_each_individual_owes_gets_temp
         }))
 
-
-
-
-
-    }
-
-
-
-
-    HandelCurrencyOnChange = (e) => {
-
-        this.setState({
-            currency: e.target.value
-        })
     }
 
     HandelDescriptionOnChange = (e) => {
@@ -140,161 +128,227 @@ class group_page extends Component {
         })
     }
 
-  
+    HandelAmountOnChange = (e) => {
+
+        this.setState({
+            amount: e.target.value
+        })
+    }
+    HandelCommentOnChange = (e) => {
+
+        this.setState({
+            comment: e.target.value
+        })
+    }
+
 
     OnClickSaveandSplit = async (e) => {
-
-        //get the values in one object
-
-        let data = {
-            paid_by_UID: this.props.user.UID_user,
-            name_of_UID_paid: this.props.user.name_user,
-            expense_of_Group_ID: this.props.history.location.state.group_id,
-            name_of_group_ID: this.props.history.location.state.group_name,
-            amount: this.state.currency,
-            currency: "USD",
-            description: this.state.description
-
+        //get the data to be inseretd 
+        const data = {
+            UID_adding_expense: this.state.UID,
+            name: this.state.name,
+            amount: this.state.amount,
+            comment: this.state.comment,
+            description: this.state.description,
+            groupID: this.state.groupID,
+            group_name: this.state.group_name
         }
-        //validate the inputs
-        if (data.amount === 0 || data.description === "") {
-
+        const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data)
+        //check the respose 
+        if (response_Expense_add.data.auth_falg === "F") {
             this.setState({
-                error_flag: true,
+                auth_flag: true,
                 error_message: <div>
-                    <h3>Either amount or description is empty!</h3>
+                    {
+                        response_Expense_add.data.message.map((error_message, index) => {
+                            return (
+                                <div key={index}>
+                                    <ul list-style-position="inside" >
+                                        <li>{error_message}</li>
+                                    </ul>
+                                </div>
+                            )
+                        })
+                    }
                 </div>
+
             })
-        }
 
+        }
         else {
-            this.hideModal()
-            const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data)
-            this.props.history.push("/group_invite")
+
+            this.handleCloseModal()
+            this.update()
 
         }
-
-
-
 
 
     }
-
     render() {
 
         return (
-            <div>
-                <div>
+
+            <div className="main_page_div">
+                <div className="Main_inside_header">
                     <Login_header props={this.props} />
-                    <div>
-                        <div><h3>Group page for {this.props.history.location.state.group_name} </h3></div>
+                </div>
+
+                <div className="container">
+                    <div className="leftdiv">
+                        <Left_toggel_bar props={this.props} />
                     </div>
-                    <div><h4>Group Members </h4></div>
-                    <div>
-                        {
+                    <div className="d-flex flex-row my-1 justify-content-between">
+                        <div className="bg w-50">
+                            <div className="d-flex flex-row justify-content-evenly">
+                                <div className=" w-30">
+                                    <img src={avatar_image} className="group_icon_logo">
+                                    </img>
+                                </div>
+                                <div className=" w-70 mx-3 my-3 "><h1 className="fs-2">{this.state.group_name}</h1></div>
+                            </div>
 
-                            this.state.users_in_group &&
-                            this.state.users_in_group.map((user, index) => {
-                                return (
-                                    <div key={index}>
+                        </div>
+                        <div className=" w-50 mx-5 d-flex flex-row justify-content-end">
+                            <div>
+                                <button className="darkbutton my-3" onClick={this.handleOpenModal}>Add Expenses</button>
+                            </div>
+                            <div>
+                                <button className="lightbutton my-3" >Settle UP</button>
+                            </div>
 
-                                        <input value={user} readOnly="readonly" />
+                        </div>
+                    </div>
+
+                    <div className="d-flex flex-row mx-2 pl-2 justify-contenet-start ">
+                        <div className=" w-75 ">
+                            <div className="d-flex flex-column my-3">
+                                {
+                                    this.state.group_expenses_details &&
+                                    this.state.group_expenses_details.map((data, index) => {
+                                        return (
+                                            <div key={index}>
+                                                <div >
+                                                    <div className="d-flex flex-row border justify-content-start border ">
+                                                        <div className=" w-5 mx-3">
+                                                            <div className="d-flex flex-row">
+                                                                <div className="w-5">
+                                                                    <p>{data.Expense_date}</p>
+                                                                </div>
+                                                                <div className="w-5 mx-3">
+                                                                    <img src={Bill_Logo}></img>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-25 mx-2 ">
+                                                            <p>{data.description} for {data.amount} USD</p>
+                                                        </div>
+                                                        <div className="mx-2 w-5">
+                                                            <button>deatils</button>
+                                                        </div>
+
+                                                        <div className=" w-25">
+                                                            <div className="d-flex flex row  justify-content-end ">
+                                                                <div className="w-25"> <p>Paid By </p></div>
+                                                                <div className="w-50"><p>{data.paid_by}</p></div>
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+
+                                }
+
+                            </div>
+                        </div>
+                        <div className="w-25">
+                            <div className="d-flex flex-column my-2">
+                                {
+                                    this.state.details_of_each_individual_owes_gets &&
+                                    this.state.details_of_each_individual_owes_gets.map((data, index) => {
+                                        return (
+                                            <div key={index}>
+                                                <div className="d-flex flex-column my-2 mx-2 border">
+                                                    <div className="border">
+                                                        <span >{data.name}</span>
+                                                    </div>
+                                                    <div className="d-flex flex-row justify-content-centre ">
+                                                        <div className="w-50 mx-3 ">
+                                                            <div className="d-flex flex-column">
+                                                                <div><span >amount owes</span></div>
+                                                                <div><span >${data.amount_ows}</span></div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-50 border">
+                                                            <div className="d-flex flex-column">
+                                                                <div><span >amount gets</span></div>
+                                                                <div><span >${data.amount_gets}</span></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <Modal isOpen={this.state.showModal} style={customStyles} >
+                        <div className="d-flex flex-row  justify-content-between">
+                            <div className="w-100">
+                                <div className="add_expenses_image">
+                                    <h4>Add Expenses</h4>
+                                </div>
+                            </div>
+                            <div className="w-10 ">
+                                <button className="btnN" onClick={this.handleCloseModal}><i className="fa fa-close"></i> X</button>
+                            </div>
+                        </div>
+                        <div className="d-flex flex-row">
+                            <div className=" w-30 my-3">
+                                <img src={Bill_Logo}></img>
+                            </div>
+                            <div className=" w-70">
+                                <div className="d-flex flex-column">
+                                    <div className="my-3">
+                                        <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" placeholder="Enter a description" onChange={this.HandelDescriptionOnChange} />
                                     </div>
-                                )
-                            })
+                                    <div className="my-0.5">
+                                        <input type="Number" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" placeholder="0.00" onChange={this.HandelAmountOnChange} />
+                                    </div>
+                                    <div className="my-3">
+                                        <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" placeholder="Comment" onChange={this.HandelCommentOnChange} />
+                                    </div>
+                                    <div className="my-0.5">
+                                        <img src={save_by}></img>
+                                    </div>
+                                    <div className="my-3">
+                                        <button className="lightbutton w-50" onClick={this.OnClickSaveandSplit} > Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        }
-                    </div>
-                    <br />
-                    <br />
-                    <Modal show={this.state.show} handleClose={this.hideModal}  >
-                        <h2>Add expenses</h2>
-                        <br />
-                        <label><b>Amount:</b></label>
-                        <br />
-                        <input type="number" onChange={this.HandelCurrencyOnChange}></input>
-                        <br />
-                        <label><b>Currency</b></label>
-                        <br />
-                        <select >
-                            <option defaultValue>USD</option>
-                            <option value="1">KWD</option>
-                            <option value="2">BHD</option>
-                            <option value="3">GBP</option>
-                            <option value="4">EUR</option>
-                            <option value="5">CAD</option>
-                        </select>
-                        <br />
-                        <label><b>Description:</b></label>
-                        <br />
-                        <input type="text" onChange={this.HandelDescriptionOnChange}></input>
-                        <br />
-                        <br />
-                        <button type="button" onClick={this.OnClickSaveandSplit} className="button_Login">
-                            Save and Split
-                    </button>
-                        <br />
-                        
-                        {this.state.error_flag && <div>{this.state.error_message} </div>}
-                      
-                        <br />
+
+
                     </Modal>
-                    <button onClick={this.showModal} className="button_signUp">Add expenses</button>
-                </div>
-                <div>
 
-                    <div>
-                        <br />
-                        <label><b>Group expenses</b></label>
-                        <br />
-
-                        {
-                            this.state.expenses_of_this_group &&
-                            this.state.expenses_of_this_group.map((expense, index) => {
-                                return (
-                                    <div key={index}>
-                                        <label>{this.state.expense_amount_of_this_group[index]} $ paid by  </label> <label>{this.state.name_of_user_who_paid[index]}</label>  <label> for {expense}</label>
-                                    </div>
-                                )
-                            })
-
-                        }
-
-
-                    </div>
-                    <div>
-                        <label><b>Group Balance</b></label>
-                        {
-                            //group_bal_users_get
-                            this.state.group_bal_users_get &&
-                            this.state.group_bal_users_get.map((data, index) => {
-                                return (
-                                    <div key={index}>
-                                        <input value={data.name} readOnly="readonly" /><label>Amount gets ---</label> <label>{data.amount_gets} $</label>
-                                    </div>
-                                )
-                            })
-
-                        }
-
-                    </div>
-                    <div>
-                        {
-                            //group_bal_users_ows
-                            this.state.group_bal_users_ows &&
-                            this.state.group_bal_users_ows.map((data, index) => {
-                                return (
-                                    <div key={index}>
-                                        <input value={data.name} readOnly="readonly" /><label>Amount owes ---</label>  <label>{data.amount_ows} $</label>
-                                    </div>
-                                )
-                            })
-
-                        }
-                    </div>
 
                 </div>
+
+
+
             </div>
+
         )
     }
 }

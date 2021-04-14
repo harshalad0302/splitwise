@@ -1,5 +1,6 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import userReducer from '../Reducers/User_reducers'
+import { composeWithDevTools } from 'redux-devtools-extension';
 
 
 export default () => {

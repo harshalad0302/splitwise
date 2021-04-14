@@ -1,8 +1,9 @@
 const express = require("express");
-const sequelize = require('../db/connection.js');
+//const sequelize = require('../db/connection.js');
 const users = require('../db_models/users');
 const groups = require('../db_models/groups');
-const expensenses = require('../db_models/expensenses');
+const comments = require('../db_models/comments')
+const expenses = require('../db_models/expenses');
 const invitations = require('../db_models/invitations');
 const recentactivities = require('../db_models/recentactivities')
 const router = new express.Router();
@@ -14,811 +15,604 @@ const { findAll } = require("../db_models/users");
 const { Json } = require("sequelize");
 const sharp = require('sharp');
 const multer = require('multer');
+require('../db/mongo')
 
 router.post('/signup', async (req, res) => {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  var auth_falg = "S"
+  var message = []
+  if (req.body.emailid === "" || re.test(String(req.body.emailid).toLowerCase()) === false) {
+    auth_falg = "F"
+    message.push("Emailid field is empty or invalid")
+  }
+  if (req.body.name === "") {
+    auth_falg = "F"
+    message.unshift("name is blank")
+  }
+  if (req.body.password === "") {
+    auth_falg = "F"
+    message.unshift("password is blank")
+  }
 
+  if (auth_falg !== "F") {
+    //data can be inserted
+    //check if emailid is already present
+    //const found_data = await users.findOne({ where: { emailid: req.body.emailid } });
+    const found_data = await users.findOne({ emailid: req.body.emailid })
+    if (found_data === null) {
+      //emailid is not present and can be inserted
+      // await users.create(req.body, { fields: ["name", "emailid", "password"] });
+      //get max UID
+      const Max_UID = await users.aggregate([{ $group: { _id: null, maxId: { $max: '$UID' } } }])
+      var UID_to_be_inserted
 
-  if (req.body.emailid === "" || req.body.password === "" || req.body.name === "") {
-    result = {
-      auth_flag_email: "F"
+      if (Max_UID.length === 0) {
+        UID_to_be_inserted = 0
+      }
+      else {
+        UID_to_be_inserted = Max_UID[0].maxId + 1
+
+      }
+
+      let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: req.body.password, UID: UID_to_be_inserted, u_tokens: [] })
+      let returneduser = await users1.save()
+      await returneduser.generateAuthToken()
+      // const data_after_insert = await users.findOne({ where: { emailid: req.body.emailid } });
+      const data_after_insert = await users.findOne({ emailid: req.body.emailid })
+      message.push("data inserted")
+      result = {
+        auth_falg: "S",
+        message: message,
+        message_length: message.length,
+        UID: data_after_insert.UID,
+        name: data_after_insert.name,
+        emailid: data_after_insert.emailid
+
+      }
+      res.status(200).send(result);
+
+    }
+    else {
+      message.push("Emailid is already present")
+      result = {
+        auth_falg: "F",
+        message: message,
+        message_length: message.length
+      }
+      res.status(200).send(result);
     }
 
+  }
+  else {
+
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+
+
+  }
+
+});
+
+//login Api
+
+router.post('/login', async (req, res) => {
+  var auth_falg = "S"
+  var message = []
+  if (req.body.emailid === "") {
+    auth_falg = "F"
+    message.push("Emailid field is empty")
+  }
+  if (req.body.password === "") {
+    auth_falg = "F"
+    message.push("Password field is empty")
+  }
+
+  if (req.body.emailid !== "" && req.body.password !== "") {
+    //check if emailid is present or not
+    //  const found_data_login = await users.findOne({ where: { emailid: req.body.emailid } });
+    const found_data_login = await users.findOne({ emailid: req.body.emailid });
+    if (found_data_login === null) {
+      auth_falg = "F"
+      message.push("Emailid is not present ! please login")
+      result = {
+        auth_falg: auth_falg,
+        message: message,
+        message_length: message.length
+      }
+      res.status(200).send(result);
+    }
+    else {
+
+      //now emailid is present check for password
+
+      if (req.body.password === found_data_login.password) {
+        message.push("Password is matching and login is successful")
+        result = {
+          auth_falg: auth_falg,
+          name: found_data_login.name,
+          emailid: found_data_login.emailid,
+          UID: found_data_login.UID,
+          phone_number: found_data_login.phone_number,
+          message: message,
+          profile_photo: found_data_login.profile_photo
+
+        }
+        res.status(200).send(result);
+
+      }
+      else {
+        //invalid password
+        message.push("Invalid Password")
+        result = {
+          auth_falg: "F",
+          message: message,
+          message_length: message.length
+        }
+        res.status(200).send(result);
+      }
+    }
+
+  }
+  else {
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length
+    }
     res.status(200).send(result);
   }
 
-  else {
-    const found_data = await users.findOne({ where: { emailid: req.body.emailid } });
-    if (found_data === null) {
-
-      //inserting data
-      await users.create(req.body, { fields: ["name", "emailid", "password"] });
-
-      const data_after_insert = await users.findOne({ where: { emailid: req.body.emailid } });
+});
 
 
-
+//Api-----Create_group
+router.post('/create_group', async (req, res) => {
+  //validations
+  var auth_falg = "S"
+  var message = []
+  if (req.body.group_name === "") {
+    auth_falg = "F"
+    message.push("Group Name is empty")
+  }
+  if (req.body.length === 0) {
+    auth_falg = "F"
+    message.push("Cant create group with only 1 member! add members ")
+  }
+  if (req.body.emailid_of_members.filter(emailid_of_members => emailid_of_members === "").length !== 0) {
+    auth_falg = "F"
+    message.push("One of group member has empty value! either remove or fill the emailid")
+  }
+  if (req.body.group_name !== "" && req.body.length !== 0 && req.body.emailid_of_members.filter(emailid_of_members => emailid_of_members === "").length === 0) {
+    //now values are valid
+    //check if group name is unique is not
+    const found_group_name = await groups.findOne({ group_name: req.body.group_name });
+    if (found_group_name) {
+      message.push("Group name is already present")
       result = {
-        auth_flag_email: "S",
-        name: req.body.name,
-        emailid: req.body.emailid,
-        UID: data_after_insert.UID,
-        phone_number: req.body.phone_number
+        auth_falg: "F",
+        message: message,
+        message_length: message.length
       }
-
       res.status(200).send(result);
-
     }
-
     else {
 
+      //group name is not present can be created
+      // await groups.create({ group_name: req.body.group_name })
+      //get auto increment UID
+      const Max_Group_ID = await groups.aggregate([{ $group: { _id: null, maxId: { $max: '$groupID' } } }])
+      var Group_ID_to_be_inserted
+      if (Max_Group_ID.length === 0) {
+        Group_ID_to_be_inserted = 0
+      }
+      else {
+        Group_ID_to_be_inserted = Max_Group_ID[0].maxId + 1
 
-      result = {
-        auth_flag_email: "F",
-        auth_flag_email: "Femail_already",
-        error_message: "Email id is already present"
+      }
+      let groups_create = await new groups({ group_name: req.body.group_name, groupID: Group_ID_to_be_inserted })
+      groups_created = await groups_create.save()
+      //get the group_id from the inserted value
+      const created_group_id = groups_created.groupID
+
+      let owner = req.body.owner
+      let group_name_this = req.body.group_name
+      let activity = "user " + owner + " created a group " + group_name_this
+
+      //adding in recent activity 
+      create_recent_activity = await new recentactivities({ GroupID: created_group_id, groupname: req.body.group_name, activity: activity, UID: req.body.owner_UID, date_time: new Date() })
+      await create_recent_activity.save()
+      for (var i = 0; i < req.body.length; i++) {
+        //get the UID
+        var UID_for_group_member = await users.findOne({ emailid: req.body.emailid_of_members[i] })
+        create_invitations = await new invitations({ UID: UID_for_group_member.UID, invite_from_group_id: created_group_id, accept: "NA" })
+        await create_invitations.save()
+
+        let name_of_user_invited = await users.findOne({ UID: UID_for_group_member.UID }, 'name')
+        //recent activity sent invitation to 
+        let invite_activity = "user " + req.body.owner + " sent group invite of " + req.body.group_name + " to " + name_of_user_invited.name
+        create_recent_activity_invitation = await recentactivities({
+          GroupID: created_group_id,
+          groupname: req.body.group_name,
+          activity: invite_activity,
+          UID: req.body.owner_UID,
+          date_time: new Date()
+        })
+        await create_recent_activity_invitation.save()
+
       }
 
+      //put the owner in the group
+      put_owner_in_invitation = await new invitations({ UID: req.body.owner_UID, invite_from_group_id: created_group_id, accept: "ACCEPT" })
+      await put_owner_in_invitation.save()
+
+      result = {
+        auth_falg: auth_falg,
+        message: message,
+        message_length: message.length
+      }
       res.status(200).send(result);
+
     }
 
+
+  }
+  else {
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+  }
+
+
+});
+
+//Api-----Create_group
+router.post('/get_group_names', async (req, res) => {
+  //validations
+  var auth_falg = "S"
+  var message = []
+  let group_names = []
+  if (req.body.UID === "" || req.body.name === "") {
+    auth_falg = "F"
+    message.push("UID and name fields are empty")
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length,
+      group_names: group_names
+    }
+    res.status(200).send(result);
+  }
+  else {
+
+    const group_id_user_part_of = await invitations.find({ UID: req.body.UID, accept: "ACCEPT" }, 'invite_from_group_id')
+    for (var i = 0; i < group_id_user_part_of.length; i++) {
+      group_names.push(await groups.findOne({ groupID: group_id_user_part_of[i].invite_from_group_id }, 'group_name groupID'))
+    }
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length,
+      group_names_and_id_array: group_names
+    }
+    res.status(200).send(result);
+
+  }
+
+});
+
+//get_users_in_group
+router.post('/get_users_in_group', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+  //get the UID of members who are in group
+  const UID_of_members = await invitations.find({ invite_from_group_id: req.body.groupID, accept: "ACCEPT" }, 'UID')
+  details_of_group_members = []
+  group_expenses_details = []
+  details_of_each_individual_owes_gets = []
+  for (var i = 0; i < UID_of_members.length; i++) {
+    var name_of_UID = await users.findOne({ UID: UID_of_members[i].UID }, 'name')
+    //  details_of_group_members.push({ name_of_group_members: name_of_UID.name })
+    var amount_this_UID_ows = await personal_expenditure_ows.aggregate([
+      { $match: { UID: UID_of_members[i].UID, GroupID: req.body.groupID } },
+
+      { $group: { _id: null, amount_ows: { $sum: '$amount_ows' } } }
+
+    ])
+    var amount_this_UID_gets = await personal_expenditure_get.aggregate([
+      { $match: { UID: UID_of_members[i].UID, GroupID: req.body.groupID } },
+
+      { $group: { _id: null, amount_gets: { $sum: '$amount_gets' } } }
+
+    ])
+
+    details_of_each_individual_owes_gets.push({
+      UID: UID_of_members[i].UID,
+      name: name_of_UID,
+      amount_gets: amount_this_UID_gets,
+      amount_ows: amount_this_UID_ows
+    })
+
+  }
+
+  //get the expenses in the group_expenses_details
+
+  const get_expenses = await expenses.find({ expense_of_Group_ID: req.body.groupID })
+
+
+  result = {
+    auth_falg: auth_falg,
+    message: message,
+    message_length: message.length,
+    //  details_of_group_members: details_of_group_members,
+    group_expenses_details: get_expenses,
+    details_of_each_individual_owes_gets: details_of_each_individual_owes_gets
+  }
+  res.status(200).send(result);
+
+});
+
+
+//Expense_add
+router.post('/Expense_add', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+  //validation
+  if (req.body.amount === "") {
+    auth_falg = "F"
+    message.push("Amount is empty")
+  }
+  if (req.body.description === "") {
+    auth_falg = "F"
+    message.push("Description is empty")
+  }
+  if (req.body.amount !== "" && req.body.description !== "") {
+    //now you can entre the data
+    //auto increment expen_ID
+    const Max_expen_ID = await expenses.aggregate([{ $group: { _id: null, maxId: { $max: '$expen_ID' } } }])
+    var expen_ID_to_be_inserted
+    if (Max_expen_ID.length === 0) {
+      console.log("Max_expen_ID is here")
+      expen_ID_to_be_inserted = 0
+    }
+    else {
+      expen_ID_to_be_inserted = Max_expen_ID[0].maxId + 1
+    }
+    //expense inserted
+    create_expense = await new expenses({ paid_by_UID: req.body.UID_adding_expense, expense_of_Group_ID: req.body.groupID, amount: req.body.amount, description: req.body.description, name_of_UID_who_paid: req.body.name, expen_ID: expen_ID_to_be_inserted, date_time: new Date() })
+    let create_expense_insered = await create_expense.save()
+
+    //check if comment is there or not
+    if (req.body.comment !== "") {
+      //comment is not empty, need to insert
+      insert_comment = await new comments({
+        groupID: req.body.groupID,
+        group_name: req.body.group_name,
+        comment: req.body.comment,
+        UID_adding_comment: req.body.UID_adding_expense,
+        UID_adding_comment_name: req.body.name,
+        expen_ID: create_expense_insered.expen_ID,
+        expen_description: req.body.description,
+        date_time: new Date()
+      })
+
+      await insert_comment.save()
+
+    }
+
+    const expense_id_of_inserted_transcation = create_expense_insered.expen_ID_to_be_inserted
+    //Recent activity
+    let recent_activity_expense_added = "user " + req.body.name + " added the new expense " + req.body.description + " of " + req.body.amount + "USD in the group " + req.body.group_name
+    let insert_recent_activity = await new recentactivities({
+      GroupID: req.body.groupID,
+      groupname: req.body.group_name,
+      activity: recent_activity_expense_added,
+      UID: req.body.UID_adding_expense,
+      date_time: new Date()
+    })
+    await insert_recent_activity.save()
+    //now split
+    //get the number of members in the group
+    const no_of_members = await invitations.aggregate([
+      { $match: { invite_from_group_id: req.body.groupID, accept: "ACCEPT" } },
+
+      {
+        $count: "no_of_members"
+      }
+
+    ])
+    // console.log("no_of_members is ",no_of_members[0].no_of_members)
+    const UID_in_group = await invitations.find({ invite_from_group_id: req.body.groupID, accept: "ACCEPT" }, 'UID')
+
+
+    const each_split = req.body.amount / no_of_members[0].no_of_members
+
+    const amount_owner_gets = each_split * (no_of_members[0].no_of_members - 1)
+
+    for (var i = 0; i < UID_in_group.length; i++) {
+
+      if (UID_in_group[i].UID !== req.body.UID_adding_expense) {
+
+        let personal_expenditure_getinsert = await new personal_expenditure_get({ UID: req.body.UID_adding_expense, GroupID: req.body.groupID, amount_gets: each_split, amount_gets_from_UID: UID_in_group[i].UID, expen_ID: expense_id_of_inserted_transcation })
+        await personal_expenditure_getinsert.save()
+        let personal_expenditure_ows_inserted = await new personal_expenditure_ows({ UID: UID_in_group[i].UID, GroupID: req.body.groupID, amount_ows: each_split, amount_ows_to_UID: req.body.UID_adding_expense, expen_ID: expense_id_of_inserted_transcation })
+        await personal_expenditure_ows_inserted.save()
+      }
+    }
+
+    message.push("Expenses sucessfully added")
+    result = {
+      auth_falg: "S",
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+
+  }
+  else {
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+  }
+
+
+});
+
+//group_page_invite
+router.post('/group_page_invite', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+
+  const invitations_array = await invitations.find({ UID: req.body.UID, accept: "NA" }, 'invite_from_group_id')
+  var invite_from_groups = []
+  for (var i = 0; i < invitations_array.length; i++) {
+    invite_from_groups.push({ group_name: await groups.findOne({ groupID: invitations_array[i].invite_from_group_id }, 'group_name'), groupID: invitations_array[i].invite_from_group_id })
+  }
+
+  result = {
+    auth_falg: auth_falg,
+    message: message,
+    message_length: message.length,
+    invite_from_groups: invite_from_groups
+
+  }
+  res.status(200).send(result);
+});
+
+
+//group_invite_reject_req
+router.post('/group_invite_reject_req', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+
+  const update_output = await invitations.updateOne({ UID: req.body.current_UID, invite_from_group_id: req.body.group_ids_to_be_rejected }, { accept: 'REJECT' });
+  console.log("update_output.nModified is ", update_output.nModified)
+  if (update_output.nModified === 1) {
+    message.push("Reject is successful")
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
+  }
+  else {
+
+    message.push("Reject is not successful")
+    result = {
+      auth_falg: "F",
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
+  }
+
+});
+
+
+
+router.post('/group_invite_accept_req', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+  const update_output = await invitations.updateOne({ UID: req.body.UID, invite_from_group_id: req.body.groupID }, { accept: 'ACCEPT' });
+  if (update_output.nModified === 1) {
+    //adding to recent activity
+    let activity_insert = "user " + req.body.name + " joined the group " + req.body.group_name
+    create_recent_activity_group_accept = await recentactivities({
+      GroupID: req.body.create_expensegroupID,
+      groupname: req.body.group_name,
+      activity: activity_insert,
+      UID: req.body.UID,
+      date_time: new Date()
+    })
+    await create_recent_activity_group_accept.save()
+    message.push("User is added to a group")
+    result = {
+      auth_falg: auth_falg,
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
+  }
+  else {
+
+    message.push("adding user is not successful")
+    result = {
+      auth_falg: "F",
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
   }
 
 
 
 });
-
-
-router.post('/Login', async (req, res) => {
-
-  const found_data_login = await users.findOne({ where: { emailid: req.body.emailid } });
-
-
-  if (found_data_login === null) {
-
-
-    result_login = {
-      auth_flag_email_login: "F",
-      error_messgae: "Email id is not present,please sign up"
-    }
-
-    res.status(200).send(result_login);
-
-  }
-  else {
-    //email id is present , need to check the password
-    //get password from database
-
-    if (req.body.password === found_data_login.password) {
-      result_login = {
-        auth_flag_email_login: "S",
-        name: found_data_login.name,
-        emailid: found_data_login.emailid,
-        UID: found_data_login.UID,
-        phone_number: found_data_login.phone_number
-
-      }
-      res.status(200).send(result_login);
-    }
-    else {
-      result_login = {
-        auth_flag_email_login: "F",
-        error_messgae: "incorrect password"
-      }
-
-      res.status(200).send(result_login);
-    }
-
-
-  }
-
-
-});
-
 
 const upload = multer({
 
 })
 
 
+//update profile
+
 router.post('/profile', upload.single('u_avatar'), async (req, res) => {
-
-
-
-if (req.file) {
-  await users.update({ profile_photo: await (await sharp(req.file.buffer).resize(420, 240).toBuffer()).toString('base64') },
-    { where: { UID: req.body.UID } })
-}
-
-  if (req.body.emailid !== "") {
-    await users.update({ emailid: req.body.emailid },
-      { where: { UID: req.body.UID } })
-
-  }
-
-  if (req.body.phone_number !== "") {
-    await users.update({ phone_number: req.body.phone_number },
-      { where: { UID: req.body.UID } })
-  }
-  if (req.body.name !== "") {
-    await users.update({ name: req.body.name },
-      { where: { UID: req.body.UID } })
-  }
-
-
-
-  const updated_state = await users.findOne({ where: { UID: req.body.UID } });
-
-  result_edit = {
-    auth_flag_edit: "S",
-    updated_state: updated_state
-
-  }
-
-  res.status(200).send(result_edit);
-
-
-
-
-});
-
-
-
-//Api-----Create_group
-router.post('/Create_group', async (req, res) => {
-
-  const found_group_name = await groups.findOne({ where: { group_name: req.body.group_name } });
-
-  if (found_group_name !== null) {
-    result_group_name = {
-      group_name_already_p_f: "F",
-      error_messgae: "Group name is already present"
-    }
-
-    res.status(200).send(result_group_name);
-
-  }
-  else {
-    //inserting data in database
-    await groups.create({ group_name: req.body.group_name })
-    //get the group_id from the inserted value
-    const created_group_id = await groups.findOne({ where: { group_name: req.body.group_name } });
-
-    //--------------------------
-    let owner = req.body.owner
-    let group_name_this = req.body.group_name
-    let activity = "user " + JSON.stringify(owner) + "created a group " + JSON.stringify(group_name_this)
-    //adding in recent activity 
-    await recentactivities.create({ GroupID: created_group_id.groupID, groupname: req.body.group_name, activity: activity, UID: req.body.owner_id, date_time: Sequelize.fn('NOW') })
-    //--------------------------
-    for (var i = 0; i < req.body.length; i++) {
-      //get the UID
-      var UID_for_group_member = await users.findOne({ where: { emailid: req.body.emailid_of_members[i] } })
-      invitations.create({ UID: UID_for_group_member.UID, invite_from_group_id: created_group_id.groupID })
-      let name_of_user_invited = await users.findOne({ attributes: ['name'], where: { UID: UID_for_group_member.UID } })
-      //--------------------------
-      //recent activity sent invitation to 
-      let invite_activity = "user " + JSON.stringify(req.body.owner) + " sent group invite of " + JSON.stringify(req.body.group_name) + " to " + JSON.stringify(name_of_user_invited.name)
-
-
-      await recentactivities.create({
-        GroupID: created_group_id.groupID,
-        groupname: req.body.group_name,
-        activity: invite_activity,
-        UID: req.body.owner_id,
-        date_time: Sequelize.fn('NOW')
-      })
-      //--------------------------
-    }
-
-    //put the owner in the group
-    invitations.create({ UID: req.body.owner_id, invite_from_group_id: created_group_id.groupID, accept: "ACCEPT" })
-
-    //sending response to frontend
-    result_group_name = {
-      group_name_already_p_f: "S"
-
-    }
-
-    res.status(200).send(result_group_name);
-
-
-  }
-
-
-});
-
-
-router.post('/group_page_invite', async (req, res) => {
-
-  const count_invitations = await invitations.count(
-    {
-      where: {
-        UID: req.body.UID,
-        accept: "NA"
-      }
-    }
-  )
-
-  const invitations_array = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "NA" } })
-
-  var group_names = []
-  var group_ids = []
-
-  for (var i = 0; i < count_invitations; i++) {
-
-    group_names.push(await groups.findOne({ attributes: ['group_name'], where: { groupID: invitations_array[i].dataValues.invite_from_group_id } }))
-    group_ids.push(invitations_array[i])
-  }
-
-  //count already accepted 
-  const count_invitations_accepted = await invitations.count(
-    {
-      where: {
-        UID: req.body.UID,
-        accept: "ACCEPT"
-      }
-    }
-  )
-  //get invitation id for accpted 
-  const invitations_array_accepted = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "ACCEPT" } })
-
-  //temp array
-  var group_names_accpeted = []
-  var group_ids_accepted = []
-
-  //pushing values in them
-  for (var i = 0; i < count_invitations_accepted; i++) {
-
-    group_names_accpeted.push(await groups.findOne({ attributes: ['group_name'], where: { groupID: invitations_array_accepted[i].dataValues.invite_from_group_id } }))
-    group_ids_accepted.push(invitations_array_accepted[i])
-  }
-
-  result_data = {
-    group_ids: group_ids,
-    group_ids_accepted: group_ids_accepted,
-    group_names: group_names,
-    group_names_accpeted: group_names_accpeted,
-    count_invitations: count_invitations,
-    count_invitations_accepted: count_invitations_accepted
-  }
-
-  res.status(200).send(result_data);
-});
-
-//dashboard_reject_req
-
-router.post('/group_invite_reject_req', async (req, res) => {
-
-
-
-  //update in table 
-
-
-
-  await invitations.update({
-    accept: "REJECT"
-  }, {
-    where: {
-      UID: req.body.current_UID,
-      invite_from_group_id: req.body.group_ids_to_be_rejected
-    }
-  })
-  res.status(200)
-
-});
-
-
-router.post('/group_invite_accept_req', async (req, res) => {
-
-  await invitations.update({
-    accept: "ACCEPT"
-  }, {
-    where: {
-      UID: req.body.current_UID,
-      invite_from_group_id: req.body.accepted_group_id
-    }
-  })
-
-  //---------------------
-  //add to recent activitiies
-  let activity_insert = "user " + JSON.stringify(req.body.current_UID_name) + " joined the group " + JSON.stringify(req.body.accepted_group_name)
-  console.log("activity_insert --------", activity_insert)
-
-  await recentactivities.create({
-    GroupID: req.body.accepted_group_id,
-    groupname: req.body.accepted_group_name,
-    activity: activity_insert,
-    UID: req.body.current_UID,
-    date_time: Sequelize.fn('NOW')
-  })
-
-
-  //---------------------
-  result = {
-    acceped_for_group: req.body.accepted_group_id
-  }
-  res.status(200).send(result)
-});
-
-//get_users_in_group
-
-router.post('/get_users_in_group', async (req, res) => {
-
-  const UID = req.body.current_UID
-  const Group_ID = req.body.group_id
-  const group_name = req.body.group_name
-
-  //get all the UID who have accepted the invitation of this group
-
-  const UID_accepeted_invitation = await invitations.findAll({ attributes: ['UID'], where: { invite_from_group_id: Group_ID, accept: "ACCEPT" } })
-
-
-  //get the count 
-
-  const count_no_of_members = await invitations.count(
-    {
-      where: {
-        invite_from_group_id: Group_ID,
-        accept: "ACCEPT"
-      }
-    }
-  )
-
-  //temp array
-  var UID_of_members = []
-  var Name_of_members = []
-  //pushing values in them
-  for (var i = 0; i < count_no_of_members; i++) {
-    UID_of_members.push(UID_accepeted_invitation[i])
-    Name_of_members.push(await users.findOne({ attributes: ['name'], where: { UID: UID_accepeted_invitation[i].dataValues.UID } }))
-  }
-
-  //also display the expenses of the group on page
-
-  const expense_ids_for_this_group = await expensenses.findAll({ attributes: ['expen_ID'], where: { expense_of_Group_ID: Group_ID } })
-  const expense_amount_for_this_group = await expensenses.findAll({ attributes: ['amount'], where: { expense_of_Group_ID: Group_ID } })
-  const expense_description = await expensenses.findAll({ attributes: ['description'], where: { expense_of_Group_ID: Group_ID } })
-  const expense_paid_by_UID = await expensenses.findAll({ attributes: ['paid_by_UID'], where: { expense_of_Group_ID: Group_ID } })
-
-  //get the name of user who paid
-
-  let user_name_who_paid = []
-
-  for (var i = 0; i < expense_paid_by_UID.length; i++) {
-
-    user_name_who_paid.push(await users.findOne({ attributes: ['name'], where: { UID: expense_paid_by_UID[i].dataValues.paid_by_UID } }))
-  }
-
-  const arr_expense_gets = []
-  const arr_expenses_ows = []
-
-  for (var i = 0; i < count_no_of_members; i++) {
-
-    let amount_this_UID_ows = await personal_expenditure_ows.sum('amount_ows', { where: { UID: UID_of_members[i].dataValues.UID, GroupID: Group_ID } })
-    let amount_this_UID_gets = await personal_expenditure_get.sum('amount_gets', { where: { UID: UID_of_members[i].dataValues.UID, GroupID: Group_ID } })
-    let name_of_UID = await users.findOne({ attributes: ['name'], where: { UID: UID_of_members[i].dataValues.UID } })
-    arr_expense_gets.push({ name: name_of_UID.dataValues, UID: UID_of_members[i].dataValues.UID, amount_gets: amount_this_UID_gets })
-    arr_expenses_ows.push({ name: name_of_UID.dataValues, UID: UID_of_members[i].dataValues.UID, amount_ows: amount_this_UID_ows })
-
-
-  }
-
-
-
-  //assign and sent
-  result_data = {
-    UID_of_members: UID_of_members,
-    Name_of_members: Name_of_members,
-    count_no_of_members: count_no_of_members,
-    expense_ids_for_this_group: expense_ids_for_this_group,
-    expense_amount_for_this_group: expense_amount_for_this_group,
-    expense_description: expense_description,
-    expense_paid_by_UID: expense_paid_by_UID,
-    user_name_who_paid: user_name_who_paid,
-    arr_expense_gets: arr_expense_gets,
-    arr_expenses_ows: arr_expenses_ows
-
-
-  }
-
-
-  res.status(200).send(result_data);
-
-
-});
-
-//get_all_email
-router.post('/get_all_email', async (req, res) => {
-
-  const all_emails = await users.findAll({ attributes: ['emailid'] })
-  res.status(200).send(all_emails);
-});
-
-
-router.post('/Expense_add', async (req, res) => {
-
-
-  await expensenses.create(req.body, { fields: ["paid_by_UID", "expense_of_Group_ID", "amount", "currency", "description"] });
-  //get the expense id of latest inserted transction 
-  const expense_id_of_inserted_transcation = await expensenses.max('expen_ID')
-  //--------------------
-  //Recent activity
-  let recent_activity_expense_added = "user " + JSON.stringify(req.body.name_of_UID_paid) + " added the new expense " + JSON.stringify(req.body.description) + " of " + JSON.stringify(req.body.amount) + "USD in the group " + JSON.stringify(req.body.name_of_group_ID)
-
-  await recentactivities.create({
-    GroupID: req.body.expense_of_Group_ID,
-    groupname: req.body.name_of_group_ID,
-    activity: recent_activity_expense_added,
-    UID: req.body.paid_by_UID,
-    date_time: Sequelize.fn('NOW')
-  })
-
-
-  //--------------------
-
-  //get the number of members in the group
-
-  const no_of_members = await invitations.count(
-    {
-      where: {
-        invite_from_group_id: req.body.expense_of_Group_ID,
-        accept: "ACCEPT"
-      }
-    }
-  )//get the UID_in_group
-  const UID_in_group = await invitations.findAll({ attributes: ['UID'], where: { invite_from_group_id: req.body.expense_of_Group_ID, accept: "ACCEPT" } })
-  const each_split = req.body.amount / no_of_members
-  const amount_owner_gets = each_split * (no_of_members - 1)
-
-  for (var i = 0; i < no_of_members; i++) {
-
-    if (UID_in_group[i].dataValues.UID !== req.body.paid_by_UID) {
-      await personal_expenditure_get.create({ UID: req.body.paid_by_UID, GroupID: req.body.expense_of_Group_ID, amount_gets: each_split, amount_gets_from_UID: UID_in_group[i].dataValues.UID, expen_ID: expense_id_of_inserted_transcation })
-      await personal_expenditure_ows.create({ UID: UID_in_group[i].dataValues.UID, GroupID: req.body.expense_of_Group_ID, amount_ows: each_split, amount_ows_to_UID: req.body.paid_by_UID, expen_ID: expense_id_of_inserted_transcation })
-    }
-  }
-
-  res.status(200);
-});
-
-//dashboard_display
-
-
-router.post('/dashboard_display', async (req, res) => {
-
-
-  //get how much this UID ows
-
-  const amount_this_UID_gets = await personal_expenditure_get.sum('amount_gets', { where: { UID: req.body.UID } })
-  const amount_this_UID_ows = await personal_expenditure_ows.sum('amount_ows', { where: { UID: req.body.UID } })
-
-  let group_wise_expenses_ows = []
-
-  //get the no of groups user has --like currently accepted
-
-  const no_of_groups = await invitations.count(
-    {
-      where: {
-        UID: req.body.UID,
-        accept: "ACCEPT"
-      }
-    }
-  )
-
-  //get those two groups
-  let group_wise_data = []
-  const group_id_user_part_of = await invitations.findAll({ attributes: ['invite_from_group_id'], where: { UID: req.body.UID, accept: "ACCEPT" } })
-
-  for (var i = 0; i < group_id_user_part_of.length; i++) {
-
-    let group_name = await groups.findOne({ attributes: ['group_name'], where: { groupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
-    //check if user get anything from this group
-    let amount_get_for_this_group = await personal_expenditure_get.sum('amount_gets', { where: { UID: req.body.UID, GroupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
-
-    //check if user ows to any group
-    let amount_ows_to_this_group = await personal_expenditure_ows.sum('amount_ows', { where: { UID: req.body.UID, GroupID: group_id_user_part_of[i].dataValues.invite_from_group_id } })
-
-    let name_of_user = await users.findOne({ attributes: ['name'], where: { UID: req.body.UID } })
-
-
-
-    group_wise_data.push({ UID: req.body.UID, name: name_of_user.dataValues.name, Group_ID: group_id_user_part_of[i].dataValues.invite_from_group_id, group_name: group_name.dataValues.group_name, amount_gets_from_this_group: amount_get_for_this_group, amount_ows_to_this_group: amount_ows_to_this_group })
-
-
-  }
-
-
-
-  //send the data to frontend
-  result_dashboard = {
-    amount_this_UID_gets: amount_this_UID_gets,
-    amount_this_UID_ows: amount_this_UID_ows,
-    group_wise_data: group_wise_data
-
-  }
-
-  res.status(200).send(result_dashboard);
-
-});
-
-
-
-//Show_deatils
-
-router.post('/Show_deatils', async (req, res) => {
-
-  let array_group_specific_tran = []
-
-  //get the data
-
-  const data_of_ows = await personal_expenditure_ows.findAll({ attributes: ['amount_ows', 'amount_ows_to_UID', 'expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
-
-  for (var i = 0; i < data_of_ows.length; i++) {
-
-    //get the details of expense
-    let expense_detail = await expensenses.findOne({ attributes: ['currency', 'description', 'date', 'amount'], where: { expense_of_Group_ID: req.body.Group_ID, expen_ID: data_of_ows[i].dataValues.expen_ID } })
-    let name_of_UId_who_gets_amount = await users.findOne({ attributes: ['name'], where: { UID: data_of_ows[i].dataValues.amount_ows_to_UID } })
-    array_group_specific_tran.push({
-      name: req.body.name,
-      UID: req.body.UID,
-      amount_ows: data_of_ows[i].dataValues.amount_ows,
-      amount_ows_to_UID: data_of_ows[i].dataValues.amount_ows_to_UID,
-      amount_ows_to_name: name_of_UId_who_gets_amount.dataValues.name,
-      expen_ID: data_of_ows[i].dataValues.expen_ID,
-      expense_currency: expense_detail.dataValues.currency,
-      expense_description: expense_detail.dataValues.description,
-      expense_date: expense_detail.dataValues.date,
-      expense_amount: expense_detail.dataValues.amount
-
-    })
-
-  }
-
-  //user specific data ows
-  let combined_ows = []
-  const amount_ows_combined_with_user = await personal_expenditure_ows.findAll({ attributes: ['UID', 'GroupID', 'amount_ows_to_UID', [Sequelize.fn('sum', Sequelize.col('amount_ows')), 'amount_ows']], group: ['amount_ows_to_UID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
-
-
-  for (var i = 0; i < amount_ows_combined_with_user.length; i++) {
-    //get user name
-    let user_name = await users.findOne({ attributes: ['name'], where: { UID: amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID } })
-    combined_ows.push({
-      UID: amount_ows_combined_with_user[i].dataValues.UID,
-      GroupID: amount_ows_combined_with_user[i].dataValues.GroupID,
-      amount_ows_to_UID: amount_ows_combined_with_user[i].dataValues.amount_ows_to_UID,
-      name_of_amount_ows_to_UID: user_name.dataValues.name,
-      amount_ows: amount_ows_combined_with_user[i].dataValues.amount_ows
-
-
-    })
-  }
-
-  //similarly for gets
-  let array_group_specific_tran_gets = []
-  const data_gets = await personal_expenditure_get.findAll({ attributes: ['amount_gets', 'amount_gets_from_UID', 'expen_ID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
-
-  for (var i = 0; i < data_gets.length; i++) {
-    //get the details of expense
-    let expense_detail = await expensenses.findOne({ attributes: ['currency', 'description', 'date', 'amount'], where: { expense_of_Group_ID: req.body.Group_ID, expen_ID: data_gets[i].dataValues.expen_ID } })
-    let name_of_UId_from_whom_gets_amount = await users.findOne({ attributes: ['name'], where: { UID: data_gets[i].dataValues.amount_gets_from_UID } })
-    array_group_specific_tran_gets.push({
-      name: req.body.name,
-      UID: req.body.UID,
-      amount_gets: data_gets[i].dataValues.amount_gets,
-      amount_gets_from_UID: data_gets[i].dataValues.amount_gets_from_UID,
-      amount_gets_from_name: name_of_UId_from_whom_gets_amount.dataValues.name,
-      expen_ID: data_gets[i].dataValues.expen_ID,
-      expense_currency: expense_detail.dataValues.currency,
-      expense_description: expense_detail.dataValues.description,
-      expense_date: expense_detail.dataValues.date,
-      expense_amount: expense_detail.dataValues.amount
-
-    })
-
-  }
-  let combined_gets = []
-  const amount_gets_combined_with_user = await personal_expenditure_get.findAll({ attributes: ['UID', 'GroupID', 'amount_gets_from_UID', [Sequelize.fn('sum', Sequelize.col('amount_gets')), 'amount_gets']], group: ['amount_gets_from_UID'], where: { UID: req.body.UID, GroupID: req.body.Group_ID } })
-  for (var i = 0; i < amount_gets_combined_with_user.length; i++) {
-    //get user name
-    let user_name = await users.findOne({ attributes: ['name'], where: { UID: amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID } })
-    combined_gets.push({
-      UID: amount_gets_combined_with_user[i].dataValues.UID,
-      GroupID: amount_gets_combined_with_user[i].dataValues.GroupID,
-      amount_gets_from_UID: amount_gets_combined_with_user[i].dataValues.amount_gets_from_UID,
-      name_of_amount_gets_from_UID: user_name.dataValues.name,
-      amount_gets: amount_gets_combined_with_user[i].dataValues.amount_gets
-
-
-    })
-  }
-
-  result = {
-    array_group_specific_tran: array_group_specific_tran,
-    combined_ows: combined_ows,
-    array_group_specific_tran_gets: array_group_specific_tran_gets,
-    combined_gets: combined_gets
-
-
-  }
-
-  res.status(200).send(result);
-});
-
-
-//response_users_to_show
-router.post('/response_users_to_show', async (req, res) => {
-
-  console.log("length is ", req.body.length)
-
-  let user_names = []
-
-  for (var i = 0; i < req.body.length; i++) {
-    user_names.push(await users.findOne({ attributes: ['name', 'UID'], where: { UID: req.body[i] } }))
-  }
-
-  result = {
-
-    user_names: user_names
-  }
-
-  res.status(200).send(result);
-
-});
-
-//Settle_req
-
-router.post('/Settle_req', async (req, res) => {
-
-  //delete data from gets table
-
-  await personal_expenditure_get.destroy({ where: { UID: req.body.UID_of_login, GroupID: req.body.GroupID, amount_gets_from_UID: req.body.other_UID } })
-  await personal_expenditure_ows.destroy({ where: { UID: req.body.UID_of_login, GroupID: req.body.GroupID, amount_ows_to_UID: req.body.other_UID } })
-
-  //-----------------
-  //recent activity
-
-  let settle_activity = "user " + JSON.stringify(req.body.name_of_UID_login) + "settle up with " + JSON.stringify(req.body.name_of_other_UID) + " for group " + JSON.stringify(req.body.GroupID_name)
-  await recentactivities.create({
-    GroupID: req.body.GroupID,
-    groupname: req.body.GroupID_name,
-    activity: settle_activity,
-    UID: req.body.UID_of_login,
-    date_time: Sequelize.fn('NOW')
-  })
-  // -----------------
-
-
-  res.status(200);
-
-});
-
-//leave_group
-router.post('/leave_group', async (req, res) => {
-  //first check if everything is settel 
-  const count_gets = await personal_expenditure_get.count({
-    where: {
-      UID: req.body.UID,
-      GroupID: req.body.group_id
-    }
-  })
-
-
-  const count_ows = await personal_expenditure_ows.count(
-    {
-      where: {
-        UID: req.body.UID,
-        GroupID: req.body.group_id
-      }
-    }
-  )
-
-
-
-
-  if (count_gets === 0 && count_ows === 0) {
-    console.log("Inside")
-    result = {
-      flag_settle: "S"
-
-    }
-    //user can leave the group
-    invitations.destroy({
-      where: {
-        invite_from_group_id: req.body.group_id,
-        UID: req.body.UID,
-        accept: "ACCEPT"
-      }
-    })
-
-    //-------------recent activity
-
-    let activity_left = "user " + JSON.stringify(req.body.UID_name) + " left the group " + JSON.stringify(req.body.group_name)
-
-    await recentactivities.create({
-      GroupID: req.body.group_id,
-      groupname: req.body.group_name,
-      activity: activity_left,
-      UID: req.body.UID,
-      date_time: Sequelize.fn('NOW')
-    })
-    //----------------------
-  }
-  else {
-    result = {
-      flag_settle: "F",
-      count_ows: count_ows,
-      count_gets: count_gets
-
-    }
-  }
-
-
-  console.log("result is ", result)
-  res.status(200).send(result);
-
-});
-
-//recent_activities
-
-router.post('/recent_activities', async (req, res) => {
-
-
-  //first get user is part of which all groups
-  const Group_IDS_user_part_of = await invitations.findAll({
-    attributes: ['invite_from_group_id'],
-    where: {
-      UID: req.body.UID,
-      accept: "ACCEPT"
-    }
-  })
-
-  let Group_ids_user_belongTo = []
-
-  for (var i = 0; i < Group_IDS_user_part_of.length; i++) {
-    Group_ids_user_belongTo.push({ Group_Id: Group_IDS_user_part_of[i].dataValues.invite_from_group_id })
-  }
-  console.log("Group_ids_user_belongTo is ", Group_ids_user_belongTo)
-  //get the data from table
-
-  let array_recent_act = []
-  let data_from_recent_activities = []
-  for (var i = 0; i < Group_ids_user_belongTo.length; i++) {
-    //get the data 
-    data_from_recent_activities = await recentactivities.findAll({
-      where: {
-        UID: req.body.UID,
-        GroupID: Group_ids_user_belongTo[i].Group_Id
-      }
-    })
-
-  }
-
-  for (var i = 0; i < data_from_recent_activities.length; i++) {
-    array_recent_act.push({
-      UID:data_from_recent_activities[i].dataValues.UID,
-      name:req.body.name,
-      GroupName:data_from_recent_activities[i].dataValues.groupname,
-      Activity:data_from_recent_activities[i].dataValues.activity,
-      id:data_from_recent_activities[i].dataValues.id,
-      date:data_from_recent_activities[i].dataValues.date_time
-    })
-  }
-
  
+  var auth_falg = "S"
+  message = []
+  if (req.file) {
+    await users.updateOne(
+      { UID: req.body.UID },
+      { profile_photo: await (await sharp(req.file.buffer).resize(420, 240).toBuffer()).toString('base64') }
+    )
+    if (req.body.emailid !== "") {
+      await users.updateOne(
+        { UID: req.body.UID },
+        { emailid: req.body.emailid })
 
-  //sort the array
 
-  array_recent_act.sort((a, b) => (a.id < b.id) ? 1 : -1)
+    }
+
+    if (req.body.phone_number !== "") {
+      await users.updateOne(
+        { UID: req.body.UID },
+        { phone_number: req.body.phone_number })
+
+    }
+
+    if (req.body.name !== "") {
+      await users.updateOne({ UID: req.body.UID },
+        { name: req.body.name })
+
+    }
+
+    const updated_state = await users.findOne({ UID: req.body.UID });
+
+    message.push("Update is successful")
+    result = {
+      auth_falg: "S",
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
 
 
-  result = {
-
-    array_recent_act:array_recent_act
   }
 
-  res.status(200).send(result);
-
 });
-
 
 module.exports = router

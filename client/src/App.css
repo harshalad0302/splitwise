@@ -1,257 +1,630 @@
-
-
-body {
-    width: auto;
-    height: auto;
-}
-
-
-
-.background_img {
-background-image:url("../src/Assests/Img/homepage.png");
-background-repeat: no-repeat;
-background-size: auto;
-border: 2px solid rgb(74, 202, 181);
-padding: 25px;
-height: 100vh;
-width: auto;
-}
-.background {
-  background-repeat: no-repeat;
-  background-size: auto;
-  border: 2px solid rgb(74, 202, 181);
-  padding: 25px;
-  height: 100vh;
-  width: auto;
-  }
-  
-
- .header {
-  
-padding: 5px;
-    width: auto;
-    background: #5bc5a7;
-    border-bottom: 1px solid #48be9d;
-    color: #fff;
-    text-shadow: 0 -1px 0 #39a385;
-    box-shadow: 0 0 3px rgb(0 0 0 / 50%);
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-
-.color
-{
-    background: #5bc5a7; 
-    border: 0;
-
-}
-.main_class_create_group
-{
-    align-items: center;
-    align-content: center;
-}
-
-.color:hover{
-    background: #33aa88; 
-}
-
-
-.zero_margin
-{
-    margin: 0px;
-    padding: 0px;
-}
-
-
-.header_image {
-    height: 40px;
+.main_page_div {
+    margin-top: 10px;
+    margin-left: 10px;
+   
     
 }
 
-.header_image_landing{
-  height: 60px;
+.splitwiselogowithname {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    margin-left: 15%;
 }
 
-.input_for_profile {
-    border-top-style: hidden;
-    border-right-style: hidden;
-    border-left-style: hidden;
-    border-bottom-style: hidden;
-   
-  }
-  
-  .input_for_profile:focus {
-    outline: none;
-  }
-
-
-  .Edit_button {     
-    background-color: Transparent;
-    background-repeat:no-repeat;
-    border: none;
-    cursor:pointer;
-    overflow: hidden; 
-    outline:none;
-    color: rgb(68, 56, 236);       
+.splitwiselogowithname_inside {
+    display: -webkit-box;
+    display: flex;
+    margin-left: 9%;
+    -webkit-box-align: center;
+    align-items: center;
 }
 
-
-.right_corner {
- 
-  width: fit-content;
-  position: fixed;
-  top: 40px;
-  right:30px;
-}
-
-.button_Login {
-  background-color: #33aa88; 
-  border: none;
-  color: white;
-  padding: 10px 60px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-
-.button_signUp {
-  background-color: #FF652f; 
-  border: none;
-  color: white;
-  padding: 10px 60px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-body {
-    font-family: Helvetica, sans-serif;
-  }
-  
-  .react-autosuggest__container {
-    position: relative;
-  }
-  
-  .react-autosuggest__input {
-    width: 240px;
-    height: 30px;
-    padding: 10px 20px;
-    font-family: Helvetica, sans-serif;
-    font-weight: 300;
-    font-size: 16px;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-  }
-  
-  .react-autosuggest__input--focused {
-    outline: none;
-  }
-  
-  .react-autosuggest__input--open {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  
-  .react-autosuggest__suggestions-container {
-    display: none;
-  }
-  
-  .react-autosuggest__suggestions-container--open {
-    display: block;
-    position: absolute;
-    top: 51px;
-    width: 280px;
-    border: 1px solid #aaa;
-    background-color: #fff;
-    font-family: Helvetica, sans-serif;
-    font-weight: 300;
-    font-size: 16px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    z-index: 2;
-  }
-  
-  .react-autosuggest__suggestions-list {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-  }
-  
-  .react-autosuggest__suggestion {
-    cursor: pointer;
-    padding: 10px 20px;
-  }
-  
-  .react-autosuggest__suggestion--highlighted {
-    background-color: #ddd;
-  }
-  
-  .react-autosuggest__suggestion-match {
-    color: red;
-    font-weight: bold;
-  }
-  
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width:100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-  }
-  
-  .modal-main {
-    position:fixed;
-    background: white;
+.splitwiselogodiv {
+    float: left;
+    background-color: white;
+    height: 500px;
     width: 80%;
-    height: auto;
-    top:50%;
-    left:50%;
-    transform: translate(-50%,-50%);
-  }
-  
-  .display-block {
-    display: block;
-  }
-  
-  .display-none {
-    display: none;
-  }
- 
+    height: 10vh;
+}
 
-  #title {
-    text-align: center;
-    font-family: arial, sans-serif;
-  }
-  
-  #students {
-    text-align: center;
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    border: 3px solid #ddd;
-    width: 100%;
-  }
-  
-  #students td, #students th {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
-  
-  #students tr:nth-child(even){background-color: #f2f2f2;}
-  
-  #students tr:hover {background-color: #ddd;}
-  
-  #students th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: center;
-    background-color: #33aa88; 
+.splitwisebuttondiv {
+    float: right;
+    width: 20%;
+    height: 10vh;
+    background-color: white;
+}
+
+.alignment_of_element {
+    margin-top: 5px;
+    margin-left: 60px;
+    align-items: left;
+}
+
+.button_decoration_signup {
+    background-color: #1CC29F;
+    border: none;
     color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 10px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button_decoration_signup:hover {
+    background-color: #2bb496
+}
+
+.button_decoration_signup:active {
+    background-color: #1CC29F;
+}
+
+.button_decoration_login {
+    background-color: white;
+    border: none;
+    color: #1CC29F;
+    font-size: 16px;
+    border-radius: 10px;
+}
+
+.backgrounfimagediv {
+   
+    background-image: url("../src/Assests/Img/landing_page_image.png");
+    width: 100%;
+  height: 500px;
+  background-size: cover;
+  background-position: 50% 50%;
+  
+}
+
+.firstleftdiv {
+    font-family: Lato;
+    height: 90vh;
+
+    float: left;
+    width: 50%;
+}
+
+.insideleftdiv {
+    margin-top: 10%;
+    margin-left: 10%;
+    margin-right: 10%;
+    height:60vh;
+    width: 100%;
+   background-size: cover;
+  background-position: 50% 50%;
+    background-image: url("../src/Assests/Img/background_image_left_div.PNG");
+}
+
+
+.belowdivsignup {
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 8vh;
+}
+
+.bigFatSignup {
+    align-content: center;
+    width: 35%;
+    height: 8vh;
+    background-color: #1CC29F;
+    border: none;
+    color: white;
+    margin-top: 5%;
+    margin-left: 19%;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.bigFatSignup:hover {
+    background-color: #2bb496
+}
+
+.bigFatSignup:active {
+    background-color: #1CC29F;
+    transform: translateY(4px);
+}
+
+.firstrighttdiv {
+    background-image: url("../src/Assests/Img/logo_image_landing.PNG");
+    height: 90vh;
+    background-size: cover;
+   background-position: 50% 50%;
+    float: right;
+    width: 50%;
+}
+
+.divleftsignup {
+    float: left;
+    width: 40%;
+    height: 90vh;
+}
+
+.insideLeftdiv {
+    background-image: url("../src/Assests/Img/signupPageLogo.PNG");
+    margin-top: 15%;
+    margin-left: 60%;
+    width: 40%;
+    background-size: cover;
+    background-position: 50% 50%;
+    height: 45vh;
+}
+
+.divrightsignup {
+    float: right;
+    width: 60%;
+    height: 90vh;
+}
+
+.fontfamiliytext {
+    margin-top: 9%;
+    margin-right: 60%;
+    height: 13vh;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-image: url("../src/Assests/Img/name_logo.PNG");
+}
+.fontfamiliytext1{
+    margin-top: 9%;
+    margin-right: 60%;
+    height: 13vh;
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.fontfamiliytext_withdifflogo {
+    margin-top: 9%;
+    margin-right: 20%;
+    margin-left: 0%;
+    height: 9vh;
+    width: 50%;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-image: url("../src/Assests/Img/welcome_logo.PNG");
+}
+
+.signupinfodiv {
+    margin-left: 3%;
+    margin-right: 50%;
+}
+
+.inputTextClass {
+    width: 100%;
+    height: 8vh;
+    padding: 12px 20px;
+    margin: 8px 0;
+    font-size: 24px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.font_class
+{
+    
+    font-size: 24px;
+    font-family: 'Lato'
+}
+
+.inputTextClass1 {
+    width: 25%;
+    height: 5vh;
+    padding: 12px 20px;
+    margin: 8px 0;
+    font-size: 24px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+
+.inputTextClass_invisible {
+    width:75%;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+
+  
+}
+
+.button_edit
+{
+    background-color: white;
+    border: none;
+    color: blue;
+}
+.inputTextClass_invisible1 {
+    width:75%;
+    border: none;
+   
+
+  
+}
+
+.select_styles{
+    width:90%;
+}
+
+.btnN {
+    background-color: rgba(231, 67, 26, 0.952);
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
   }
+  
+  /* Darker background on mouse-over */
+  .btnN:hover {
+    background-color: rgb(235, 61, 8);
+  }
+.headerinSignup {
+    font-size: 24px;
+    margin-left: 3%;
+}
+
+.signupbuttonClasssignuppage {
+    align-content: center;
+    width: 50%;
+    height: 8vh;
+    background-color: #ff652f;
+    border: none;
+    font-size: 24px;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.red_error_background {
+    background-color: #CC4455;
+    height: fit-content;
+    width: 100%;
+    font-size: 20px;
+    color: white;
+}
+
+.loginheader {
+    width: 100%;
+    height: 10vh;
+}
+
+.divLeftloginheader {
+    width: 25%;
+    height: 8vh;
+    float: left;
+    background-color: #1CC29F;
+}
+
+.logoinLoginHeader{
+
+    margin-top: 1%;
+}
+.header_image_landing {
+    height: 45px;
+}
+
+.divRightloginheader {
+    width: 75%;
+    background-color: #1CC29F;
+    height: 8vh;
+    float: right;
+}
+
+.group_page_div{
+  background-color: rgb(6, 13, 26);
+    float: left;
+    height: 90vh;
+    width:69%
+   
+}
+.group_page_div_inside{
+    background-color: chartreuse;
+    height: 18vh;
+
+}
+.group_icon_and_name{
+    background-color: #290a31;
+    float: left;
+    height: 18vh;
+    width: 10%;
+}
+
+.Group_name_logo{
+    background-color: blueviolet;
+    float: left;
+    height: 18vh;
+}
+
+.group_icon_logo{
+    border-radius: 50%;
+    width: 20x;
+    height: 10vh;
+    
+}
+.groupName{
+    background-color: darkred;
+    float: left;
+}
+
+.darkbutton{
+    background-color: #ff652f; 
+    border: none;
+    color: white;
+    padding: 10px 60px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+.darkbutton:hover {
+    background-color: #e04810
+}
+
+.darkbutton:active {
+    background-color:#ff652f;
+    transform: translateY(4px);
+}
+
+.lightbutton{
+    background-color: #33aa88; 
+    border: none;
+    color: white;
+    padding: 10px 60px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.crossbutton{
+    background-color: #f13e12; 
+    color: white;
+    border: none;
+    height: 3.1vh;
+    text-align: center;
+    text-decoration: none;
+}
+
+
+.lightbutton:hover {
+    background-color: #2bb496
+}
+.Header{
+    background-color:#2bb496; 
+    margin-top: 10%;
+    height: 10vh;
+}
+.lightbutton:active {
+   
+    transform: translateY(4px);
+}
+
+.div_group_page_right{
+   
+    float: left;
+    height: 90vh;
+    width: 16%;
+ 
+}
+
+.divRightloginheader_for_pic {
+    width: 75%;
+    background-color: #351cc2;
+    height: 8vh;
+    float: right;
+}
+
+.divRightloginheader_inside {
+    margin-left: 70%;
+    margin-right: 0.1%;
+}
+
+.button_profile {
+    align-content: center;
+    width: 100%;
+    height: 8vh;
+    background-color: #1CC29F;
+    border: none;
+    font-size: 24px;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #1c856e
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .button_profile {
+    background-color: #1c856e;
+}
+
+.defaultDashboardleft {
+    float: left;
+    width: 40%;
+    height: 90vh;
+}
+
+.defaultDashboardright {
+    float: right;
+    width: 60%;
+    height: 90vh;
+}
+
+.defaultDashboardleft_inside {
+    background-image: url("../src/Assests/Img/default_dashboard_logo.PNG");
+    background-size: cover;
+    background-position: 50% 50%;
+    margin-top: 10%;
+    margin-left: 55%;
+    height: 55vh;
+}
+
+
+.defaultDashboardright_inside {
+    margin-top: 7%;
+    background-image: url("../src/Assests/Img/welcome_to_splitwise_logo.PNG");
+    background-size: cover;
+    background-position: 50% 50%;
+    background-color: aqua;
+    margin-right: 10%;
+    height: 20vh;
+    width: 60%;
+}
+
+.similarClass {
+    margin-right: 45%;
+    margin-left: 6%;
+    width: 50%;
+}
+
+.add_expenses_image
+{
+    background-color:#33aa88;
+   width: 100%;
+    color: white;
+    
+}
+
+.addappartmentbutton {
+    background: url("../src/Assests/Img/add_apartment_logo.PNG");
+    background-position: center;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    align-content: center;
+    width: 100%;
+    height: 8vh;
+    border: none;
+    font-size: 24px;
+    color: white;
+    border-radius: 5px;
+}
+
+.leftdiv {
+   
+    float: left;
+    width: 15%;
+    font-size: 16px;
+    margin-top:0%;
+    height: 90vh;
+}
+.Main_inside_header{
+    height: 8vh;
+}
+
+.Main_inside_header_logo{
+   
+    background: url("../src/Assests/Img/logo_with_name.jfif");
+    background-position: center;
+    background-color:#1CC29F ;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    align-content: top;
+    float: left;
+    height: 8vh;
+    width: 15%;
+}
+
+
+.leftdiv_inside {
+    margin-top: 3%;
+    width: 100%;
+    height: 6vh;
+}
+
+.DashboardButton{
+    background: url("../src/Assests/Img/dshboard_button_icon.PNG");
+    background-position: left;
+    background-repeat: no-repeat;
+    align-content: left;
+    width: 100%;
+    height: 6vh;
+    border: none;
+    outline: none;
+}
+
+.DashboardButton:active{
+    border: none;
+    outline: none;
+}
+.DashboardButton:focus{
+    -moz-outline-style: none; 
+}
+
+.DashboardButtonRecentactivity{
+    background: url("../src/Assests/Img/recent_activity_logo.PNG");
+    background-position: middle;
+    background-repeat: no-repeat;
+    align-content: left;
+    width: 100%;
+    height: 6vh;
+    border: none;
+    outline: none;
+}
+
+.DashboardButtonRecentactivity:active{
+    border: none;
+    outline: none;
+}
+.DashboardButtonRecentactivity:focus{
+    -moz-outline-style: none; 
+}
+
+
+.GroupsAddbutton_class{
+    align-content: left;
+    align-items: left;
+    text-align: left;
+    background-color:rgba(204, 204, 204, 0.911);
+   
+    font-family: Lato;
+    width: 100%;
+    height: 4vh;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+.GroupsAddbutton_class:hover{
+    background-color: rgba(20, 3, 3, 0.11);
+}
+.GroupsAddbutton_class:active{
+    background-color:  rgba(20, 3, 3, 0.11);
+}
+

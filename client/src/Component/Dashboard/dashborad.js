@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import Login_header from '../Login_header/Login_header'
+import Login_header from '../Login_header/login_header'
 import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig'
-
+import Default_dashboard from '../Default_dashboard/Default_dashboard'
 import { add_user } from '../../Actions/user_action'
 import show_details from '../../Component/Show_details/show_details'
-
+import Actual_dashboard from '../Actual_Dashboard/actual_dashboard'
 
 //connection to global store
 const connection_to_redux = (state) => {
@@ -25,11 +25,12 @@ class dashborad extends Component {
         this.state = {
             amount_this_uid_gets: 0,
             amount_this_uid_ows: 0,
-            UID: this.props.user.UID_user,
-            name: this.props.user.name_user,
+            UID: this.props.user.UID,
+            name: this.props.user.name,
             total: 0,
-            group_wise_balence: undefined
-           
+            group_wise_balence: undefined,
+            render_content: undefined
+
         }
 
 
@@ -79,28 +80,47 @@ class dashborad extends Component {
             group_wise_balence: group_wise_balence_temp
         }))
 
+      
+
+        if (this.state.group_wise_balence.length!==0) {
+            this.setState(() => ({
+                render_content: <div>
+                    <Actual_dashboard props={this.props} />
+                </div>
+            }))
+        }
+        else {
+            this.setState(() => ({
+                render_content: <div>
+                <Actual_dashboard props={this.props} />
+                </div>
+            }))
+
+        }
+
 
     }
 
-    show_details_click=(data)=>{
-   
+    show_details_click = (data) => {
+
         //sending props to show detail page 
         this.props.history.push({
             pathname: '/show_details',
-            state: { UID:data.UID,
-                name:data.name,
-                Group_Id:data.Group_Id,
-                Group_name:data.Group_name,
-                amount_gets:data.amount_gets,
-                amount_ows:data.amount_ows
-             }
-          })
+            state: {
+                UID: data.UID,
+                name: data.name,
+                Group_Id: data.Group_Id,
+                Group_name: data.Group_name,
+                amount_gets: data.amount_gets,
+                amount_ows: data.amount_ows
+            }
+        })
 
-         
+
     }
 
- 
-  
+
+
 
     render() {
 
@@ -108,51 +128,16 @@ class dashborad extends Component {
         return (
 
 
-            <div>
+            <div className="main_page_div">
                 <div>
                     <Login_header props={this.props} />
                 </div>
-                <h2 data-testid="Dashboard">Dashboard</h2>
-                <label>Amount {this.state.name} gets =</label> <label>{this.state.amount_this_uid_gets}$</label> 
-                <br />
-                <label>Amount {this.state.name} owes =</label> <label>{this.state.amount_this_uid_ows}$</label>
-                <br />
-                <label>Total Balance  = </label> <label>{this.state.total}$</label>
-                <br />
-               <h3>Details</h3>
+                <div>
+                    {
+                        this.state.render_content
+                    }
 
-                {
-
-                    //group_bal_users_ows
-                    this.state.group_wise_balence &&
-                    this.state.group_wise_balence.map((data, index) => {
-                        return (
-                            <div key={index}>
-                                <table id="students">
-                                <tbody>
-                                    <tr>
-                                        <th>Group Name</th>
-                                        <th>Amount gets</th>
-                                        <th>Amount owes</th>
-                                        <th></th>
-                                   
-                                    </tr>
-                                    <tr>
-                                        <td>{data.Group_name}</td>
-                                        <td>{data.amount_gets ? data.amount_gets : 0}$</td>
-                                        <td>{data.amount_ows ? data.amount_ows:0}$</td>
-                                        <td><button onClick={() =>this.show_details_click(data)}className="button_signUp">Show details</button></td>
-                                      
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        )
-                    })
-
-                }
-
-              
+                </div>
             </div>
 
         )

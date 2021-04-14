@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
-import Login_header from '../Login_header/Login_header'
+import Login_header from '../Login_header/login_header'
 import { connect } from 'react-redux';
 import Modal from '../../Component/Modal/Modal'
 
@@ -169,7 +169,7 @@ class show_details extends Component {
                                     return (
                                         <div key={index}>
                                         <label>Settle up with</label>
-                                          <input type="text" value={data.name} readOnly="readonly"></input> <button onClick={() =>this.Settle_with_this_click(data)}>Settle</button>
+                                          <input type="text" value={data.name} readOnly="readonly"></input> <button onClick={() =>this.Settle_with_this_click(data)} className="button_Login">Settle</button>
                                         </div>
                                     )
                                 })

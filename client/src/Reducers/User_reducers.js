@@ -8,7 +8,8 @@ const user_global_state = {
     name_user: "",
     emailid_user: "",
     UID_user: "",
-    phone_number_user: ""
+    phone_number_user: "",
+    profile_photo_user:""
 
 
 }

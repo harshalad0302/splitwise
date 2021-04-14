@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
-import backendServer from '../../../src/WebConfig';
+import backendServer from '../../WebConfig';
 import HomeHeader from '../HomeHeader/HomeHeader'
 
 //connection to global store
@@ -47,36 +47,41 @@ class Login extends Component {
 
     SubmitLogin = async (e) => {
         e.preventDefault();
-
         const data = {
             emailid: this.state.emailid,
             password: this.state.password
         }
-        const response_login = await axios.post(`${backendServer}/Login`, data)
+         const response_login = await axios.post(`${backendServer}/login`, data)
 
+            if (response_login.data.auth_falg === "S") {
+                //Redux dispath
+                this.props.dispatch(add_user(response_login.data))
+                this.props.history.push("/actual_dashboard")
+                this.setState({
+                    auth_flag: false
+                })
 
-        if (response_login.data.auth_flag_email_login === "S") {
+            }
+            else {
+                this.setState({
+                    auth_flag: true,
+                    error_message: <div>
+                    {
+                        response_login.data.message.map((error_message, index) => {
+                            return (
+                                <div key={index}>
+                                   <ul list-style-position="inside" >
+                                       <li>{error_message}</li>
+                                       </ul> 
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+                })
+            }
 
-
-            //Redux dispath
-            this.props.dispatch(add_user(response_login.data))
-     
-            this.props.history.push("/dashboard")
-            this.setState({
-                auth_flag: false
-            })
-
-
-        }
-        else {
-            this.setState({
-                auth_flag: true,
-                error_message:
-                    <div>
-                        <h2>{response_login.data.error_messgae}</h2>
-                    </div>
-            })
-        }
+        
 
 
 
@@ -86,31 +91,25 @@ class Login extends Component {
 
 
         return (
-
-            <div>
-            <div>
-            <HomeHeader props={this.props}/>
-            </div>
-
-                <div className="App">
-                  
-                    <br></br>
-                    <label><b>Email address   :</b></label>
-                    <br></br>
-                    <input onChange={this.EmailChangeHandler} type="text" />
-                    <br></br>
-                    <br></br>
-                    <label><b> Password   :</b></label>
-                    <br></br>
-                    <input onChange={this.passwordChangeHandle} type="password" />
-                    <br></br>
-                    <br></br>
-                    <button onClick={this.SubmitLogin} className="button_signUp" >Login</button>
-                    {this.state.auth_flag && <div>{this.state.error_message} </div>}
-
-                    <br></br>
-                    <br></br>
-
+            <div className="main_page_div">
+                <div>
+                    <HomeHeader props={this.props} />
+                </div>
+                <div className="divleftsignup">
+                    <div className="insideLeftdiv">
+                    </div>
+                </div>
+                <div className="divrightsignup">
+                    <div className="fontfamiliytext_withdifflogo">
+                    </div>
+                    <div className="signupinfodiv">
+                        <p className="headerinSignup">Email address</p>
+                        <input type="text" className="inputTextClass" onChange={this.EmailChangeHandler}></input>
+                        <p className="headerinSignup">Password</p>
+                        <input type="password" className="inputTextClass" onChange={this.passwordChangeHandle}></input>
+                        <button className="signupbuttonClasssignuppage" onClick={this.SubmitLogin}>Login</button>
+                        {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                    </div>
                 </div>
             </div>
         )

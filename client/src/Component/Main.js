@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {BrowserRouter,Route} from 'react-router-dom';
 
 
-import Login from './Login/Login';
+import Login from './Login/login';
 import signup from './signup/signup';
 import landing from './Landing/landing';
 import group_invite from './group_invite/group_invite';
@@ -12,7 +12,8 @@ import Create_groups from './Create_groups/Create_groups'
 import dashboard from './Dashboard/dashborad'
 import recent_activities from './Recent_activities/recent_activities'
 import show_details from './Show_details/show_details'
-import temp from './Temp/temp'
+import Actual_Dashboard from './Actual_Dashboard/actual_dashboard'
+import Left_toggel_bar from './Left_Toggle_bar/left_toggel_bar'
 
 
 
@@ -23,8 +24,9 @@ class Main extends Component {
             <div>
          <BrowserRouter>
             <Route exact path="/" component={landing}/>
-            <Route exact path="/Login" component={Login}/>
+            <Route exact path="/login" component={Login}/>
             <Route path="/signup" component={signup}/> 
+            <Route path="/left_toggel_bar" component={Left_toggel_bar}/> 
             <Route path="/group_invite" component={group_invite}/> 
             <Route path="/profile" component={profile}/> 
             <Route path="/group_page" component={group_page}/> 
@@ -32,7 +34,8 @@ class Main extends Component {
             <Route path="/Create_groups" component={Create_groups}/> 
             <Route path="/show_details" component={show_details}/> 
             <Route path="/recent_activities" component={recent_activities}/> 
-            <Route path="/temp" component={temp}/> 
+            <Route path="/actual_Dashboard" component={Actual_Dashboard}/> 
+         
           
           
             </BrowserRouter>

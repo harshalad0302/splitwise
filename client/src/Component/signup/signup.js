@@ -60,7 +60,6 @@ class signup extends Component {
 
     submitSignUp = async (e) => {
 
-
         e.preventDefault();
         const data = {
             name: this.state.name,
@@ -68,40 +67,38 @@ class signup extends Component {
             emailid: this.state.emailid
 
         }
-
-
+        //sending to backend
         const response = await axios.post(`${backendServer}/signup`, data)
 
-        if (response.data.auth_flag_email === "S") {
+        if (response.data.auth_falg === "S") {
 
             this.props.history.push("/dashboard");
             this.props.dispatch(add_user(response.data))
         }
 
-        if (response.data.auth_flag_email === "F") {
+        if (response.data.auth_falg === "F") {
             this.setState({
                 auth_flag: true,
                 error_message: <div>
-                    <h2 >The following errors occurred:</h2>
-                    <ul list-style-position="inside" >
-                        <li>First name can't be blank</li>
-                        <li>Email address can't be blank</li>
-                        <li>Password is too short (minimum is 8 characters)</li>
-                        <li>Please enter a valid email address.</li>
-                    </ul>
+                    {
+                      
+                        response.data.message.map((error_message, index) => {
+                            return (
+                                <div key={index}>
+                                   <ul list-style-position="inside" >
+                                       <li>{error_message}</li>
+                                       </ul> 
+                                </div>
+                            )
+                        })
+                    }
                 </div>
+
             })
-
-
 
         }
 
-        if (response.data.auth_flag_email === "Femail_already") {
-            this.setState({
-                auth_flag_second_email: true,
-                error_message_email_already_p: response.data.error_message
-            })
-        }
+       
 
 
     }
@@ -112,34 +109,25 @@ class signup extends Component {
 
 
         return (
-            <div>
-               
-                <HomeHeader props={this.props}/>
-               
-                
-                <br></br>
-               
-                <label><b>Name   :</b></label>
-                <br></br>
-                <input onChange = {this.nameChangeHandler} type="text" />
-                <br></br>
-                <br></br>
-                <label><b>Email ID   :</b></label>
-                <br></br>
-                <input onChange = {this.Email_idChangeHandler} type="text" />
-                <br></br>
-                <br></br>
-                <label><b>Password   :</b></label>
-                <br></br>
-                <input onChange = {this.passwordChangeHandler} type="password" />
-                <br></br>
-                <br></br>
-                <button className="button_signUp" onClick={this.submitSignUp} >SignUp</button>
-                {this.state.auth_flag && <div>{this.state.error_message} </div>}
-                <div>
-           
-                {this.state.auth_flag_second_email && <div>{this.state.error_message_email_already_p} </div>}
-     
+            <div className="main_page_div">
+                <div className="divleftsignup">
+                    <div className="insideLeftdiv">
+                    </div>
+                </div>
+                <div className="divrightsignup">
+                    <div className="fontfamiliytext">
+                    </div>
+                    <div className="signupinfodiv">
+                        <input onChange={this.nameChangeHandler} className="inputTextClass"></input>
+                        <p className="headerinSignup">Here’s my email address:</p>
+                        <input type="text" onChange={this.Email_idChangeHandler} className="inputTextClass"></input>
+                        <p className="headerinSignup">And here’s my password:</p>
+                        <input className="inputTextClass" onChange={this.passwordChangeHandler} type="password"></input>
+                        <br />
+                        <button className="signupbuttonClasssignuppage" onClick={this.submitSignUp}>Sign me up!</button>
+                        <a href="/login"> already have account</a>
+                        {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                    </div>
                 </div>
             </div>
         )

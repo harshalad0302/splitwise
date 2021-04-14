@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
-import Login_header from '../Login_header/Login_header'
+import Login_header from '../Login_header/login_header'
 import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig';
 
@@ -21,7 +21,9 @@ class recent_activities extends Component {
     constructor() {
         super();
         this.state = {
-           Array_recent:undefined
+        Array_recent:undefined,
+         filtered_array:undefined
+
         }
     }
     componentDidMount = async (e) => {
@@ -52,7 +54,23 @@ class recent_activities extends Component {
         }))
   
 
-        console.log("Array_recent is ",this.state.Array_recent)
+        console.log("Array_recent is ",this.state.Array_recent[0].activity)
+    }
+
+    OnChangSerachBar= async(e)=>{
+        const value_serach=e.target.value
+        // console.log("--------------,",value_serach)
+        // console.log("----------------",this.state.Array_recent.activity)
+       // const filter_value=this.state.Array_recent.activity
+      const filtered=this.state.Array_recent.filter((group)=>{
+          return group.activity.includes(value_serach)
+      })
+
+      this.setState(()=>({
+        filtered_array:filtered
+    }))
+  
+  
     }
 
     render() {
@@ -64,21 +82,44 @@ class recent_activities extends Component {
                     </div>
                     <div>
                     <h2>Recent Activities</h2>
+                    <input type="text" placeholder=" Find " onChange={this.OnChangSerachBar}></input>
+                    <br/>
+                    <br/>
                     <div>
                     {
+                        !this.state.filtered_array &&
                         this.state.Array_recent &&
                         this.state.Array_recent.map((data, index) => {
                             return (
-                                <div key={index}>
-                             <label>Group name =</label>
-                           <label>{data.Group_name} --</label>
-                            <label>{data.activity} at  --</label>
-                           <label>{data.date}</label>
+                             <div key={index}>
+                             
+                                <ul>
+                                <li>{data.activity} at </li> &nbsp; <label> <b>{data.date} </b></label>
+                                </ul>
                                 </div>
                             )
                         })
 
                     }
+                    
+                    {
+                      
+                        this.state.filtered_array &&
+                        this.state.filtered_array.map((data, index) => {
+                            return (
+                             <div key={index}>
+                             
+                                <ul>
+                                <li>{data.activity} at </li> &nbsp; <label> <b>{data.date} </b></label>
+                                </ul>
+                        
+                            
+                                </div>
+                            )
+                        })
+
+                    }
+               
                     
                     </div>
 
