@@ -26,7 +26,11 @@ class actual_dashboard extends Component {
             auth_flag: false,
             error_message: "",
             show_toggel: undefined,
-            array_invite_length:0
+            array_invite_length: 0,
+            amount_gets: 0,
+            amount_owes: 0,
+            bal: 0
+
         }
 
     }
@@ -53,12 +57,32 @@ class actual_dashboard extends Component {
         }
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
+
+
+        if (group_invite_req.data.amount_gets_length !== 0) {
+            this.setState(() => ({
+                amount_gets: group_invite_req.data.amount_gets[0].amount_gets
+
+            }))
+        }
+        if (group_invite_req.data.amount_owes_length !== 0) {
+            this.setState(() => ({
+                amount_owes: group_invite_req.data.amount_owes[0].amount_owes
+
+            }))
+        }
+
+        //caculate the balance
+     const bal=this.state.amount_gets-this.state.amount_owes
+
         this.setState(() => ({
             invites_from_group: group_invite_req.data.invite_from_groups,
             show_toggel: true,
-            array_invite_length:group_invite_req.data.invite_from_groups.length
+            array_invite_length: group_invite_req.data.invite_from_groups.length,
+            bal:bal
+
         }))
-      
+
 
 
     }
@@ -187,6 +211,12 @@ class actual_dashboard extends Component {
                                 <div className=" w-25">
                                     <h1 >Dashboard</h1>
                                 </div>
+                                <div className=" w-50 mx-5 d-flex flex-row justify-content-end">
+                                    <div>
+                                        <button className="lightbutton my-3" >Settle up</button>
+                                    </div>
+
+                                </div>
 
                             </div>
                         </div>
@@ -194,19 +224,19 @@ class actual_dashboard extends Component {
                             <div className=" w-100 border">
                                 <div className="d-flex flex-column">
                                     <div><p className="text-center">total balance</p></div>
-                                    <div><p className="text-center">Total Blance answer</p></div>
+                                    <div><p className="text-center">${this.state.bal}</p></div>
                                 </div>
                             </div>
                             <div className="w-100 border">
                                 <div className="d-flex flex-column">
                                     <div><p className="text-center secondary">you are owed</p></div>
-                                    <div><p className="text-center">Total Blance answer</p></div>
+                                    <div><p className="text-center">${this.state.amount_gets}</p></div>
                                 </div>
                             </div>
                             <div className="w-100 border">
                                 <div className="d-flex flex-column">
                                     <div><p className="text-center">you owe</p></div>
-                                    <div><p className="text-center">Total Blance answer</p></div>
+                                    <div><p className="text-center">${this.state.amount_owes}</p></div>
                                 </div>
                             </div>
                         </div>
@@ -215,7 +245,7 @@ class actual_dashboard extends Component {
                             <h2 className="text-center">Group Invites</h2>
                         </div>
                         <div className="my-2">
-                        <p className="text-center">{this.state.array_invite_length ? "":"You dont have any invites"}</p>
+                            <p className="text-center">{this.state.array_invite_length ? "" : "You dont have any invites"}</p>
                         </div>
                         {
                             this.state.invites_from_group &&

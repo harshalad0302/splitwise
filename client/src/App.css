@@ -20,6 +20,18 @@
     -webkit-box-align: center;
     align-items: center;
 }
+.pb-cmnt-container {
+    font-family: Lato;
+    margin-top: 100px;
+}
+.text_area_style{
+    font-family: Lato;
+    margin-top: 100px;
+    padding: 20px;
+    border: 1px solid #F2F2F2;
+}
+
+
 
 .splitwiselogodiv {
     float: left;
@@ -345,6 +357,13 @@
     border-radius: 50%;
     width: 20x;
     height: 10vh;
+    
+}
+
+.group_icon_logo_small{
+    border-radius: 50%;
+    width: 20x;
+    height: 3vh;
     
 }
 .groupName{

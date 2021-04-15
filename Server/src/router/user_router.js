@@ -372,6 +372,8 @@ router.post('/Expense_add', async (req, res) => {
     auth_falg = "F"
     message.push("Description is empty")
   }
+
+
   if (req.body.amount !== "" && req.body.description !== "") {
     //now you can entre the data
     //auto increment expen_ID
@@ -385,7 +387,17 @@ router.post('/Expense_add', async (req, res) => {
       expen_ID_to_be_inserted = Max_expen_ID[0].maxId + 1
     }
     //expense inserted
-    create_expense = await new expenses({ paid_by_UID: req.body.UID_adding_expense, expense_of_Group_ID: req.body.groupID, amount: req.body.amount, description: req.body.description, name_of_UID_who_paid: req.body.name, expen_ID: expen_ID_to_be_inserted, date_time: new Date() })
+    create_expense = await new expenses(
+      {
+        paid_by_UID: req.body.UID_adding_expense,
+        expense_of_Group_ID: req.body.groupID,
+        amount: req.body.amount,
+        description: req.body.description,
+        name_of_UID_who_paid: req.body.name,
+        expen_ID: expen_ID_to_be_inserted,
+        date_time: new Date()
+      }
+    )
     let create_expense_insered = await create_expense.save()
 
     //check if comment is there or not
@@ -397,7 +409,7 @@ router.post('/Expense_add', async (req, res) => {
         comment: req.body.comment,
         UID_adding_comment: req.body.UID_adding_expense,
         UID_adding_comment_name: req.body.name,
-        expen_ID: create_expense_insered.expen_ID,
+        expen_ID: expen_ID_to_be_inserted,
         expen_description: req.body.description,
         date_time: new Date()
       })
@@ -478,11 +490,32 @@ router.post('/group_page_invite', async (req, res) => {
     invite_from_groups.push({ group_name: await groups.findOne({ groupID: invitations_array[i].invite_from_group_id }, 'group_name'), groupID: invitations_array[i].invite_from_group_id })
   }
 
+  //display total amount on dashboard
+
+  const amount_this_UID_gets = await personal_expenditure_get.aggregate([
+    { $match: { UID: req.body.UID } },
+
+    { $group: { _id: null, amount_gets: { $sum: '$amount_gets' } } }
+
+  ])
+
+  const amount_this_UID_ows = await personal_expenditure_ows.aggregate([
+    { $match: { UID: req.body.UID } },
+
+    { $group: { _id: null, amount_owes: { $sum: '$amount_ows' } } }
+
+  ])
+
+
   result = {
     auth_falg: auth_falg,
     message: message,
     message_length: message.length,
-    invite_from_groups: invite_from_groups
+    invite_from_groups: invite_from_groups,
+    amount_gets: amount_this_UID_gets,
+    amount_gets_length: amount_this_UID_gets.length,
+    amount_owes_length: amount_this_UID_ows.length,
+    amount_owes: amount_this_UID_ows
 
   }
   res.status(200).send(result);
@@ -570,7 +603,7 @@ const upload = multer({
 //update profile
 
 router.post('/profile', upload.single('u_avatar'), async (req, res) => {
- 
+
   var auth_falg = "S"
   message = []
   if (req.file) {
@@ -582,7 +615,6 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
       await users.updateOne(
         { UID: req.body.UID },
         { emailid: req.body.emailid })
-
 
     }
 
@@ -612,6 +644,125 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
 
   }
+
+});
+
+
+
+
+
+//add  comment
+
+router.post('/add_comment', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+
+  if (req.body.comment === "") {
+    message.push("adding comment is not successful because comment is empty")
+    result = {
+      auth_falg: "S",
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
+
+  }
+  else {
+    adding_comment = await comments({
+      groupID: req.body.groupID,
+      group_name: req.body.group_name,
+      comment: req.body.comment,
+      UID_adding_comment: req.body.UID,
+      UID_adding_comment_name: req.body.name,
+      expen_ID: req.body.expen_ID,
+      expen_description: req.body.description,
+      date_time: new Date()
+    })
+    await adding_comment.save()
+
+    message.push("adding comment is successful")
+    result = {
+      auth_falg: "S",
+      message: message,
+      message_length: message.length,
+
+    }
+    res.status(200).send(result);
+  }
+
+
+
+});
+
+//get_all_comments
+router.post('/get_all_comments', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+  //get all the comments 
+
+  const all_comments_on_this_expense = await comments.find({ expen_ID: req.body.expen_ID })
+
+
+  message.push("got all comments is successful")
+  result = {
+    auth_falg: "S",
+    message: message,
+    message_length: message.length,
+    all_comments_on_this_expense: all_comments_on_this_expense,
+    comments_length: all_comments_on_this_expense.length
+  }
+  res.status(200).send(result);
+
+});
+
+//leave_group
+router.post('/leave_group', async (req, res) => {
+  var auth_falg = "S"
+  message = []
+
+  //check if user has cleared all the expenses
+  const amount_user_gets = await personal_expenditure_get.aggregate([
+    { $match: { UID: req.body.UID, GroupID: req.body.groupID } },
+
+    {
+      $count: "amount_user_gets"
+    }
+
+  ])
+
+  const amount_user_owes = await personal_expenditure_ows.aggregate([
+    { $match: { UID: req.body.UID, GroupID: req.body.groupID } },
+
+    {
+      $count: "amount_user_owes"
+    }
+
+  ])
+
+  if (amount_user_gets === 0 && amount_user_owes === 0) {
+    message.push("user can leave the group")
+    result = {
+      auth_falg: "S",
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+  }
+  else {
+    message.push("user can't leave the group as some expenses are yet to setteled")
+    result = {
+      auth_falg: "F",
+      message: message,
+      message_length: message.length
+    }
+    res.status(200).send(result);
+  }
+
+
+
+
+
 
 });
 

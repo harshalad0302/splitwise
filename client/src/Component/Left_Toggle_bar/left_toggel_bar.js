@@ -94,11 +94,11 @@ class left_toggel_bar extends Component {
                     <br></br>
                     <button className="GroupsAddbutton_class" >My Groups</button>
                     <br></br>
-                    <br></br>
+                   
                     <div>
                         <input type="text" className="inputTextClass_invisible1" placeholder="search for group" onChange={this.OnChangSerachBar}></input>
                     </div>
-                    <br></br>
+                  
                     <div>
                         {
                           
