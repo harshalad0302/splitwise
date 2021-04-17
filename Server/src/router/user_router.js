@@ -11,7 +11,7 @@ const { QueryTypes, where } = require('sequelize');
 const { Sequelize } = require('sequelize');
 const personal_expenditure_get = require('../db_models/personal_expenditure_get');
 const personal_expenditure_ows = require('../db_models/personal_expenditure_ows');
-const { findAll } = require("../db_models/users");
+const { findAll, find, findOne } = require("../db_models/users");
 const { Json } = require("sequelize");
 const sharp = require('sharp');
 const multer = require('multer');
@@ -19,22 +19,22 @@ require('../db/mongo')
 
 router.post('/signup', async (req, res) => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  var auth_falg = "S"
+  var auth_flag = "S"
   var message = []
   if (req.body.emailid === "" || re.test(String(req.body.emailid).toLowerCase()) === false) {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Emailid field is empty or invalid")
   }
   if (req.body.name === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.unshift("name is blank")
   }
   if (req.body.password === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.unshift("password is blank")
   }
 
-  if (auth_falg !== "F") {
+  if (auth_flag !== "F") {
     //data can be inserted
     //check if emailid is already present
     //const found_data = await users.findOne({ where: { emailid: req.body.emailid } });
@@ -61,7 +61,7 @@ router.post('/signup', async (req, res) => {
       const data_after_insert = await users.findOne({ emailid: req.body.emailid })
       message.push("data inserted")
       result = {
-        auth_falg: "S",
+        auth_flag: "S",
         message: message,
         message_length: message.length,
         UID: data_after_insert.UID,
@@ -75,7 +75,7 @@ router.post('/signup', async (req, res) => {
     else {
       message.push("Emailid is already present")
       result = {
-        auth_falg: "F",
+        auth_flag: "F",
         message: message,
         message_length: message.length
       }
@@ -86,7 +86,7 @@ router.post('/signup', async (req, res) => {
   else {
 
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length
     }
@@ -100,14 +100,14 @@ router.post('/signup', async (req, res) => {
 //login Api
 
 router.post('/login', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   var message = []
   if (req.body.emailid === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Emailid field is empty")
   }
   if (req.body.password === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Password field is empty")
   }
 
@@ -116,10 +116,10 @@ router.post('/login', async (req, res) => {
     //  const found_data_login = await users.findOne({ where: { emailid: req.body.emailid } });
     const found_data_login = await users.findOne({ emailid: req.body.emailid });
     if (found_data_login === null) {
-      auth_falg = "F"
+      auth_flag = "F"
       message.push("Emailid is not present ! please login")
       result = {
-        auth_falg: auth_falg,
+        auth_flag: auth_flag,
         message: message,
         message_length: message.length
       }
@@ -132,7 +132,7 @@ router.post('/login', async (req, res) => {
       if (req.body.password === found_data_login.password) {
         message.push("Password is matching and login is successful")
         result = {
-          auth_falg: auth_falg,
+          auth_flag: auth_flag,
           name: found_data_login.name,
           emailid: found_data_login.emailid,
           UID: found_data_login.UID,
@@ -148,7 +148,7 @@ router.post('/login', async (req, res) => {
         //invalid password
         message.push("Invalid Password")
         result = {
-          auth_falg: "F",
+          auth_flag: "F",
           message: message,
           message_length: message.length
         }
@@ -159,7 +159,7 @@ router.post('/login', async (req, res) => {
   }
   else {
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length
     }
@@ -172,18 +172,18 @@ router.post('/login', async (req, res) => {
 //Api-----Create_group
 router.post('/create_group', async (req, res) => {
   //validations
-  var auth_falg = "S"
+  var auth_flag = "S"
   var message = []
   if (req.body.group_name === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Group Name is empty")
   }
   if (req.body.length === 0) {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Cant create group with only 1 member! add members ")
   }
   if (req.body.emailid_of_members.filter(emailid_of_members => emailid_of_members === "").length !== 0) {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("One of group member has empty value! either remove or fill the emailid")
   }
   if (req.body.group_name !== "" && req.body.length !== 0 && req.body.emailid_of_members.filter(emailid_of_members => emailid_of_members === "").length === 0) {
@@ -193,7 +193,7 @@ router.post('/create_group', async (req, res) => {
     if (found_group_name) {
       message.push("Group name is already present")
       result = {
-        auth_falg: "F",
+        auth_flag: "F",
         message: message,
         message_length: message.length
       }
@@ -250,7 +250,7 @@ router.post('/create_group', async (req, res) => {
       await put_owner_in_invitation.save()
 
       result = {
-        auth_falg: auth_falg,
+        auth_flag: auth_flag,
         message: message,
         message_length: message.length
       }
@@ -262,7 +262,7 @@ router.post('/create_group', async (req, res) => {
   }
   else {
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length
     }
@@ -275,14 +275,14 @@ router.post('/create_group', async (req, res) => {
 //Api-----Create_group
 router.post('/get_group_names', async (req, res) => {
   //validations
-  var auth_falg = "S"
+  var auth_flag = "S"
   var message = []
   let group_names = []
   if (req.body.UID === "" || req.body.name === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("UID and name fields are empty")
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length,
       group_names: group_names
@@ -296,7 +296,7 @@ router.post('/get_group_names', async (req, res) => {
       group_names.push(await groups.findOne({ groupID: group_id_user_part_of[i].invite_from_group_id }, 'group_name groupID'))
     }
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length,
       group_names_and_id_array: group_names
@@ -309,7 +309,7 @@ router.post('/get_group_names', async (req, res) => {
 
 //get_users_in_group
 router.post('/get_users_in_group', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
   //get the UID of members who are in group
   const UID_of_members = await invitations.find({ invite_from_group_id: req.body.groupID, accept: "ACCEPT" }, 'UID')
@@ -347,7 +347,7 @@ router.post('/get_users_in_group', async (req, res) => {
 
 
   result = {
-    auth_falg: auth_falg,
+    auth_flag: auth_flag,
     message: message,
     message_length: message.length,
     //  details_of_group_members: details_of_group_members,
@@ -361,15 +361,15 @@ router.post('/get_users_in_group', async (req, res) => {
 
 //Expense_add
 router.post('/Expense_add', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
   //validation
   if (req.body.amount === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Amount is empty")
   }
   if (req.body.description === "") {
-    auth_falg = "F"
+    auth_flag = "F"
     message.push("Description is empty")
   }
 
@@ -460,7 +460,7 @@ router.post('/Expense_add', async (req, res) => {
 
     message.push("Expenses sucessfully added")
     result = {
-      auth_falg: "S",
+      auth_flag: "S",
       message: message,
       message_length: message.length
     }
@@ -469,7 +469,7 @@ router.post('/Expense_add', async (req, res) => {
   }
   else {
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length
     }
@@ -481,7 +481,7 @@ router.post('/Expense_add', async (req, res) => {
 
 //group_page_invite
 router.post('/group_page_invite', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
 
   const invitations_array = await invitations.find({ UID: req.body.UID, accept: "NA" }, 'invite_from_group_id')
@@ -508,7 +508,7 @@ router.post('/group_page_invite', async (req, res) => {
 
 
   result = {
-    auth_falg: auth_falg,
+    auth_flag: auth_flag,
     message: message,
     message_length: message.length,
     invite_from_groups: invite_from_groups,
@@ -524,7 +524,7 @@ router.post('/group_page_invite', async (req, res) => {
 
 //group_invite_reject_req
 router.post('/group_invite_reject_req', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
 
   const update_output = await invitations.updateOne({ UID: req.body.current_UID, invite_from_group_id: req.body.group_ids_to_be_rejected }, { accept: 'REJECT' });
@@ -532,7 +532,7 @@ router.post('/group_invite_reject_req', async (req, res) => {
   if (update_output.nModified === 1) {
     message.push("Reject is successful")
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length,
 
@@ -543,7 +543,7 @@ router.post('/group_invite_reject_req', async (req, res) => {
 
     message.push("Reject is not successful")
     result = {
-      auth_falg: "F",
+      auth_flag: "F",
       message: message,
       message_length: message.length,
 
@@ -556,7 +556,7 @@ router.post('/group_invite_reject_req', async (req, res) => {
 
 
 router.post('/group_invite_accept_req', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
   const update_output = await invitations.updateOne({ UID: req.body.UID, invite_from_group_id: req.body.groupID }, { accept: 'ACCEPT' });
   if (update_output.nModified === 1) {
@@ -572,7 +572,7 @@ router.post('/group_invite_accept_req', async (req, res) => {
     await create_recent_activity_group_accept.save()
     message.push("User is added to a group")
     result = {
-      auth_falg: auth_falg,
+      auth_flag: auth_flag,
       message: message,
       message_length: message.length,
 
@@ -583,7 +583,7 @@ router.post('/group_invite_accept_req', async (req, res) => {
 
     message.push("adding user is not successful")
     result = {
-      auth_falg: "F",
+      auth_flag: "F",
       message: message,
       message_length: message.length,
 
@@ -604,7 +604,7 @@ const upload = multer({
 
 router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
   if (req.file) {
     await users.updateOne(
@@ -635,7 +635,7 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
     message.push("Update is successful")
     result = {
-      auth_falg: "S",
+      auth_flag: "S",
       message: message,
       message_length: message.length,
 
@@ -654,13 +654,13 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 //add  comment
 
 router.post('/add_comment', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
 
   if (req.body.comment === "") {
     message.push("adding comment is not successful because comment is empty")
     result = {
-      auth_falg: "S",
+      auth_flag: "S",
       message: message,
       message_length: message.length,
 
@@ -683,7 +683,7 @@ router.post('/add_comment', async (req, res) => {
 
     message.push("adding comment is successful")
     result = {
-      auth_falg: "S",
+      auth_flag: "S",
       message: message,
       message_length: message.length,
 
@@ -697,16 +697,15 @@ router.post('/add_comment', async (req, res) => {
 
 //get_all_comments
 router.post('/get_all_comments', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
   //get all the comments 
 
   const all_comments_on_this_expense = await comments.find({ expen_ID: req.body.expen_ID })
 
-
   message.push("got all comments is successful")
   result = {
-    auth_falg: "S",
+    auth_flag: "S",
     message: message,
     message_length: message.length,
     all_comments_on_this_expense: all_comments_on_this_expense,
@@ -718,7 +717,7 @@ router.post('/get_all_comments', async (req, res) => {
 
 //leave_group
 router.post('/leave_group', async (req, res) => {
-  var auth_falg = "S"
+  var auth_flag = "S"
   message = []
 
   //check if user has cleared all the expenses
@@ -743,7 +742,7 @@ router.post('/leave_group', async (req, res) => {
   if (amount_user_gets === 0 && amount_user_owes === 0) {
     message.push("user can leave the group")
     result = {
-      auth_falg: "S",
+      auth_flag: "S",
       message: message,
       message_length: message.length
     }
@@ -752,7 +751,7 @@ router.post('/leave_group', async (req, res) => {
   else {
     message.push("user can't leave the group as some expenses are yet to setteled")
     result = {
-      auth_falg: "F",
+      auth_flag: "F",
       message: message,
       message_length: message.length
     }
@@ -760,10 +759,172 @@ router.post('/leave_group', async (req, res) => {
   }
 
 
+});
 
 
+//settle_up
+
+router.post('/settle_up', async (req, res) => {
+
+  var auth_flag = "S"
+  message = []
+
+  const UID_from_which_amount_gets = await personal_expenditure_get.distinct("amount_gets_from_UID", { UID: req.body.UID })
+  const UID_to_which_amount_owes = await personal_expenditure_ows.distinct("amount_ows_to_UID", { UID: req.body.UID })
+  let amount_gets_array = []
+  let amount_owes_array = []
+
+  if (UID_from_which_amount_gets.length !== 0) {
+
+    for (var i = 0; i < UID_from_which_amount_gets.length; i++) {
+
+      let UID_from_which_amount_gets_all_UID = UID_from_which_amount_gets[i]
+      let UID_from_which_amount_gets_all_UID_name = await users.findOne({ UID: UID_from_which_amount_gets_all_UID }, 'name')
+
+
+
+      let final_amount_gets = await personal_expenditure_get.aggregate(
+        [
+          {
+            $match: {
+              UID: req.body.UID,
+              amount_gets_from_UID: UID_from_which_amount_gets_all_UID
+            }
+          },
+          {
+            $group: {
+              _id: {
+                amount_gets_from_UID: '$UID_from_which_amount_gets_all_UID'
+
+              }, final_amount_gets_total: { $sum: '$amount_gets' }
+            }
+          }
+        ])
+
+
+
+      amount_gets_array.push({
+        UID: req.body.UID,
+        name: req.body.name,
+        amount_gets: final_amount_gets[0].final_amount_gets_total,
+        amount_gets_from: UID_from_which_amount_gets_all_UID_name.name,
+        amount_gets_from_UID: UID_from_which_amount_gets_all_UID
+      })
+
+    }
+
+
+  }
+
+  if (UID_to_which_amount_owes.length !== 0) {
+
+    for (var i = 0; i < UID_to_which_amount_owes.length; i++) {
+
+      let UID_to_which_amount_owes_all_UID = UID_to_which_amount_owes[i]
+      let UID_to_which_amount_owes_all_UID_name = await users.findOne({ UID: UID_to_which_amount_owes_all_UID }, 'name')
+
+
+      let final_amount_owes = await personal_expenditure_ows.aggregate(
+        [
+          {
+            $match: {
+              UID: req.body.UID,
+              amount_ows_to_UID: UID_to_which_amount_owes_all_UID
+            }
+          },
+          {
+            $group: {
+              _id: {
+                amount_ows_to_UID: '$UID_to_which_amount_owes_all_UID'
+
+              }, final_amount_owes_total: { $sum: '$amount_ows' }
+            }
+          }
+        ])
+
+      console.log("final_amount_owes is ", final_amount_owes[0].final_amount_owes_total)
+
+      amount_owes_array.push({
+        UID: req.body.UID,
+        name: req.body.name,
+        amount_owes: final_amount_owes[0].final_amount_owes_total,
+        amount_owes_to: UID_to_which_amount_owes_all_UID,
+        amount_owes_to_name: UID_to_which_amount_owes_all_UID_name.name
+      })
+
+    }
+
+
+  }
+
+  message.push("balance is as bellow")
+  result = {
+    auth_flag: "S",
+    message: message,
+    message_length: message.length,
+    amount_gets_array: amount_gets_array,
+    amount_gets_array_length: amount_gets_array.length,
+    amount_owes_array: amount_owes_array,
+    amount_owes_array_length: amount_owes_array.length
+  }
+  res.status(200).send(result);
 
 
 });
+
+//setle_up_amount_gets
+
+router.post('/setle_up_amount_gets', async (req, res) => {
+  //delete the amount_gets
+  var auth_flag = "S"
+  message = []
+  await personal_expenditure_get.deleteMany({
+    UID: req.body.UID,
+    amount_gets_from_UID: req.body.settle_up_with_UID
+  })
+
+  await personal_expenditure_ows.deleteMany({
+    amount_ows_to_UID: req.body.UID,
+    UID: req.body.settle_up_with_UID
+  })
+
+  message.push("settled up ")
+  result = {
+    auth_flag: "S",
+    message: message,
+    message_length: message.length
+    
+  }
+  res.status(200).send(result);
+
+
+});
+
+router.post('/setle_up_amount_owes', async (req, res) => {
+  //delete the amount_gets
+  var auth_flag = "S"
+  message = []
+  await personal_expenditure_ows.deleteMany({
+    UID: req.body.UID,
+    amount_ows_to_UID: req.body.settle_up_with_UID
+  })
+
+  await personal_expenditure_get.deleteMany({
+    amount_gets_from_UID: req.body.UID,
+    UID: req.body.settle_up_with_UID
+  })
+
+  message.push("settled up ")
+  result = {
+    auth_flag: "S",
+    message: message,
+    message_length: message.length
+    
+  }
+  res.status(200).send(result);
+
+
+});
+
 
 module.exports = router

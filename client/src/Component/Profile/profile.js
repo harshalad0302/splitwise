@@ -115,7 +115,7 @@ class profile extends Component {
         formData.append('UID', this.props.user.UID)
 
      
-        console.log("formData is ",formData)
+       
 
         const config = {
             headers: {
@@ -125,9 +125,9 @@ class profile extends Component {
 
         const response_save = (await axios.post(`${backendServer}/profile`, formData, config)).data
 
-        console.log("response_save is ",response_save)
+     
 
-        if (response_save.data.auth_falg === "S") {
+        if (response_save.data.auth_flag === "S") {
 
             this.props.dispatch(add_user(response_save.updated_state))
             this.props.history.push("/dashboard")
@@ -147,7 +147,7 @@ class profile extends Component {
 
     componentDidMount = (e) => {
 
-        console.log(this.props)
+        
         if (this.props.user.profile_photo_user) {
             this.setState(() => ({ profile_photo: `data:image/png;base64,${Buffer.from(this.props.user.profile_photo_user, 'base64')}` }))
         }

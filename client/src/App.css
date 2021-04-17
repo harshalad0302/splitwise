@@ -225,10 +225,8 @@
 }
 
 .inputTextClass1 {
-    width: 25%;
+    width: 35%;
     height: 5vh;
-    padding: 12px 20px;
-    margin: 8px 0;
     font-size: 24px;
     display: inline-block;
     border: 1px solid #ccc;

@@ -70,13 +70,13 @@ class signup extends Component {
         //sending to backend
         const response = await axios.post(`${backendServer}/signup`, data)
 
-        if (response.data.auth_falg === "S") {
+        if (response.data.auth_flag === "S") {
 
-            this.props.history.push("/dashboard");
+            this.props.history.push("/actual_dashboard");
             this.props.dispatch(add_user(response.data))
         }
 
-        if (response.data.auth_falg === "F") {
+        if (response.data.auth_flag === "F") {
             this.setState({
                 auth_flag: true,
                 error_message: <div>

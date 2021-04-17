@@ -87,7 +87,7 @@ class group_page extends Component {
         const data = {
             expen_ID: this.state.group_expenses_details[index].Expense_ID
         }
-        console.log("data is ", data)
+    
         const get_all_comments = await axios.post(`${backendServer}/get_all_comments`, data)
         let temp_all_comments = []
         for (var i = 0; i < get_all_comments.data.comments_length; i++) {
@@ -224,13 +224,22 @@ class group_page extends Component {
 
         }
 
-
+        console.log(this.props)
+    
         this.setState(() => ({
             // group_member_details: get_users_in_group.data.details_of_group_members,
             group_expenses_details: exepense_details,
-            details_of_each_individual_owes_gets: details_of_each_individual_owes_gets_temp
+            details_of_each_individual_owes_gets: details_of_each_individual_owes_gets_temp,
+            group_name:this.props.location.state.group_name
         }))
 
+    }
+
+    componentDidUpdate = () => {
+       // console.log("from CMU", this.props)
+        if(this.state.group_name != this.props.location.state.group_name) {
+            this.setState({group_name: this.props.location.state.group_name})
+        }
     }
 
     HandelDescriptionOnChange = (e) => {
@@ -267,7 +276,7 @@ class group_page extends Component {
         }
         const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data)
         //check the respose 
-        if (response_Expense_add.data.auth_falg === "F") {
+        if (response_Expense_add.data.auth_flag === "F") {
             this.setState({
                 auth_flag: true,
                 error_message: <div>
@@ -318,7 +327,7 @@ class group_page extends Component {
 
         }
         const respose_from_post_comment = await axios.post(`${backendServer}/add_comment`, data)
-        if (respose_from_post_comment.data.auth_falg === "S") {
+        if (respose_from_post_comment.data.auth_flag === "S") {
             this.handleCloseModal_comment()
             this.update()
         }
@@ -335,7 +344,7 @@ class group_page extends Component {
             group_name: this.props.location.state.group_name
         }
         const leave_group_response = await axios.post(`${backendServer}/leave_group`, data)
-        if (leave_group_response.data.auth_falg === "F") {
+        if (leave_group_response.data.auth_flag === "F") {
             this.setState({
                 auth_flag: true,
                 error_message: <div>

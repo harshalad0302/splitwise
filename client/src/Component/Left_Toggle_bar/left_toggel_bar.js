@@ -56,14 +56,15 @@ class left_toggel_bar extends Component {
 
     GotoGroupOnClick = (index) => {
 
+       
         this.props.props.history.push({
             pathname: '/group_page',
-
             state: {
                 group_name: this.state.group_names_and_id_array[index].group_name,
                 groupID: this.state.group_names_and_id_array[index].groupID
             }
         })
+        
 
     }
 

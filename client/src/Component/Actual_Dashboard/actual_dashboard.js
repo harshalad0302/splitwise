@@ -4,8 +4,10 @@ import backendServer from '../../WebConfig';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import Login_header from '../Login_header/login_header'
 import { connect } from 'react-redux';
+import avatar_image from '../../Assests/Img/avatar.png'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 import axios from 'axios';
+import Modal from 'react-modal'
 
 const connection_to_redux = (state) => {
 
@@ -13,6 +15,18 @@ const connection_to_redux = (state) => {
         user: state.user
     }
 }
+
+const customStyles = {
+    content: {
+        top: '40%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)'
+
+    }
+};
 
 
 class actual_dashboard extends Component {
@@ -24,6 +38,11 @@ class actual_dashboard extends Component {
             name: this.props.user.name,
             invites_from_group: undefined,
             auth_flag: false,
+            showModal: false,
+            amount_gets_settle_up: undefined,
+            amount_gets_settle_up_length: undefined,
+            amount_owes_settle_up_length: undefined,
+            amount_owes_settle_up: undefined,
             error_message: "",
             show_toggel: undefined,
             array_invite_length: 0,
@@ -32,7 +51,55 @@ class actual_dashboard extends Component {
             bal: 0
 
         }
+        this.handleOpenModal = this.handleOpenModal.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
 
+    }
+
+
+    handleOpenModal = async () => {
+
+
+        //display the settle up things 
+        const data = {
+            UID: this.props.user.UID,
+            name: this.props.user.name
+        }
+
+
+        const settle_up_response = await axios.post(`${backendServer}/settle_up`, data)
+
+
+        if (settle_up_response.data.auth_flag === "S") {
+
+
+            this.setState({
+                showModal: true,
+                amount_gets_settle_up: settle_up_response.data.amount_gets_array,
+                amount_owes_settle_up: settle_up_response.data.amount_owes_array
+
+            });
+
+            if (settle_up_response.data.amount_gets_array_length !== 0) {
+                this.setState({
+                    amount_gets_settle_up_length: settle_up_response.data.amount_gets_array_length
+                })
+            }
+            if (settle_up_response.data.amount_owes_array_length !== 0) {
+                this.setState({
+                    amount_owes_settle_up_length: settle_up_response.data.amount_owes_array_length
+                })
+            }
+
+        }
+
+
+
+    }
+
+
+    handleCloseModal() {
+        this.setState({ showModal: false });
     }
 
 
@@ -43,8 +110,30 @@ class actual_dashboard extends Component {
         }
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
+
+
+        if (group_invite_req.data.amount_gets_length !== 0) {
+            this.setState(() => ({
+                amount_gets: group_invite_req.data.amount_gets[0].amount_gets
+
+            }))
+        }
+        if (group_invite_req.data.amount_owes_length !== 0) {
+            this.setState(() => ({
+                amount_owes: group_invite_req.data.amount_owes[0].amount_owes
+
+            }))
+        }
+
+        //caculate the balance
+        const bal = this.state.amount_gets - this.state.amount_owes
+
         this.setState(() => ({
-            invites_from_group: group_invite_req.data.invite_from_groups
+            invites_from_group: group_invite_req.data.invite_from_groups,
+            show_toggel: true,
+            array_invite_length: group_invite_req.data.invite_from_groups.length,
+            bal: bal
+
         }))
 
     }
@@ -73,13 +162,13 @@ class actual_dashboard extends Component {
         }
 
         //caculate the balance
-     const bal=this.state.amount_gets-this.state.amount_owes
+        const bal = this.state.amount_gets - this.state.amount_owes
 
         this.setState(() => ({
             invites_from_group: group_invite_req.data.invite_from_groups,
             show_toggel: true,
             array_invite_length: group_invite_req.data.invite_from_groups.length,
-            bal:bal
+            bal: bal
 
         }))
 
@@ -186,6 +275,48 @@ class actual_dashboard extends Component {
 
     }
 
+
+    HandleSettleClick_amount_gets = async (index) => {
+        //send data to backend to settleup ammountgets
+        const data = {
+            UID: this.state.UID,
+            name: this.state.name,
+            settle_up_with_UID: this.state.amount_gets_settle_up[index].amount_gets_from_UID,
+            settle_up_with_UID_name: this.state.amount_gets_settle_up[index].amount_gets_from,
+            amount: this.state.amount_gets_settle_up[index].amount_gets
+
+        }
+        const response_settle_up_amount_gets = await axios.post(`${backendServer}/setle_up_amount_gets`, data)
+
+        if (response_settle_up_amount_gets.data.auth_flag === "S") {
+
+            this.handleCloseModal()
+            this.update()
+        }
+
+
+    }
+
+    HandleSettleClick_amount_owes = async (index) => {
+        //send data to backend to settleup amount owes
+     
+        const data = {
+            UID: this.state.UID,
+            name: this.state.name,
+            settle_up_with_UID: this.state.amount_owes_settle_up[index].amount_owes_to,
+            settle_up_with_UID_name: this.state.amount_owes_settle_up[index].amount_owes_to_name,
+            amount: this.state.amount_owes_settle_up[index].amount_owes
+
+        }
+         const response_settle_up_amount_owes = await axios.post(`${backendServer}/setle_up_amount_owes`, data)
+
+        if (response_settle_up_amount_owes.data.auth_flag === "S") {
+
+            this.handleCloseModal()
+            this.update()
+        }
+    }
+
     render() {
 
 
@@ -213,7 +344,7 @@ class actual_dashboard extends Component {
                                 </div>
                                 <div className=" w-50 mx-5 d-flex flex-row justify-content-end">
                                     <div>
-                                        <button className="lightbutton my-3" >Settle up</button>
+                                        <button className="lightbutton my-3" onClick={this.handleOpenModal} >Settle up</button>
                                     </div>
 
                                 </div>
@@ -275,6 +406,85 @@ class actual_dashboard extends Component {
                     </div>
                 </div>
 
+                <Modal isOpen={this.state.showModal} style={customStyles} >
+                    <div className="d-flex flex-column">
+                        <div className="d-flex flex-row  justify-content-between">
+                            <div className="w-100">
+                                <div className="add_expenses_image">
+                                    <h4>Settle up</h4>
+                                </div>
+                            </div>
+                            <div className="w-10 ">
+                                <button className="btnN" onClick={this.handleCloseModal}><i className="fa fa-close"></i> X</button>
+                            </div>
+                        </div>
+                        <div>
+
+                            {
+                                this.state.amount_gets_settle_up &&
+                                this.state.amount_gets_settle_up.map((data, index) => {
+                                    return (
+                                        <div key={index} className="border my-2">
+                                            <div className="d-flex flex-row justify-content-end my-2">
+                                                <div className="w-50  mx-2">
+                                                    <img src={avatar_image} className="group_icon_logo_small"></img>
+                                                </div>
+                                                <div className=" w-50 mx-2">
+                                                    <p className="font_class">{data.amount_gets_from}</p>
+                                                </div>
+
+                                                <div className="w-75 mx-2">
+                                                    <p className="font_class">owes you</p>
+
+                                                </div>
+                                                <div className="w-75 mx-2">
+                                                    <p className="font_class">${data.amount_gets}</p>
+                                                </div>
+                                                <div className="w-75 mx-2">
+                                                    <button className="lightbutton" onClick={() => this.HandleSettleClick_amount_gets(index)}>Settle UP</button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
+
+                            {
+                                this.state.amount_owes_settle_up &&
+                                this.state.amount_owes_settle_up.map((data, index) => {
+                                    return (
+                                        <div key={index} className="border my-2">
+                                            <div className="d-flex flex-row justify-content-end my-2">
+                                                <div className="w-50  mx-2">
+                                                    <img src={avatar_image} className="group_icon_logo_small"></img>
+                                                </div>
+                                                <div className=" w-50 mx-2">
+                                                    <p className="font_class">{data.amount_owes_to_name}</p>
+                                                </div>
+
+                                                <div className="w-75 mx-2">
+                                                    <p className="font_class"> you owe</p>
+
+                                                </div>
+                                                <div className="w-75 mx-2">
+                                                    <p className="font_class">${data.amount_owes}</p>
+                                                </div>
+                                                <div className="w-75 mx-2">
+                                                    <button className="lightbutton" onClick={() => this.HandleSettleClick_amount_owes(index)} >Settle UP</button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
+
+
+                        </div>
+
+                    </div>
+                </Modal>
             </div>
         )
     }

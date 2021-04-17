@@ -101,7 +101,7 @@ class show_details extends Component {
 
     Settle_with_this_click=async(data)=>{
 
-        //console.log("settle is clicked for ",data)
+       
         this.hideModal()
         const data_to_settle={
             UID_of_login:this.props.user.UID_user,

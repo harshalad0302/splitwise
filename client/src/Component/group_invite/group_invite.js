@@ -121,9 +121,7 @@ class group_invite extends Component {
     OnClickLeaveGroup= async (index)=>
     {
 
-        // console.log("----------",this.state.User_is_part_of_group_id[index])
-        // console.log("----------",this.state.User_is_part_of_group[index])
-        //sending data to leav group api
+        
         const data={
             group_name:this.state.User_is_part_of_group[index],
             group_id:this.state.User_is_part_of_group_id[index],
@@ -132,7 +130,7 @@ class group_invite extends Component {
         }
 
         const response_leave_group= await axios.post(`${backendServer}/leave_group`, data)
-        console.log(response_leave_group.data)
+       
         if(response_leave_group.data.flag_settle==="S")
         {
             //user can leave the group
