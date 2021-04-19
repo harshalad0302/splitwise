@@ -570,6 +570,11 @@ router.post('/group_invite_accept_req', async (req, res) => {
       date_time: new Date()
     })
     await create_recent_activity_group_accept.save()
+
+    //add in recent activity
+
+
+
     message.push("User is added to a group")
     result = {
       auth_flag: auth_flag,
@@ -681,6 +686,20 @@ router.post('/add_comment', async (req, res) => {
     })
     await adding_comment.save()
 
+    //adding recent activity
+    let activity = " user " + req.body.name + " commented " + req.body.comment + " to the expense " + req.body.description
+    create_recent_activity = await new recentactivities(
+      {
+        GroupID: req.body.groupID,
+        groupname: req.body.group_name,
+        activity: activity,
+        UID: req.body.UID,
+        date_time: new Date()
+      }
+    )
+    await create_recent_activity.save()
+
+
     message.push("adding comment is successful")
     result = {
       auth_flag: "S",
@@ -720,6 +739,8 @@ router.post('/leave_group', async (req, res) => {
   var auth_flag = "S"
   message = []
 
+  console.log("req.body", req.body)
+
   //check if user has cleared all the expenses
   const amount_user_gets = await personal_expenditure_get.aggregate([
     { $match: { UID: req.body.UID, GroupID: req.body.groupID } },
@@ -730,6 +751,8 @@ router.post('/leave_group', async (req, res) => {
 
   ])
 
+
+
   const amount_user_owes = await personal_expenditure_ows.aggregate([
     { $match: { UID: req.body.UID, GroupID: req.body.groupID } },
 
@@ -739,7 +762,14 @@ router.post('/leave_group', async (req, res) => {
 
   ])
 
-  if (amount_user_gets === 0 && amount_user_owes === 0) {
+
+
+
+  if (amount_user_gets[0].amount_user_gets === 0 && amount_user_owes[0].amount_user_owes === 0) {
+    //leave the group 
+
+    
+
     message.push("user can leave the group")
     result = {
       auth_flag: "S",
@@ -747,7 +777,10 @@ router.post('/leave_group', async (req, res) => {
       message_length: message.length
     }
     res.status(200).send(result);
+
+
   }
+
   else {
     message.push("user can't leave the group as some expenses are yet to setteled")
     result = {
@@ -842,7 +875,7 @@ router.post('/settle_up', async (req, res) => {
           }
         ])
 
-      console.log("final_amount_owes is ", final_amount_owes[0].final_amount_owes_total)
+
 
       amount_owes_array.push({
         UID: req.body.UID,
@@ -888,12 +921,27 @@ router.post('/setle_up_amount_gets', async (req, res) => {
     UID: req.body.settle_up_with_UID
   })
 
+  //add to the recent activity
+
+//  let activity="user "+req.body.name+" has setteled up with "+
+  // create_recent_activity = await new recentactivities(
+  //   {
+  //     GroupID: created_group_id,
+  //     groupname: req.body.group_name,
+  //     activity: activity,
+  //     UID: req.body.owner_UID,
+  //     date_time: new Date()
+  //   }
+  // )
+
+  // await create_recent_activity.save()
+
   message.push("settled up ")
   result = {
     auth_flag: "S",
     message: message,
     message_length: message.length
-    
+
   }
   res.status(200).send(result);
 
@@ -914,12 +962,36 @@ router.post('/setle_up_amount_owes', async (req, res) => {
     UID: req.body.settle_up_with_UID
   })
 
+  let activity="user "+req.body.name+" has setteled up with "+settle_up_with_UID_name
+
+  //get user is part of which all groups
+  const user_is_part_of_groupID = await invitations.find({ UID: req.body.UID, accept: "ACCEPT" }, 'invite_from_group_id')
+
+
+  var group_details = []
+  for (var i = 0; i < user_is_part_of_groupID.length; i++) {
+    group_details.push({ group_name: await groups.findOne({ groupID: invitations_array[i].invite_from_group_id }, 'group_name'), groupID: invitations_array[i].invite_from_group_id })
+  }
+  
+
+  create_recent_activity = await new recentactivities(
+    {
+      GroupID: created_group_id,
+      groupname: req.body.group_name,
+      activity: activity,
+      UID: req.body.UID,
+      date_time: new Date()
+    }
+  )
+
+  await create_recent_activity.save()
+
   message.push("settled up ")
   result = {
     auth_flag: "S",
     message: message,
     message_length: message.length
-    
+
   }
   res.status(200).send(result);
 

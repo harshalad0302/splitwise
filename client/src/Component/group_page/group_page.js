@@ -343,8 +343,12 @@ class group_page extends Component {
             groupID: this.props.location.state.groupID,
             group_name: this.props.location.state.group_name
         }
+        
+        console.log("data is ------------",data)
         const leave_group_response = await axios.post(`${backendServer}/leave_group`, data)
+
         if (leave_group_response.data.auth_flag === "F") {
+          
             this.setState({
                 auth_flag: true,
                 error_message: <div>
@@ -361,6 +365,8 @@ class group_page extends Component {
                     }
                 </div>
             })
+
+            console.log("sate is ",this.state)
         }
 
     }
@@ -377,6 +383,7 @@ class group_page extends Component {
                     <div className="leftdiv">
                         <Left_toggel_bar props={this.props} />
                     </div>
+                
                     <div className="d-flex flex-row my-1 justify-content-between">
                         <div className="bg w-50">
                             <div className="d-flex flex-row justify-content-evenly">
@@ -398,10 +405,13 @@ class group_page extends Component {
 
                         </div>
                     </div>
-                    {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                   
                     <div className="d-flex flex-row mx-2 pl-2 justify-contenet-start ">
                         <div className=" w-75 ">
                             <div className="d-flex flex-column my-3">
+                                <div>
+                                {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                                </div>
                                 {
                                     this.state.group_expenses_details &&
                                     this.state.group_expenses_details.map((data, index) => {
