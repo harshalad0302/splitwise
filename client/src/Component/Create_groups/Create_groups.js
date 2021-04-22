@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig'
 import avatar_image from '../../Assests/Img/avatar.png'
@@ -136,20 +136,20 @@ class Create_groups extends Component {
                             </div>
                         </div>
                         <div>
-                            <div className="d-flex flex-row justify-content-end">
-                                <div className="w-25 ">
-                                    <div className="d-flex flex-row  justify-content-end ">
-                                        <div className="d-flex flex-column pt-3">
-                                            <div>
+                            <div className="d-flex flex-row justify-content-start">
+                                <div className="w-25">
+                                    <div className="d-flex flex-row  justify-content-start ">
+                                        <div className="d-flex flex-column ">
+                                            <div className="mx-3 my-2">
                                                 <img src={avatar_image} className="img_style"></img>
                                             </div>
-                                            <div className="my-2">
+                                            <div className="my-2 mx-3">
                                                 <input type="file" name="filetag" onChange={this.FileOnChange} />
                                                 <img src="" className="rounded mx-auto d-block" name="imagetag"></img>
                                             </div>
 
                                             <div>
-                                                <div>
+                                                <div className="mx-3">
                                                     <button className="lightbutton" onClick={this.handelSaveOnClick} >Save</button>
                                                 </div>
                                             </div>
@@ -158,23 +158,23 @@ class Create_groups extends Component {
 
                                     </div>
                                 </div>
-                                <div className="w-75">
-                                    <div className="d-flex flex-column ">
-                                        <div>
+                                <div className=" W-75 mx-3">
+                                    <div className="d-flex flex-column justify-content-start">
+                                        <div className="mx-3">
                                             <img src={create_group}></img>
                                         </div>
-                                        <div>
+                                        <div className="mx-3">
                                             <input className="inputTextClass1" onChange={this.OnchangeGroup_name} ></input>
                                         </div>
-                                        <div>
-                                            <p className="font_class">Owner</p>
+                                        <div className="mx-3">
+                                            <p className="font_class_OWNER">Owner</p>
                                         </div>
-                                        <div>
+                                        <div className="mx-3">
                                             <input className="inputTextClass1" value={this.props.user.emailid} readonly="readonly" ></input>
                                         </div>
                                         <div>
                                             <div className="d-flex flex-row">
-                                                <div>
+                                                <div className="mx-3">
                                                     <p className="font_class">Group Members</p>
                                                 </div>
                                                 <div className="mx-3">

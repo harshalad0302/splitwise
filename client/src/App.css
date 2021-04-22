@@ -224,8 +224,19 @@
     font-family: 'Lato'
 }
 
+.font_class_OWNER
+{
+    
+    font-size: 24px;
+    font-family: 'Lato'
+}
+
+.font_class_recent_activity{
+    font-size: 15px;
+    font-family: 'Lato'
+}
 .inputTextClass1 {
-    width: 35%;
+    width: 60%;
     height: 5vh;
     font-size: 24px;
     display: inline-block;
@@ -645,3 +656,33 @@
     background-color:  rgba(20, 3, 3, 0.11);
 }
 
+.pagination {
+    margin: 15px auto;
+    display: flex;
+    list-style: none;
+    outline: none;
+    
+    
+  }
+  .pagination > .active > a{
+    background-color: #47ccde ;
+    border-color: #47ccde ;
+    color: #fff;
+  }
+  .pagination > li > a{
+    border: 1px solid #1CC29F ;
+    padding: 5px 10px;
+    outline: none;
+    cursor: pointer;
+  }
+  .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus{
+    background-color:#1CC29F ;
+    border-color:#1CC29F;
+    outline: none ;
+  }
+  .pagination > li > a, .pagination > li > span{
+    color: #1CC29F
+  }
+  .pagination > li:first-child > a, .pagination > li:first-child > span, .pagination > li:last-child > a, .pagination > li:last-child > span{
+    border-radius: unset
+  }

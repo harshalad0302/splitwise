@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import '../../App.css';
 import backendServer from '../../WebConfig';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import avatar_image from '../../Assests/Img/avatar.png'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
@@ -59,7 +59,6 @@ class actual_dashboard extends Component {
 
     handleOpenModal = async () => {
 
-
         //display the settle up things 
         const data = {
             UID: this.props.user.UID,
@@ -111,21 +110,37 @@ class actual_dashboard extends Component {
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
 
+        console.log("group_invite_req is ", group_invite_req.data)
 
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
-                amount_gets: group_invite_req.data.amount_gets[0].amount_gets
+                amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
 
             }))
         }
+
+        else {
+            this.setState(() => ({
+                amount_gets: 0
+
+            }))
+
+        }
         if (group_invite_req.data.amount_owes_length !== 0) {
             this.setState(() => ({
-                amount_owes: group_invite_req.data.amount_owes[0].amount_owes
+                amount_owes: parseFloat(group_invite_req.data.amount_owes[0].amount_owes).toFixed(2)
+
+            }))
+        }
+        else {
+            this.setState(() => ({
+                amount_owes: 0
 
             }))
         }
 
         //caculate the balance
+
         const bal = this.state.amount_gets - this.state.amount_owes
 
         this.setState(() => ({
@@ -135,6 +150,7 @@ class actual_dashboard extends Component {
             bal: bal
 
         }))
+
 
     }
 
@@ -147,21 +163,23 @@ class actual_dashboard extends Component {
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
 
+        console.log("group_invite_req is ", group_invite_req.data)
 
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
-                amount_gets: group_invite_req.data.amount_gets[0].amount_gets
+                amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
 
             }))
         }
         if (group_invite_req.data.amount_owes_length !== 0) {
             this.setState(() => ({
-                amount_owes: group_invite_req.data.amount_owes[0].amount_owes
+                amount_owes: parseFloat(group_invite_req.data.amount_owes[0].amount_owes).toFixed(2)
 
             }))
         }
 
         //caculate the balance
+
         const bal = this.state.amount_gets - this.state.amount_owes
 
         this.setState(() => ({
@@ -283,15 +301,15 @@ class actual_dashboard extends Component {
             name: this.state.name,
             settle_up_with_UID: this.state.amount_gets_settle_up[index].amount_gets_from_UID,
             settle_up_with_UID_name: this.state.amount_gets_settle_up[index].amount_gets_from,
-            amount: this.state.amount_gets_settle_up[index].amount_gets
+            amount: parseFloat(this.state.amount_gets_settle_up[index].amount_gets).toFixed(2)
 
         }
         const response_settle_up_amount_gets = await axios.post(`${backendServer}/setle_up_amount_gets`, data)
 
         if (response_settle_up_amount_gets.data.auth_flag === "S") {
 
-            this.handleCloseModal()
             this.update()
+            this.handleCloseModal()
         }
 
 
@@ -299,21 +317,24 @@ class actual_dashboard extends Component {
 
     HandleSettleClick_amount_owes = async (index) => {
         //send data to backend to settleup amount owes
-     
+
         const data = {
             UID: this.state.UID,
             name: this.state.name,
             settle_up_with_UID: this.state.amount_owes_settle_up[index].amount_owes_to,
             settle_up_with_UID_name: this.state.amount_owes_settle_up[index].amount_owes_to_name,
-            amount: this.state.amount_owes_settle_up[index].amount_owes
+            amount: parseFloat(this.state.amount_owes_settle_up[index].amount_owes).toFixed(2)
 
         }
-         const response_settle_up_amount_owes = await axios.post(`${backendServer}/setle_up_amount_owes`, data)
+
+        const response_settle_up_amount_owes = await axios.post(`${backendServer}/setle_up_amount_owes`, data)
 
         if (response_settle_up_amount_owes.data.auth_flag === "S") {
 
-            this.handleCloseModal()
-            this.update()
+            console.log("---------------------------", response_settle_up_amount_owes.data.auth_flag)
+            await this.update()
+            await this.handleCloseModal()
+
         }
     }
 
@@ -438,7 +459,7 @@ class actual_dashboard extends Component {
 
                                                 </div>
                                                 <div className="w-75 mx-2">
-                                                    <p className="font_class">${data.amount_gets}</p>
+                                                    <p className="font_class">${parseFloat(data.amount_gets).toFixed(2)}</p>
                                                 </div>
                                                 <div className="w-75 mx-2">
                                                     <button className="lightbutton" onClick={() => this.HandleSettleClick_amount_gets(index)}>Settle UP</button>
@@ -468,7 +489,7 @@ class actual_dashboard extends Component {
 
                                                 </div>
                                                 <div className="w-75 mx-2">
-                                                    <p className="font_class">${data.amount_owes}</p>
+                                                    <p className="font_class">${parseFloat(data.amount_owes).toFixed(2)}</p>
                                                 </div>
                                                 <div className="w-75 mx-2">
                                                     <button className="lightbutton" onClick={() => this.HandleSettleClick_amount_owes(index)} >Settle UP</button>

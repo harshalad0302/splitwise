@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import axios from 'axios';
 import backendServer from '../../../src/WebConfig';

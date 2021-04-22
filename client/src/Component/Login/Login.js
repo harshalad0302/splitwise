@@ -53,6 +53,8 @@ class Login extends Component {
         }
          const response_login = await axios.post(`${backendServer}/login`, data)
 
+         console.log("response_login is ",response_login)
+
             if (response_login.data.auth_flag === "S") {
                 //Redux dispath
                 this.props.dispatch(add_user(response_login.data))

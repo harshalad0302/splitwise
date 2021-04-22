@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import avatar_image from '../../Assests/Img/avatar.png'
 import { connect } from 'react-redux';
 import { add_user } from '../../Actions/user_action'
@@ -102,21 +102,13 @@ class profile extends Component {
 
 
     save_button_click = async (e) => {
-
-
         e.preventDefault();
-
         let formData = new FormData()
-
         formData.append('u_avatar', this.state.file)
         formData.append('name', this.state.name)
         formData.append('emailid', this.state.emailid)
         formData.append('phone_number', this.state.phone_number)
         formData.append('UID', this.props.user.UID)
-
-     
-       
-
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -124,13 +116,12 @@ class profile extends Component {
         }
 
         const response_save = (await axios.post(`${backendServer}/profile`, formData, config)).data
+      
 
-     
-
-        if (response_save.data.auth_flag === "S") {
+        if (response_save.auth_flag === "S") {
 
             this.props.dispatch(add_user(response_save.updated_state))
-            this.props.history.push("/dashboard")
+            this.props.history.push("/actual_dashboard")
 
         }
 
@@ -148,8 +139,8 @@ class profile extends Component {
     componentDidMount = (e) => {
 
         
-        if (this.props.user.profile_photo_user) {
-            this.setState(() => ({ profile_photo: `data:image/png;base64,${Buffer.from(this.props.user.profile_photo_user, 'base64')}` }))
+        if (this.props.user.profile_photo) {
+            this.setState(() => ({ profile_photo: `data:image/png;base64,${Buffer.from(this.props.user.profile_photo, 'base64')}` }))
         }
         else {
             this.setState(() => {
@@ -180,7 +171,7 @@ class profile extends Component {
                             <div className="w-25">
                                 <div className="d-flex flex-column">
                                     <div>
-                                        <img src={this.state.profile_photo}></img>
+                                        <img src={this.state.profile_photo} style={{width:"200px",height:"200px"}}></img>
 
                                     </div>
                                     <div className="my-4">
@@ -270,8 +261,8 @@ class profile extends Component {
                                         <p>Your default currency</p>
                                     </div>
                                     <div className="w-100">
-                                        <select className="select_styles">
-                                            <option defaultValue>USD</option>
+                                        <select className="select_styles" defaultValue="0">
+                                            <option value="0">USD</option>
                                             <option value="1">KWD</option>
                                             <option value="2">BHD</option>
                                             <option value="3">GBP</option>
@@ -283,8 +274,8 @@ class profile extends Component {
                                         <p>Your time zone</p>
                                     </div>
                                     <div className="w-100">
-                                        <select className="select_styles">
-                                            <option defaultValue>(GMT -12:00) Eniwetok, Kwajalein</option>
+                                        <select className="select_styles" defaultValue="0">
+                                            <option value="0">(GMT -12:00) Eniwetok, Kwajalein</option>
                                             <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
                                             <option value="-10:00">(GMT -10:00) Hawaii</option>
                                             <option value="-09:50">(GMT -9:30) Taiohae</option>
@@ -330,8 +321,8 @@ class profile extends Component {
                                         <p>Language</p>
                                     </div>
                                     <div>
-                                        <select className="select_styles">
-                                            <option defaultValue>English</option>
+                                        <select className="select_styles" defaultValue="0">
+                                            <option value="0">English</option>
                                             <option value="SQ">Albanian</option>
                                             <option value="AR">Arabic</option>
                                             <option value="HY">Armenian</option>

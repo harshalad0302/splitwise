@@ -70,8 +70,9 @@ class left_toggel_bar extends Component {
 
     OnChangSerachBar = async (e) => {
         const value_serach = e.target.value
-       const filtered = this.state.group_names_and_id_array.filter((group_names) => {
-            return group_names.group_names
+
+       const filtered = this.state.group_names_and_id_array.filter((data) => {
+            return data.group_name.includes(value_serach)
         })
 
         this.setState(() => ({
@@ -102,7 +103,7 @@ class left_toggel_bar extends Component {
                   
                     <div>
                         {
-                          
+                            !this.state.filtered_array &&
                             this.state.group_names_and_id_array &&
                             this.state.group_names_and_id_array.map((data, index) => {
 
@@ -110,13 +111,26 @@ class left_toggel_bar extends Component {
                                     <div key={index}>
                                         <br></br>
                                         <button className="GroupsAddbutton_class" onClick={() => this.GotoGroupOnClick(index)}>{data.group_name}</button>
-
                                     </div>
                                 )
 
                             })
                         }
                        
+                        {
+                          
+                            this.state.filtered_array &&
+                            this.state.filtered_array.map((data, index) => {
+
+                                return (
+                                    <div key={index}>
+                                        <br></br>
+                                        <button className="GroupsAddbutton_class" onClick={() => this.GotoGroupOnClick(index)}>{data.group_name}</button>
+                                    </div>
+                                )
+
+                            })
+                        }
                     </div>
                 </div>
             </div>

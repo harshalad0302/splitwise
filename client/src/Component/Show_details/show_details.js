@@ -3,7 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import Modal from '../../Component/Modal/Modal'
 

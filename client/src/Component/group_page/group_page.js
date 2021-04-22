@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import Login_header from '../Login_header/login_header'
+import Login_header from '../Login_header/Login_header'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 import { connect } from 'react-redux';
 import axios from 'axios';
@@ -87,11 +87,11 @@ class group_page extends Component {
         const data = {
             expen_ID: this.state.group_expenses_details[index].Expense_ID
         }
-    
+
         const get_all_comments = await axios.post(`${backendServer}/get_all_comments`, data)
         let temp_all_comments = []
         for (var i = 0; i < get_all_comments.data.comments_length; i++) {
-            var options = { year: 'numeric', month: 'long', day: 'numeric' }
+            var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
             var date_value = new Date(get_all_comments.data.all_comments_on_this_expense[i].date_time).toLocaleDateString([], options);
             temp_all_comments.push(
                 {
@@ -126,7 +126,7 @@ class group_page extends Component {
         }
         const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data)
         //  const get_expenses_of_group = await axios.post(`${backendServer}/get_expenses_of_group`, data)
-        var options = { year: 'numeric', month: 'long', day: 'numeric' }
+        var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
 
         let exepense_details = []
         let details_of_each_individual_owes_gets_temp = []
@@ -137,7 +137,7 @@ class group_page extends Component {
                 Expense_date: date_value,
                 Expense_ID: get_users_in_group.data.group_expenses_details[i].expen_ID,
                 paid_by_UID: get_users_in_group.data.group_expenses_details[i].paid_by_UID,
-                amount: get_users_in_group.data.group_expenses_details[i].amount,
+                amount: parseFloat(get_users_in_group.data.group_expenses_details[i].amount).toFixed(2),
                 description: get_users_in_group.data.group_expenses_details[i].description,
                 paid_by: get_users_in_group.data.group_expenses_details[i].name_of_UID_who_paid
 
@@ -149,11 +149,11 @@ class group_page extends Component {
             let amount_owes = 0
 
             if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets.length !== 0) {
-                amount_gets = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets[0].amount_gets
+                amount_gets = parseFloat(get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets[0].amount_gets).toFixed(2)
             }
 
             if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows.length !== 0) {
-                amount_owes = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows[0].amount_ows
+                amount_owes = parseFloat(get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows[0].amount_ows).toFixed(2)
             }
             details_of_each_individual_owes_gets_temp.push(
                 {
@@ -184,8 +184,7 @@ class group_page extends Component {
         }
         const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data)
         //  const get_expenses_of_group = await axios.post(`${backendServer}/get_expenses_of_group`, data)
-        var options = { year: 'numeric', month: 'long', day: 'numeric' }
-
+        var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
         let exepense_details = []
         let details_of_each_individual_owes_gets_temp = []
 
@@ -207,11 +206,11 @@ class group_page extends Component {
             let amount_owes = 0
 
             if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets.length !== 0) {
-                amount_gets = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets[0].amount_gets
+                amount_gets = parseFloat(get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_gets[0].amount_gets).toFixed(2)
             }
 
             if (get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows.length !== 0) {
-                amount_owes = get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows[0].amount_ows
+                amount_owes = parseFloat(get_users_in_group.data.details_of_each_individual_owes_gets[i].amount_ows[0].amount_ows).toFixed(2)
             }
             details_of_each_individual_owes_gets_temp.push(
                 {
@@ -224,21 +223,21 @@ class group_page extends Component {
 
         }
 
-        console.log(this.props)
-    
+
+
         this.setState(() => ({
             // group_member_details: get_users_in_group.data.details_of_group_members,
             group_expenses_details: exepense_details,
             details_of_each_individual_owes_gets: details_of_each_individual_owes_gets_temp,
-            group_name:this.props.location.state.group_name
+            group_name: this.props.location.state.group_name
         }))
 
     }
 
     componentDidUpdate = () => {
-       // console.log("from CMU", this.props)
-        if(this.state.group_name != this.props.location.state.group_name) {
-            this.setState({group_name: this.props.location.state.group_name})
+
+        if (this.state.group_name != this.props.location.state.group_name) {
+            this.setState({ group_name: this.props.location.state.group_name })
         }
     }
 
@@ -343,12 +342,12 @@ class group_page extends Component {
             groupID: this.props.location.state.groupID,
             group_name: this.props.location.state.group_name
         }
-        
-        console.log("data is ------------",data)
+
+
         const leave_group_response = await axios.post(`${backendServer}/leave_group`, data)
 
         if (leave_group_response.data.auth_flag === "F") {
-          
+
             this.setState({
                 auth_flag: true,
                 error_message: <div>
@@ -366,7 +365,11 @@ class group_page extends Component {
                 </div>
             })
 
-            console.log("sate is ",this.state)
+
+        }
+        else {
+            //redirect to dashboard
+            this.props.history.push("/actual_dashboard")
         }
 
     }
@@ -383,7 +386,7 @@ class group_page extends Component {
                     <div className="leftdiv">
                         <Left_toggel_bar props={this.props} />
                     </div>
-                
+
                     <div className="d-flex flex-row my-1 justify-content-between">
                         <div className="bg w-50">
                             <div className="d-flex flex-row justify-content-evenly">
@@ -405,12 +408,12 @@ class group_page extends Component {
 
                         </div>
                     </div>
-                   
+
                     <div className="d-flex flex-row mx-2 pl-2 justify-contenet-start ">
                         <div className=" w-75 ">
                             <div className="d-flex flex-column my-3">
                                 <div>
-                                {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                                    {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
                                 </div>
                                 {
                                     this.state.group_expenses_details &&
@@ -556,16 +559,19 @@ class group_page extends Component {
                                                             <div className="w-25">
                                                                 <img src={avatar_image} className="group_icon_logo_small"></img>
                                                             </div>
-                                                            <div className="w-25">
+                                                            <div className="w-25 mx-2">
                                                                 <p>{data.made_by}</p>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="w-75">
+                                                    <div className="w-75 mx-3">
                                                         <p>{data.comment}</p>
                                                     </div>
-                                                    <div className="w-20">
+                                                    <div className="w-20 mx-3">
                                                         <p>{data.date}</p>
+                                                    </div>
+                                                    <div className="w-20 pl-3">
+                                                        <button className="btnN" onClick={this.handleCloseModal_comment}><i className="fa fa-close"></i> X</button>
                                                     </div>
                                                 </div>
                                             </div>

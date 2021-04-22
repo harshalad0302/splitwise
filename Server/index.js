@@ -6,6 +6,7 @@ const mysql = require('mysql');
 var Sequelize = require('sequelize');
 const user_router=require('./src/router/user_router');
 
+
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', '*')
