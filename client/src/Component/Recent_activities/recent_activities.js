@@ -68,7 +68,7 @@ class recent_activities extends Component {
 
 
         //sending data to backend
-        const get_response_recentactivities = await axios.post(`${backendServer}/recent_activities`, data)
+        const get_response_recentactivities = await axios.post(`${backendServer}/recent_activities`, data,{headers:{"Authorization":this.props.user.token}})
 
         this.setState(() => ({
             Array_recent: get_response_recentactivities.data.details_recent_activity,

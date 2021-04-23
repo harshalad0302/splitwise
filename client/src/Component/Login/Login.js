@@ -24,7 +24,8 @@ class Login extends Component {
             emailid: "",
             password: "",
             auth_flag: false,
-            error_message: ""
+            error_message: "",
+            token:""
         }
 
 
@@ -52,9 +53,7 @@ class Login extends Component {
             password: this.state.password
         }
          const response_login = await axios.post(`${backendServer}/login`, data)
-
-         console.log("response_login is ",response_login)
-
+         
             if (response_login.data.auth_flag === "S") {
                 //Redux dispath
                 this.props.dispatch(add_user(response_login.data))

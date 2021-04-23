@@ -69,7 +69,7 @@ class Create_groups extends Component {
             group_name: this.state.group_name
         }
 
-        const response_create_group = await axios.post(`${backendServer}/Create_group`, data)
+        const response_create_group = await axios.post(`${backendServer}/Create_group`, data ,{headers:{"Authorization":this.props.user.token}})
 
         if (response_create_group.data.auth_flag === "F") {
             this.setState({

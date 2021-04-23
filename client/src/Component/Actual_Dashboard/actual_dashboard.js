@@ -66,7 +66,8 @@ class actual_dashboard extends Component {
         }
 
 
-        const settle_up_response = await axios.post(`${backendServer}/settle_up`, data)
+
+        const settle_up_response = await axios.post(`${backendServer}/settle_up`, data, { headers: { "Authorization": this.props.user.token } })
 
 
         if (settle_up_response.data.auth_flag === "S") {
@@ -108,9 +109,8 @@ class actual_dashboard extends Component {
             name: this.state.name
         }
         //send data to backend to get the group invites
-        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
-
-        console.log("group_invite_req is ", group_invite_req.data)
+        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
+        console.log("this.props is ", this.props)
 
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
@@ -156,14 +156,15 @@ class actual_dashboard extends Component {
 
     componentDidMount = async (e) => {
 
+
         const data = {
             UID: this.state.UID,
             name: this.state.name
         }
         //send data to backend to get the group invites
-        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data)
+        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
 
-        console.log("group_invite_req is ", group_invite_req.data)
+        console.log("this.props is ", this.props)
 
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
@@ -203,7 +204,7 @@ class actual_dashboard extends Component {
             UID: this.state.UID,
             name: this.state.name
         }
-        const response_accepted_group_req = await axios.post(`${backendServer}/group_invite_accept_req`, data)
+        const response_accepted_group_req = await axios.post(`${backendServer}/group_invite_accept_req`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (response_accepted_group_req.data.auth_flag === "F") {
             this.setState({
@@ -252,7 +253,7 @@ class actual_dashboard extends Component {
         }
 
 
-        const rejected_group = await axios.post(`${backendServer}/group_invite_reject_req`, data)
+        const rejected_group = await axios.post(`${backendServer}/group_invite_reject_req`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (rejected_group.data.auth_flag === "F") {
             this.setState(() => ({
@@ -304,7 +305,7 @@ class actual_dashboard extends Component {
             amount: parseFloat(this.state.amount_gets_settle_up[index].amount_gets).toFixed(2)
 
         }
-        const response_settle_up_amount_gets = await axios.post(`${backendServer}/setle_up_amount_gets`, data)
+        const response_settle_up_amount_gets = await axios.post(`${backendServer}/setle_up_amount_gets`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (response_settle_up_amount_gets.data.auth_flag === "S") {
 
@@ -327,11 +328,9 @@ class actual_dashboard extends Component {
 
         }
 
-        const response_settle_up_amount_owes = await axios.post(`${backendServer}/setle_up_amount_owes`, data)
+        const response_settle_up_amount_owes = await axios.post(`${backendServer}/setle_up_amount_owes`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (response_settle_up_amount_owes.data.auth_flag === "S") {
-
-            console.log("---------------------------", response_settle_up_amount_owes.data.auth_flag)
             await this.update()
             await this.handleCloseModal()
 

@@ -5,6 +5,15 @@ const cors = require('cors');
 const mysql = require('mysql');
 var Sequelize = require('sequelize');
 const user_router=require('./src/router/user_router');
+const passport=require('passport')
+
+// Passport Config
+require('./src/passport')(passport)
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 
 app.use((req, res, next) => {

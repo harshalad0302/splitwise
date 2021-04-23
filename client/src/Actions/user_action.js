@@ -8,7 +8,8 @@ export const add_user = ({
     emailid = "",
     UID = "",
     phone_number = "",
-    profile_photo = ""
+    profile_photo = "",
+    token=""
 
 
 } = {}) => {
@@ -20,7 +21,8 @@ export const add_user = ({
             emailid,
             phone_number,
             UID,
-            profile_photo
+            profile_photo,
+            token
 
 
         }
@@ -37,7 +39,8 @@ export const remove_user = () => {
             emailid: "",
             UID: "",
             phone_number: "",
-            profile_photo: ""
+            profile_photo: "",
+            token: ""
         }
     }
 

@@ -46,7 +46,7 @@ class left_toggel_bar extends Component {
             name: this.state.name
         }
 
-        const response_get_group_names = await axios.post(`${backendServer}/get_group_names`, data)
+        const response_get_group_names = await axios.post(`${backendServer}/get_group_names`, data,{headers:{"Authorization":this.props.user.token}})
 
         this.setState({
             group_names_and_id_array: response_get_group_names.data.group_names_and_id_array
@@ -55,8 +55,6 @@ class left_toggel_bar extends Component {
     }
 
     GotoGroupOnClick = (index) => {
-
-       
         this.props.props.history.push({
             pathname: '/group_page',
             state: {
@@ -96,7 +94,7 @@ class left_toggel_bar extends Component {
                     <br></br>
                     <button className="GroupsAddbutton_class" >My Groups</button>
                     <br></br>
-                   
+                    <br></br>
                     <div>
                         <input type="text" className="inputTextClass_invisible1" placeholder="search for group" onChange={this.OnChangSerachBar}></input>
                     </div>

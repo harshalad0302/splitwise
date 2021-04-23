@@ -84,12 +84,17 @@ class group_page extends Component {
 
 
     handleOpenModal_comment = async (index) => {
+
         const data = {
             expen_ID: this.state.group_expenses_details[index].Expense_ID
         }
 
-        const get_all_comments = await axios.post(`${backendServer}/get_all_comments`, data)
+        const get_all_comments = await axios.post(`${backendServer}/get_all_comments`, data, { headers: { "Authorization": this.props.user.token } })
+
+
+
         let temp_all_comments = []
+
         for (var i = 0; i < get_all_comments.data.comments_length; i++) {
             var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
             var date_value = new Date(get_all_comments.data.all_comments_on_this_expense[i].date_time).toLocaleDateString([], options);
@@ -97,7 +102,12 @@ class group_page extends Component {
                 {
                     comment: get_all_comments.data.all_comments_on_this_expense[i].comment,
                     made_by: get_all_comments.data.all_comments_on_this_expense[i].UID_adding_comment_name,
-                    date: date_value
+                    date: date_value,
+                    group_name: get_all_comments.data.all_comments_on_this_expense[i].group_name,
+                    UID_adding_comment: get_all_comments.data.all_comments_on_this_expense[i].UID_adding_comment,
+                    expen_ID: get_all_comments.data.all_comments_on_this_expense[i].expen_ID,
+                    expen_description: get_all_comments.data.all_comments_on_this_expense[i].expen_description,
+                    groupID: get_all_comments.data.all_comments_on_this_expense[i].groupID
 
                 }
 
@@ -124,7 +134,7 @@ class group_page extends Component {
             groupID: this.props.location.state.groupID,
             current_UID: this.props.user.UID
         }
-        const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data)
+        const get_users_in_group = await axios.post(`${backendServer}/get_users_in_group`, data, { headers: { "Authorization": this.props.user.token } })
         //  const get_expenses_of_group = await axios.post(`${backendServer}/get_expenses_of_group`, data)
         var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
 
@@ -273,7 +283,7 @@ class group_page extends Component {
             groupID: this.state.groupID,
             group_name: this.state.group_name
         }
-        const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data)
+        const response_Expense_add = await axios.post(`${backendServer}/Expense_add`, data, { headers: { "Authorization": this.props.user.token } })
         //check the respose 
         if (response_Expense_add.data.auth_flag === "F") {
             this.setState({
@@ -325,7 +335,7 @@ class group_page extends Component {
 
 
         }
-        const respose_from_post_comment = await axios.post(`${backendServer}/add_comment`, data)
+        const respose_from_post_comment = await axios.post(`${backendServer}/add_comment`, data, { headers: { "Authorization": this.props.user.token } })
         if (respose_from_post_comment.data.auth_flag === "S") {
             this.handleCloseModal_comment()
             this.update()
@@ -344,7 +354,7 @@ class group_page extends Component {
         }
 
 
-        const leave_group_response = await axios.post(`${backendServer}/leave_group`, data)
+        const leave_group_response = await axios.post(`${backendServer}/leave_group`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (leave_group_response.data.auth_flag === "F") {
 
@@ -371,6 +381,59 @@ class group_page extends Component {
             //redirect to dashboard
             this.props.history.push("/actual_dashboard")
         }
+
+    }
+
+
+    handel_comment_delete = async (index) => {
+        //send req to backend
+        const data = {
+            UID_adding_comment: this.state.all_comments_for_this_expense[index].UID_adding_comment,
+            groupID: this.state.all_comments_for_this_expense[index].groupID,
+            expen_ID: this.state.all_comments_for_this_expense[index].expen_ID
+        }
+        const delete_comment_req = await axios.post(`${backendServer}/delete_comment`, data, { headers: { "Authorization": this.props.user.token } })
+
+        if (delete_comment_req.data.auth_flag === "S") {
+
+            const data = {
+                expen_ID: this.state.all_comments_for_this_expense[index].expen_ID
+            }
+
+            const get_all_comments = await axios.post(`${backendServer}/get_all_comments`, data, { headers: { "Authorization": this.props.user.token } })
+
+
+
+            let temp_all_comments = []
+
+            for (var i = 0; i < get_all_comments.data.comments_length; i++) {
+                var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
+                var date_value = new Date(get_all_comments.data.all_comments_on_this_expense[i].date_time).toLocaleDateString([], options);
+                temp_all_comments.push(
+                    {
+                        comment: get_all_comments.data.all_comments_on_this_expense[i].comment,
+                        made_by: get_all_comments.data.all_comments_on_this_expense[i].UID_adding_comment_name,
+                        date: date_value,
+                        group_name: get_all_comments.data.all_comments_on_this_expense[i].group_name,
+                        UID_adding_comment: get_all_comments.data.all_comments_on_this_expense[i].UID_adding_comment,
+                        expen_ID: get_all_comments.data.all_comments_on_this_expense[i].expen_ID,
+                        expen_description: get_all_comments.data.all_comments_on_this_expense[i].expen_description,
+                        groupID: get_all_comments.data.all_comments_on_this_expense[i].groupID
+
+                    }
+
+                )
+            }
+            this.setState({
+                showModal_comment: true,
+                comments_number: get_all_comments.data.comments_length,
+                Expense_ID_N: this.state.group_expenses_details[index].Expense_ID,
+                Expense_description_N: this.state.group_expenses_details[index].description,
+                all_comments_for_this_expense: temp_all_comments
+            })
+
+        }
+
 
     }
     render() {
@@ -521,6 +584,16 @@ class group_page extends Component {
                                     <div className="my-3">
                                         <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" placeholder="Comment" onChange={this.HandelCommentOnChange} />
                                     </div>
+                                    <div className="my-3">
+                                        <select className="select_styles1" defaultValue="0">
+                                            <option value="0">USD</option>
+                                            <option value="1">KWD</option>
+                                            <option value="2">BHD</option>
+                                            <option value="3">GBP</option>
+                                            <option value="4">EUR</option>
+                                            <option value="5">CAD</option>
+                                        </select>
+                                    </div>
                                     <div className="my-0.5">
                                         <img src={save_by}></img>
                                     </div>
@@ -571,7 +644,7 @@ class group_page extends Component {
                                                         <p>{data.date}</p>
                                                     </div>
                                                     <div className="w-20 pl-3">
-                                                        <button className="btnN" onClick={this.handleCloseModal_comment}><i className="fa fa-close"></i> X</button>
+                                                        <button className="btnN" onClick={() => this.handel_comment_delete(index)}><i className="fa fa-close"></i> X</button>
                                                     </div>
                                                 </div>
                                             </div>
