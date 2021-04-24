@@ -8,7 +8,6 @@ import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig';
 import Flag_logo from '../../Assests/Img/flag_logo_for_activity.PNG'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
-
 const connection_to_redux = (state) => {
 
     return {
@@ -16,14 +15,12 @@ const connection_to_redux = (state) => {
     }
 }
 
-
 class recent_activities extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             Array_recent: undefined,
-            filtered_array: undefined,
             UID: this.props.user.UID,
             name: this.props.user.name,
             offset: 0,
@@ -32,75 +29,55 @@ class recent_activities extends Component {
             currentPage: 0,
             sliceddata: undefined,
             distinct_groupname: undefined
-
-
         }
         this.handlePageClick = this.handlePageClick.bind(this)
     }
 
 
     receivedData = async () => {
-
         const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
-
+        console.log("slice ----------",slice)
         this.setState({
-            sliceddata: slice
+            sliceddata: slice,
+            pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage)    
         })
-
-        this.setState({
-            pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage),
-
-        })
-
-
-
+        
     }
 
 
 
     componentDidMount = async (e) => {
         //get the data of recent activities from backend
-
         const data = {
             UID: this.props.user.UID,
             name: this.props.user.name
         }
-
-
         //sending data to backend
-        const get_response_recentactivities = await axios.post(`${backendServer}/recent_activities`, data,{headers:{"Authorization":this.props.user.token}})
-
+        const get_response_recentactivities = await axios.post(`${backendServer}/recent_activities`, data, { headers: { "Authorization": this.props.user.token } })
         this.setState(() => ({
             Array_recent: get_response_recentactivities.data.details_recent_activity,
             distinct_groupname: get_response_recentactivities.data.distinct_groupname
         }))
         await this.receivedData()
-
-
-
     }
 
 
 
-    handleChange = async (e, data) => {
-
+    handleChange_records_on_page = async (e, data) => {
         let myint = parseInt(e.target.value)
-
         await this.setState({
-
             perPage: myint
-
         })
-
-        const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
-
+        let slice
+        slice = this.state.Array_recent.slice(0, 0 + this.state.perPage)
         this.setState({
-            sliceddata: slice
-        })
-        this.setState({
+            sliceddata: slice,
             pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage),
-
+            selectedPage:1,
+            offset:0
         })
+        console.log("slice is ------------",slice)
+        
     }
 
     handlePageClick = (e) => {
@@ -118,31 +95,20 @@ class recent_activities extends Component {
 
 
     handleChangeGroupName = async (e) => {
-
         let group_name = e.target.value
-
-         const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
-
-       await this.setState({
-            sliceddata: slice
+        const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
+        const filtered = slice.filter((data) => {
+            return data.group_name.includes(group_name)
         })
-      await  this.setState({
+
+        await this.setState({
+            sliceddata: filtered
+        })
+        await this.setState({
             pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage),
 
         })
 
-
-        const filtered = this.state.sliceddata.filter((data) => {
-            return data.group_name.includes(group_name)
-        })
-
-
-        await this.setState(() => ({
-            filtered_array: filtered
-        }))
-
-
-      
 
     }
 
@@ -166,9 +132,7 @@ class recent_activities extends Component {
                     <div className="my-2 mx-3">
                         <h1 >Recent Activities</h1>
                     </div>
-                    <div className="my-2 mx-3">
-                        <input type="text" placeholder=" Find by group " className="inputTextClass_invisible1" onChange={this.OnChangSerachBar}></input>
-                    </div>
+                   
                     <div className="my-2 mx-3">
                         <ReactPaginate
                             previousLabel={"prev"}
@@ -192,7 +156,7 @@ class recent_activities extends Component {
                             <div className=" justify-content-start mx-2">
                                 <select value="1"
                                     value={this.state.selectValue}
-                                    onChange={this.handleChange} >
+                                    onChange={this.handleChange_records_on_page} >
                                     <option value="2">2</option>
                                     <option value="5">5</option>
                                     <option value="10">10</option>
@@ -216,11 +180,19 @@ class recent_activities extends Component {
                                     }
                                 </select>
                             </div>
+                            <div className="mx-2 justify-content-start">
+                                <p>sort</p>
+                            </div>
+                            <div className="mx-2 justify-content-start">
+                                <select defaultValue="1">
+                                    <option value="1">Most Recent First</option>
+                                    <option value="2">Most Recent Last</option>     
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div className="my-2 mx-3">
                         {
-                            !this.state.filtered_array &&
                             this.state.sliceddata &&
                             this.state.sliceddata.map((data, index) => {
                                 return (
@@ -245,32 +217,7 @@ class recent_activities extends Component {
 
 
                         }
-                        {
 
-                            this.state.filtered_array &&
-                            this.state.filtered_array.map((data, index) => {
-                                return (
-                                    <div key={index} className=" my-2 mx-3">
-                                        <div className="d-flex flex-row justify-content-start">
-                                            <div className="w-5 mx-2">
-                                                <p className="font_class_recent_activity"> {data.group_name}</p>
-                                            </div>
-                                            <div className="w-5 mx-2">
-                                                <img src={Flag_logo}></img>
-                                            </div>
-                                            <div className="w-95">
-                                                <p className="font_class_recent_activity">{data.activity}</p>
-                                            </div>
-                                            <div className="w-95 mx-5">
-                                                <p className="font_class_recent_activity"><b>{data.date_time}</b></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })
-
-
-                        }
 
                     </div>
 

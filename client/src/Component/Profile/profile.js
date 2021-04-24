@@ -29,7 +29,8 @@ class profile extends Component {
             password: "",
             auth_flag_update: "",
             file: "",
-            profile_photo: ""
+            profile_photo: "",
+            token:this.props.user.token
         }
 
     }
@@ -103,12 +104,14 @@ class profile extends Component {
 
     save_button_click = async (e) => {
         e.preventDefault();
+        
         let formData = new FormData()
         formData.append('u_avatar', this.state.file)
         formData.append('name', this.state.name)
         formData.append('emailid', this.state.emailid)
         formData.append('phone_number', this.state.phone_number)
         formData.append('UID', this.props.user.UID)
+        formData.append('token', this.props.user.token)
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -118,10 +121,14 @@ class profile extends Component {
         const response_save = (await axios.post(`${backendServer}/profile`, formData, config)).data
       
 
+      
+
+        response_save.updated_state.token=response_save.token
+        console.log("response_save is ",response_save)
         if (response_save.auth_flag === "S") {
 
-            this.props.dispatch(add_user(response_save.updated_state))
-            this.props.history.push("/actual_dashboard")
+            await this.props.dispatch(add_user(response_save.updated_state))
+            await this.props.history.push("/actual_dashboard")
 
         }
 

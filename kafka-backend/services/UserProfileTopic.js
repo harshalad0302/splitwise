@@ -189,9 +189,11 @@ async function signup(msg, callback) {
 
       }
 
-      let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: req.body.password, UID: UID_to_be_inserted, u_tokens: [] })
+      let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: req.body.password, UID: UID_to_be_inserted })
       let returneduser = await users1.save()
-      await returneduser.generateAuthToken()
+     
+        let token = jwt.sign(UID_to_be_inserted, SecretKey)
+        token = "Bearer " + token
       // const data_after_insert = await users.findOne({ where: { emailid: req.body.emailid } });
       const data_after_insert = await users.findOne({ emailid: req.body.emailid })
       message.push("data inserted")
@@ -201,8 +203,8 @@ async function signup(msg, callback) {
         message_length: message.length,
         UID: data_after_insert.UID,
         name: data_after_insert.name,
-        emailid: data_after_insert.emailid
-
+        emailid: data_after_insert.emailid,
+        token: token
       }
       //res.status(200).send(result);
       return callback(null, result)

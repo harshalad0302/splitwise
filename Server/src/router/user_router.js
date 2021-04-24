@@ -47,9 +47,9 @@ router.post('/login', async (req, res) => {
 
 });
 //Api-----Create_group
-router.post('/create_group', async (req, res) => {
+router.post('/create_group',passport.authenticate('jwt', { session: false }), async (req, res) => {
   //kafka
-  kafka.make_request("user_topic", { "path": "create_group", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+  kafka.make_request("user_topic", { "path": "create_group", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -74,8 +74,8 @@ router.post('/get_group_names', passport.authenticate('jwt', { session: false })
 });
 
 //get_users_in_group
-router.post('/get_users_in_group', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "get_users_in_group", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+router.post('/get_users_in_group',passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "get_users_in_group", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -87,9 +87,9 @@ router.post('/get_users_in_group', async (req, res) => {
 
 
 //Expense_add
-router.post('/Expense_add', async (req, res) => {
+router.post('/Expense_add',passport.authenticate('jwt', { session: false }), async (req, res) => {
 
-  kafka.make_request("user_topic", { "path": "Expense_add", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+  kafka.make_request("user_topic", { "path": "Expense_add", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -101,8 +101,8 @@ router.post('/Expense_add', async (req, res) => {
 });
 
 //group_page_invite
-router.post('/group_page_invite', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "group_page_invite", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+router.post('/group_page_invite', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "group_page_invite", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -114,8 +114,8 @@ router.post('/group_page_invite', async (req, res) => {
 
 
 //group_invite_reject_req
-router.post('/group_invite_reject_req', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "group_invite_reject_req", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+router.post('/group_invite_reject_req',passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "group_invite_reject_req", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -127,8 +127,8 @@ router.post('/group_invite_reject_req', async (req, res) => {
 
 
 
-router.post('/group_invite_accept_req', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "group_invite_accept_req", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+router.post('/group_invite_accept_req', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "group_invite_accept_req", body: req.body },function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -147,6 +147,8 @@ const upload = multer({
 
 router.post('/profile', upload.single('u_avatar'), async (req, res) => {
   var auth_flag = "S"
+
+
   message = []
   if (req.file) {
     await users.updateOne(
@@ -177,13 +179,14 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
   }
 
-  const updated_state = await users.findOne({ UID: req.body.UID });
+  let updated_state = await users.findOne({ UID: req.body.UID });
 
   message.push("Update is successful")
   result = {
     auth_flag: "S",
     message: message,
     updated_state: updated_state,
+    token:req.body.token,
     message_length: message.length
 
   }
@@ -200,9 +203,9 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
 
 //add  comment
 
-router.post('/add_comment', async (req, res) => {
+router.post('/add_comment', passport.authenticate('jwt', { session: false }), async (req, res) => {
 
-  kafka.make_request("user_topic", { "path": "add_comment", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+  kafka.make_request("user_topic", { "path": "add_comment", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -213,8 +216,8 @@ router.post('/add_comment', async (req, res) => {
 });
 
 //get_all_comments
-router.post('/get_all_comments', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "get_all_comments", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+router.post('/get_all_comments', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "get_all_comments", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -225,8 +228,8 @@ router.post('/get_all_comments', async (req, res) => {
 });
 
 //leave_group
-router.post('/leave_group', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "leave_group", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+router.post('/leave_group', passport.authenticate('jwt', { session: false }),async (req, res) => {
+  kafka.make_request("user_topic", { "path": "leave_group", body: req.body },function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -240,8 +243,8 @@ router.post('/leave_group', async (req, res) => {
 
 //settle_up
 
-router.post('/settle_up', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "settle_up", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+router.post('/settle_up', passport.authenticate('jwt', { session: false }),async (req, res) => {
+  kafka.make_request("user_topic", { "path": "settle_up", body: req.body },function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -254,9 +257,9 @@ router.post('/settle_up', async (req, res) => {
 
 //setle_up_amount_gets
 
-router.post('/setle_up_amount_gets', async (req, res) => {
+router.post('/setle_up_amount_gets',  passport.authenticate('jwt', { session: false }), async (req, res) => {
  
-  kafka.make_request("user_topic", { "path": "setle_up_amount_gets", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+  kafka.make_request("user_topic", { "path": "setle_up_amount_gets", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -267,9 +270,9 @@ router.post('/setle_up_amount_gets', async (req, res) => {
 
 });
 
-router.post('/setle_up_amount_owes', async (req, res) => {
+router.post('/setle_up_amount_owes',  passport.authenticate('jwt', { session: false }), async (req, res) => {
  
-  kafka.make_request("user_topic", { "path": "setle_up_amount_owes", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+  kafka.make_request("user_topic", { "path": "setle_up_amount_owes", body: req.body },function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -283,8 +286,8 @@ router.post('/setle_up_amount_owes', async (req, res) => {
 
 //recent_activities
 
-router.post('/recent_activities', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "recent_activities", body: req.body },passport.authenticate('jwt', { session: false }), function (err, results) {
+router.post('/recent_activities', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "recent_activities", body: req.body }, function (err, results) {
 
     if (err) {
       res.status(400).send(results);
@@ -296,8 +299,8 @@ router.post('/recent_activities', async (req, res) => {
 
 //delete_comment
 
-router.post('/delete_comment', async (req, res) => {
-  kafka.make_request("user_topic", { "path": "delete_comment", body: req.body }, passport.authenticate('jwt', { session: false }),function (err, results) {
+router.post('/delete_comment', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  kafka.make_request("user_topic", { "path": "delete_comment", body: req.body },function (err, results) {
 
     if (err) {
       res.status(400).send(results);
