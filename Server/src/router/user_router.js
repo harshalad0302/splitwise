@@ -18,6 +18,7 @@ const sharp = require('sharp');
 const multer = require('multer');
 const passport = require('passport')
 require('../db/mongo')
+const bcrypt = require("bcrypt");
 
 
 router.post('/signup', async (req, res) => {
@@ -61,7 +62,7 @@ router.post('/create_group', passport.authenticate('jwt', { session: false }), a
 });
 
 //Api-----get_group_names
-router.post('/get_group_names',  async (req, res) => {
+router.post('/get_group_names', async (req, res) => {
   //kafka
   kafka.make_request("user_topic", { "path": "get_group_names", body: req.body }, function (err, results) {
 
@@ -101,7 +102,7 @@ router.post('/Expense_add', passport.authenticate('jwt', { session: false }), as
 });
 
 //group_page_invite
-router.post('/group_page_invite',  async (req, res) => {
+router.post('/group_page_invite', async (req, res) => {
   kafka.make_request("user_topic", { "path": "group_page_invite", body: req.body }, function (err, results) {
 
     if (err) {
@@ -158,7 +159,7 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
   }
 
   if (req.body.emailid !== "") {
-  
+
     //check if email id is already present or not
     const found_data = await users.findOne({ emailid: req.body.emailid })
     if (found_data === null) {
@@ -168,7 +169,7 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
         { emailid: req.body.emailid })
     }
     else {
-     
+
       message.push("Email id is already present ")
       result = {
         auth_flag: "F",
@@ -182,11 +183,11 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
     }
 
 
-
   }
 
   if (req.body.phone_number !== "") {
-
+    //validate the phone number
+    let length_of_phone_number=req.body.phone_number.toString().length
 
     await users.updateOne(
       { UID: req.body.UID },
@@ -197,6 +198,16 @@ router.post('/profile', upload.single('u_avatar'), async (req, res) => {
   if (req.body.name !== "") {
     await users.updateOne({ UID: req.body.UID },
       { name: req.body.name })
+
+  }
+
+  if (req.body.password !== "") {
+    //password is not empty
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    await users.updateOne({ UID: req.body.UID },
+      { password: hashPassword })
 
   }
 
@@ -331,5 +342,17 @@ router.post('/delete_comment', passport.authenticate('jwt', { session: false }),
   })
 });
 
+//get_all_emails
+
+router.post('/get_all_emails',  async (req, res) => {
+  kafka.make_request("user_topic", { "path": "get_all_emails", body: req.body }, function (err, results) {
+
+    if (err) {
+      res.status(400).send(results);
+    } else {
+      res.status(200).send(results);
+    }
+  })
+});
 
 module.exports = router

@@ -15,10 +15,7 @@ const connection_to_redux = (state) => {
     }
 }
 
-
 class signup extends Component {
-
-
     constructor(props) {
         super(props);
         this.state = {
@@ -72,6 +69,11 @@ class signup extends Component {
 
         if (response.data.auth_flag === "S") {
             this.props.dispatch(add_user(response.data))
+            localStorage.setItem('name', response.data.name)
+            localStorage.setItem('emailid', response.data.emailid)
+            localStorage.setItem('UID', response.data.UID)
+            localStorage.setItem('token', response.data.token)
+
             this.props.history.push("/actual_dashboard");
            
         }

@@ -17,14 +17,13 @@ const connection_to_redux = (state) => {
 class login_header extends Component {
 
 
-   
-
     submitYourAccount = (e) => {
         this.props.props.history.push("/profile")
     }
 
-    submitLogout = (e) => {
+    submitLogout = async(e) => {
 
+        await localStorage.clear();
         this.props.props.history.push("/")
         this.props.dispatch(remove_user())
 
@@ -48,7 +47,7 @@ class login_header extends Component {
                     <div className="divRightloginheader_inside">
 
                         <div className="dropdown">
-                            <button className="button_profile">{this.props.user.name}</button>
+                            <button className="button_profile">{localStorage.getItem('name')}</button>
                             <div className="dropdown-content">
                                 <a onClick={this.submitYourAccount}>Your Account</a>
                                 <a onClick={this.submitLogout}>Logout</a>

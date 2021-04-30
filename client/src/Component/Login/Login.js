@@ -53,10 +53,18 @@ class Login extends Component {
             password: this.state.password
         }
          const response_login = await axios.post(`${backendServer}/login`, data)
-         
+        
             if (response_login.data.auth_flag === "S") {
                 //Redux dispath
                 this.props.dispatch(add_user(response_login.data))
+                //set data in local storage 
+                localStorage.setItem('name', response_login.data.name)
+                localStorage.setItem('emailid', response_login.data.emailid)
+                localStorage.setItem('UID', response_login.data.UID)
+                localStorage.setItem('phone_number', response_login.data.phone_number)
+                localStorage.setItem('profile_photo', response_login.data.profile_photo)
+                localStorage.setItem('token', response_login.data.token)
+
                 this.props.history.push("/actual_dashboard")
                 this.setState({
                     auth_flag: false

@@ -112,6 +112,7 @@ class profile extends Component {
         formData.append('name', this.state.name)
         formData.append('emailid', this.state.emailid)
         formData.append('phone_number', this.state.phone_number)
+        formData.append('password', this.state.password)
         formData.append('UID', this.props.user.UID)
         formData.append('token', this.props.user.token)
         const config = {
@@ -174,6 +175,10 @@ class profile extends Component {
             })
         }
 
+     
+
+
+
     }
 
 
@@ -190,7 +195,7 @@ class profile extends Component {
                     </div>
                     <div className="d-flex flex-column my-2">
                         <div className="my-2 font_class">
-                        {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
+                            {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
                             <h2>Your account</h2>
                         </div>
                         <div className="d-flex flex-row display-content-start mx-2">
@@ -248,9 +253,10 @@ class profile extends Component {
                                     <div>
                                         <p>Your phone number</p>
                                     </div>
+                                   
                                     <div className="d-flex flex-row justify-content-start">
                                         <div className="w-75 ">
-                                            <input type="number" className="inputTextClass_invisible" id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
+                                       +1 <input type="number" className="inputTextClass_invisible" id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
                                         </div>
                                         <div className="w-25">
                                             <a className="text-decoration-none EditTag">

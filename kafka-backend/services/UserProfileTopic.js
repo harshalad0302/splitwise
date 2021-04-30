@@ -7,6 +7,7 @@ const invitations = require('../db_models/invitations');
 const recentactivities = require('../db_models/recentactivities')
 const personal_expenditure_get = require('../db_models/personal_expenditure_get');
 const personal_expenditure_ows = require('../db_models/personal_expenditure_ows');
+const bcrypt = require("bcrypt");
 var jwt = require('jsonwebtoken')
 const SecretKey = "harshala"
 
@@ -63,6 +64,9 @@ exports.userService = function (msg, callback) {
     case "delete_comment":
       delete_comment(msg, callback);
       break;
+    case "get_all_emails":
+      get_all_emails(msg, callback);
+      break;
 
   }
 };
@@ -103,7 +107,12 @@ async function login(msg, callback) {
     else {
 
       //now emailid is present check for password
-      if (req.body.password === found_data_login.password) {
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        found_data_login.password
+      )
+
+      if (validPassword) {
         //login successful
         let token = jwt.sign(found_data_login.UID, SecretKey)
         token = "Bearer " + token
@@ -189,7 +198,12 @@ async function signup(msg, callback) {
 
       }
 
-      let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: req.body.password, UID: UID_to_be_inserted })
+      //hash password
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+      let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: hashPassword, UID: UID_to_be_inserted })
       let returneduser = await users1.save()
 
       let token = jwt.sign(UID_to_be_inserted, SecretKey)
@@ -1170,6 +1184,8 @@ async function recent_activities(msg, callback) {
 
 
 }
+
+
 async function delete_comment(msg, callback) {
   let req = {}
   req.body = msg.body
@@ -1179,7 +1195,7 @@ async function delete_comment(msg, callback) {
   await comments.deleteOne({
     expen_ID: req.body.expen_ID,
     groupID: req.body.groupID,
-    comment_id:req.body.comment_id,
+    comment_id: req.body.comment_id,
     UID_adding_comment: req.body.UID_adding_comment
   })
 
@@ -1187,6 +1203,30 @@ async function delete_comment(msg, callback) {
   result = {
     auth_flag: "S",
     message: message,
+    message_length: message.length
+
+  }
+  //res.status(200).send(result);
+  return callback(null, result)
+
+
+}
+
+//get_all_emails
+async function get_all_emails(msg, callback) {
+  let req = {}
+  req.body = msg.body
+  var auth_flag = "S"
+  message = []
+  let all_emails=[]
+   all_emails = await users.distinct('emailid')
+ 
+  message.push("returning all emails")
+  result = {
+    auth_flag: "S",
+    message: message,
+    all_emails:all_emails,
+    all_emails_length:all_emails.length,
     message_length: message.length
 
   }

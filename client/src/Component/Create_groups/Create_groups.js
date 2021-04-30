@@ -29,12 +29,34 @@ class Create_groups extends Component {
             file: "",
             emailid_of_members: [],
             auth_flag: false,
-            error_message: ""
+            error_message: "",
+            all_emails: undefined,
+            all_emails_length: undefined,
+            activeSuggestion: 0,
+            filteredSuggestions: [],
+            showSuggestions: false,
+            userInput: ''
 
         }
 
     }
 
+
+    componentDidMount = async (e) => {
+        //get all emails
+        const data = {
+            UID: this.props.user.UID
+        }
+        const response_all_emails = await axios.post(`${backendServer}/get_all_emails`, data)
+
+        if (response_all_emails.data.auth_flag === "S") {
+            this.setState({
+                all_emails: response_all_emails.data.all_emails,
+                all_emails_length: response_all_emails.data.all_emails_length
+            })
+        }
+
+    }
 
     FileOnChange = (e) => {
 
@@ -69,7 +91,7 @@ class Create_groups extends Component {
             group_name: this.state.group_name
         }
 
-        const response_create_group = await axios.post(`${backendServer}/Create_group`, data ,{headers:{"Authorization":this.props.user.token}})
+        const response_create_group = await axios.post(`${backendServer}/Create_group`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (response_create_group.data.auth_flag === "F") {
             this.setState({
@@ -97,7 +119,8 @@ class Create_groups extends Component {
     HandelOnChange(e, index) {
         this.state.emailid_of_members[index] = e.target.value
         this.setState({
-            emailid_of_members: this.state.emailid_of_members
+            emailid_of_members: this.state.emailid_of_members,
+            show_suggestion: true
         })
 
 
@@ -110,6 +133,14 @@ class Create_groups extends Component {
     }
 
 
+    // handleOptionONClick=async(e,index)=>{
+    //     this.state.emailid_of_members[index] = e.target.value
+    //     this.setState({
+    //         emailid_of_members: this.state.emailid_of_members,
+    //         show_suggestion: false
+    //     })
+       
+    // }
 
     render() {
 
