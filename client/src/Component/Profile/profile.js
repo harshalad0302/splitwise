@@ -29,8 +29,10 @@ class profile extends Component {
             password: "",
             auth_flag_update: "",
             file: "",
+            auth_flag: false,
+            error_message: "",
             profile_photo: "",
-            token:this.props.user.token
+            token: this.props.user.token
         }
 
     }
@@ -104,7 +106,7 @@ class profile extends Component {
 
     save_button_click = async (e) => {
         e.preventDefault();
-        
+
         let formData = new FormData()
         formData.append('u_avatar', this.state.file)
         formData.append('name', this.state.name)
@@ -119,17 +121,33 @@ class profile extends Component {
         }
 
         const response_save = (await axios.post(`${backendServer}/profile`, formData, config)).data
-      
 
-      
 
-        response_save.updated_state.token=response_save.token
-        console.log("response_save is ",response_save)
+
         if (response_save.auth_flag === "S") {
 
+            response_save.updated_state.token = response_save.token
             await this.props.dispatch(add_user(response_save.updated_state))
             await this.props.history.push("/actual_dashboard")
 
+        }
+        else {
+            this.setState({
+                auth_flag: true,
+                error_message: <div>
+                    {
+                        response_save.message.map((error_message, index) => {
+                            return (
+                                <div key={index}>
+                                    <ul list-style-position="inside" >
+                                        <li>{error_message}</li>
+                                    </ul>
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+            })
         }
 
     }
@@ -145,7 +163,7 @@ class profile extends Component {
 
     componentDidMount = (e) => {
 
-        
+
         if (this.props.user.profile_photo) {
             this.setState(() => ({ profile_photo: `data:image/png;base64,${Buffer.from(this.props.user.profile_photo, 'base64')}` }))
         }
@@ -172,13 +190,14 @@ class profile extends Component {
                     </div>
                     <div className="d-flex flex-column my-2">
                         <div className="my-2 font_class">
+                        {this.state.auth_flag && <div className="inputTextClass red_error_background">{this.state.error_message} </div>}
                             <h2>Your account</h2>
                         </div>
                         <div className="d-flex flex-row display-content-start mx-2">
                             <div className="w-25">
                                 <div className="d-flex flex-column">
                                     <div>
-                                        <img src={this.state.profile_photo} style={{width:"200px",height:"200px"}}></img>
+                                        <img src={this.state.profile_photo} style={{ width: "200px", height: "200px" }}></img>
 
                                     </div>
                                     <div className="my-4">
@@ -200,11 +219,11 @@ class profile extends Component {
                                             <div className="w-25">
                                                 <a className="text-decoration-none EditTag ">
                                                     <button className="button_edit" onClick={this.edit_name_click} >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
-                                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
-                                                    </svg>Edit
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                        </svg>Edit
                                                     </button>
-                                             </a>
+                                                </a>
                                             </div>
 
                                         </div>
@@ -214,16 +233,16 @@ class profile extends Component {
                                     </div>
                                     <div className="d-flex flex-row justify-content-start">
                                         <div className="w-75">
-                                            <input type="text" className="inputTextClass_invisible" placeholder={this.props.user.emailid} readOnly="readonly" id="edit_email"  onChange={this.OnChange_email_input} ></input>
+                                            <input type="text" className="inputTextClass_invisible" placeholder={this.props.user.emailid} readOnly="readonly" id="edit_email" onChange={this.OnChange_email_input} ></input>
                                         </div>
                                         <div className="w-25">
                                             <a className="text-decoration-none EditTag">
                                                 <button className="button_edit" onClick={this.edit_email_click}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
-                                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
-                                                </svg>Edit
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                    </svg>Edit
                                                 </button>
-                                             </a>
+                                            </a>
                                         </div>
                                     </div>
                                     <div>
@@ -231,16 +250,16 @@ class profile extends Component {
                                     </div>
                                     <div className="d-flex flex-row justify-content-start">
                                         <div className="w-75 ">
-                                            <input type="number" className="inputTextClass_invisible"  id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
+                                            <input type="number" className="inputTextClass_invisible" id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
                                         </div>
                                         <div className="w-25">
                                             <a className="text-decoration-none EditTag">
                                                 <button className="button_edit" onClick={this.edit_phone_number_click}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
-                                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
-                                                </svg>Edit
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                    </svg>Edit
                                                 </button>
-                                             </a>
+                                            </a>
                                         </div>
                                     </div>
                                     <div>
@@ -253,11 +272,11 @@ class profile extends Component {
                                         <div className="w-25">
                                             <a className="text-decoration-none EditTag">
                                                 <button className="button_edit" onClick={this.PasswordEditClick}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
-                                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
-                                                </svg>Edit
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                    </svg>Edit
                                                 </button>
-                                             </a>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

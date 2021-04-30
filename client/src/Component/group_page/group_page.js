@@ -101,6 +101,7 @@ class group_page extends Component {
             temp_all_comments.push(
                 {
                     comment: get_all_comments.data.all_comments_on_this_expense[i].comment,
+                    comment_id:get_all_comments.data.all_comments_on_this_expense[i].comment_id,
                     made_by: get_all_comments.data.all_comments_on_this_expense[i].UID_adding_comment_name,
                     date: date_value,
                     group_name: get_all_comments.data.all_comments_on_this_expense[i].group_name,
@@ -186,7 +187,6 @@ class group_page extends Component {
     }
 
     componentDidMount = async (e) => {
-
         const data = {
             group_name: this.props.location.state.group_name,
             groupID: this.props.location.state.groupID,
@@ -231,9 +231,9 @@ class group_page extends Component {
                 }
             )
 
+
+
         }
-
-
 
         this.setState(() => ({
             // group_member_details: get_users_in_group.data.details_of_group_members,
@@ -242,6 +242,8 @@ class group_page extends Component {
             group_name: this.props.location.state.group_name
         }))
 
+
+        
     }
 
     componentDidUpdate = () => {
@@ -387,11 +389,15 @@ class group_page extends Component {
 
     handel_comment_delete = async (index) => {
         //send req to backend
+
+      
         const data = {
             UID_adding_comment: this.state.all_comments_for_this_expense[index].UID_adding_comment,
             groupID: this.state.all_comments_for_this_expense[index].groupID,
-            expen_ID: this.state.all_comments_for_this_expense[index].expen_ID
+            expen_ID: this.state.all_comments_for_this_expense[index].expen_ID,
+            comment_id:this.state.all_comments_for_this_expense[index].comment_id
         }
+
         const delete_comment_req = await axios.post(`${backendServer}/delete_comment`, data, { headers: { "Authorization": this.props.user.token } })
 
         if (delete_comment_req.data.auth_flag === "S") {
@@ -424,11 +430,13 @@ class group_page extends Component {
 
                 )
             }
+
+
             this.setState({
                 showModal_comment: true,
                 comments_number: get_all_comments.data.comments_length,
-                Expense_ID_N: this.state.group_expenses_details[index].Expense_ID,
-                Expense_description_N: this.state.group_expenses_details[index].description,
+                // Expense_ID_N: this.state.group_expenses_details[index].Expense_ID,
+                // Expense_description_N: this.state.group_expenses_details[index].description,
                 all_comments_for_this_expense: temp_all_comments
             })
 

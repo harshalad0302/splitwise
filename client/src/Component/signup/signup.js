@@ -71,8 +71,6 @@ class signup extends Component {
         const response = await axios.post(`${backendServer}/signup`, data)
 
         if (response.data.auth_flag === "S") {
-
-            console.log("------------------", response.data)
             this.props.dispatch(add_user(response.data))
             this.props.history.push("/actual_dashboard");
            

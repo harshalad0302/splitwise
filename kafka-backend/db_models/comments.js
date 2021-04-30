@@ -9,6 +9,9 @@ const commentsSchema = new mongoose.Schema({
     comment: {
         type: String
     },
+    comment_id: {
+        type: Number
+    },
     UID_adding_comment: {
         type: Number
         

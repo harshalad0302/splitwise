@@ -191,9 +191,9 @@ async function signup(msg, callback) {
 
       let users1 = await new users({ name: req.body.name, emailid: req.body.emailid, password: req.body.password, UID: UID_to_be_inserted })
       let returneduser = await users1.save()
-     
-        let token = jwt.sign(UID_to_be_inserted, SecretKey)
-        token = "Bearer " + token
+
+      let token = jwt.sign(UID_to_be_inserted, SecretKey)
+      token = "Bearer " + token
       // const data_after_insert = await users.findOne({ where: { emailid: req.body.emailid } });
       const data_after_insert = await users.findOne({ emailid: req.body.emailid })
       message.push("data inserted")
@@ -260,7 +260,7 @@ async function create_group(msg, callback) {
   if (req.body.group_name !== "" && req.body.length !== 0 && req.body.emailid_of_members.filter(emailid_of_members => emailid_of_members === "").length === 0) {
     //now values are valid
     //check if group name is unique is not
-    const found_group_name = await groups.findOne({ group_name: req.body.group_name });
+    const found_group_name = await groups.findOne({ group_name: req.body.group_name })
     if (found_group_name) {
       message.push("Group name is already present")
       result = {
@@ -272,10 +272,7 @@ async function create_group(msg, callback) {
       return callback(null, result)
     }
 
-
     else {
-
-      message.push("Creating a group")
       //group name is not present can be created
       // await groups.create({ group_name: req.body.group_name })
       //get auto increment UID
@@ -288,6 +285,22 @@ async function create_group(msg, callback) {
         Group_ID_to_be_inserted = Max_Group_ID[0].maxId + 1
 
       }
+      //check if every emailid is valid
+      let found_emailid
+      for (var i = 0; i < req.body.length; i++) {
+        found_emailid = await users.findOne({ emailid: req.body.emailid_of_members[i] })
+        if (!found_emailid) {
+          message.push("Email id " + req.body.emailid_of_members[i] + " is not present")
+          result = {
+            auth_flag: "F",
+            message: message,
+            message_length: message.length
+          }
+          //res.status(200).send(result);
+          return callback(null, result)
+        }
+      }
+
       let groups_create = await new groups({ group_name: req.body.group_name, groupID: Group_ID_to_be_inserted })
       groups_created = await groups_create.save()
       //get the group_id from the inserted value
@@ -323,7 +336,8 @@ async function create_group(msg, callback) {
       //put the owner in the group
       put_owner_in_invitation = await new invitations({ UID: req.body.owner_UID, invite_from_group_id: created_group_id, accept: "ACCEPT" })
       await put_owner_in_invitation.save()
-        result = {
+      message.push("all validations are sucessful, creating a group")
+      result = {
         auth_flag: auth_flag,
         message: message,
         message_length: message.length
@@ -483,11 +497,26 @@ async function Expense_add(msg, callback) {
 
     //check if comment is there or not
     if (req.body.comment !== "") {
+
+      //get the comment id 
+
+      const Max_comment_id = await comments.aggregate([{ $group: { _id: null, maxId: { $max: '$comment_id' } } }])
+      var comment_id_to_be_inserted
+
+      if (Max_comment_id.length === 0) {
+        comment_id_to_be_inserted = 0
+      }
+      else {
+        comment_id_to_be_inserted = Max_comment_id[0].maxId + 1
+
+      }
+
       //comment is not empty, need to insert
       insert_comment = await new comments({
         groupID: req.body.groupID,
         group_name: req.body.group_name,
         comment: req.body.comment,
+        comment_id: comment_id_to_be_inserted,
         UID_adding_comment: req.body.UID_adding_expense,
         UID_adding_comment_name: req.body.name,
         expen_ID: expen_ID_to_be_inserted,
@@ -592,16 +621,32 @@ async function add_comment(msg, callback) {
 
   }
   else {
+
+    //get the commentid
+
+    const Max_comment_id = await comments.aggregate([{ $group: { _id: null, maxId: { $max: '$comment_id' } } }])
+    var comment_id_to_be_inserted
+
+    if (Max_comment_id.length === 0) {
+      comment_id_to_be_inserted = 0
+    }
+    else {
+      comment_id_to_be_inserted = Max_comment_id[0].maxId + 1
+
+    }
+
     adding_comment = await comments({
       groupID: req.body.groupID,
       group_name: req.body.group_name,
       comment: req.body.comment,
+      comment_id: comment_id_to_be_inserted,
       UID_adding_comment: req.body.UID,
       UID_adding_comment_name: req.body.name,
       expen_ID: req.body.expen_ID,
       expen_description: req.body.description,
       date_time: new Date()
     })
+
     await adding_comment.save()
     //adding recent activity
     let activity = " user " + req.body.name + " commented " + req.body.comment + " to the expense " + req.body.description
@@ -817,7 +862,7 @@ async function leave_group(msg, callback) {
     })
 
     // add to recent activity
-    let activity = " user " + req.body.name + " left " + " the group " + rew.body.group_name
+    let activity = " user " + req.body.name + " left " + " the group " + req.body.group_name
     create_recent_activity = await new recentactivities(
       {
         GroupID: req.body.groupID,
@@ -1134,6 +1179,7 @@ async function delete_comment(msg, callback) {
   await comments.deleteOne({
     expen_ID: req.body.expen_ID,
     groupID: req.body.groupID,
+    comment_id:req.body.comment_id,
     UID_adding_comment: req.body.UID_adding_comment
   })
 

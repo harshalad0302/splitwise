@@ -36,7 +36,7 @@ class recent_activities extends Component {
 
     receivedData = async () => {
         const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
-        console.log("slice ----------",slice)
+ 
         this.setState({
             sliceddata: slice,
             pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage)    
@@ -76,7 +76,7 @@ class recent_activities extends Component {
             selectedPage:1,
             offset:0
         })
-        console.log("slice is ------------",slice)
+
         
     }
 

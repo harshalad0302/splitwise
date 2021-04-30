@@ -110,8 +110,7 @@ class actual_dashboard extends Component {
         }
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
-        console.log("this.props is ", this.props)
-
+    
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
                 amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
@@ -164,7 +163,7 @@ class actual_dashboard extends Component {
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
 
-        console.log("this.props is ", this.props)
+
 
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
