@@ -6,6 +6,7 @@ import ReactPaginate from 'react-paginate';
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig';
+import { add_user } from '../../Actions/user_action'
 import Flag_logo from '../../Assests/Img/flag_logo_for_activity.PNG'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 const connection_to_redux = (state) => {

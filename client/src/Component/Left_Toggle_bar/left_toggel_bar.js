@@ -5,7 +5,7 @@ import axios from 'axios';
 import backendServer from '../../WebConfig';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import HomeHeader from '../HomeHeader/HomeHeader'
-
+import { add_user } from '../../Actions/user_action'
 const connection_to_redux = (state) => {
 
     return {
@@ -41,12 +41,26 @@ class left_toggel_bar extends Component {
 
     componentDidMount = async (e) => {
 
+        //store data from local storage to redux
+        const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
+
+        }
+
+        //dispatch data to redux
+        this.props.dispatch(add_user(data_to_be_stored))
+
         const data = {
             UID: this.state.UID,
             name: this.state.name
         }
 
-        const response_get_group_names = await axios.post(`${backendServer}/get_group_names`, data,{headers:{"Authorization":this.props.user.token}})
+        const response_get_group_names = await axios.post(`${backendServer}/get_group_names`, data, { headers: { "Authorization": this.props.user.token } })
 
         this.setState({
             group_names_and_id_array: response_get_group_names.data.group_names_and_id_array
@@ -62,14 +76,14 @@ class left_toggel_bar extends Component {
                 groupID: this.state.group_names_and_id_array[index].groupID
             }
         })
-        
+
 
     }
 
     OnChangSerachBar = async (e) => {
         const value_serach = e.target.value
 
-       const filtered = this.state.group_names_and_id_array.filter((data) => {
+        const filtered = this.state.group_names_and_id_array.filter((data) => {
             return data.group_name.includes(value_serach)
         })
 
@@ -98,7 +112,7 @@ class left_toggel_bar extends Component {
                     <div>
                         <input type="text" className="inputTextClass_invisible1" placeholder="search for group" onChange={this.OnChangSerachBar}></input>
                     </div>
-                  
+
                     <div>
                         {
                             !this.state.filtered_array &&
@@ -114,9 +128,9 @@ class left_toggel_bar extends Component {
 
                             })
                         }
-                       
+
                         {
-                          
+
                             this.state.filtered_array &&
                             this.state.filtered_array.map((data, index) => {
 

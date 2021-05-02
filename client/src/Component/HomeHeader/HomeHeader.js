@@ -1,7 +1,7 @@
 
 import '../../App.css';
 import backendServer from '../../WebConfig';
-
+import { add_user } from '../../Actions/user_action'
 import { React, Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
@@ -29,6 +29,21 @@ class HomeHeader extends Component {
     }
 
 
+    componentDidMount =async(e)=>{
+         //store data from local storage to redux
+       const data_to_be_stored={
+        name:localStorage.getItem('name'),
+        emailid:localStorage.getItem('emailid'),
+        UID:localStorage.getItem('UID'),
+        phone_number:localStorage.getItem('phone_number'),
+        profile_photo:localStorage.getItem('profile_photo'),
+        token:localStorage.getItem('token')
+        
+    }
+
+    //dispatch data to redux
+    this.props.dispatch(add_user(data_to_be_stored))
+    }
 
 
     render() {

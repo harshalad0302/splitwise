@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../../App.css';
+import { add_user } from '../../Actions/user_action'
 import Login_header from '../Login_header/Login_header'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 import { connect } from 'react-redux';
@@ -187,6 +188,21 @@ class group_page extends Component {
     }
 
     componentDidMount = async (e) => {
+
+         //store data from local storage to redux
+       const data_to_be_stored={
+        name:localStorage.getItem('name'),
+        emailid:localStorage.getItem('emailid'),
+        UID:localStorage.getItem('UID'),
+        phone_number:localStorage.getItem('phone_number'),
+        profile_photo:localStorage.getItem('profile_photo'),
+        token:localStorage.getItem('token')
+        
+    }
+
+    //dispatch data to redux
+    this.props.dispatch(add_user(data_to_be_stored))
+
         const data = {
             group_name: this.props.location.state.group_name,
             groupID: this.props.location.state.groupID,

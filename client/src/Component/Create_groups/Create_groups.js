@@ -1,16 +1,13 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import cookie from 'react-cookies';
-import logo_image from '../../Assests/Img/splitwise_logo.svg'
+import { add_user } from '../../Actions/user_action'
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';
 import backendServer from '../../../src/WebConfig'
 import avatar_image from '../../Assests/Img/avatar.png'
 import create_group from '../../Assests/Img/create_group.PNG'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
-import * as AutosuggestHighlightMatch from 'autosuggest-highlight/match';
-import * as AutosuggestHighlightParse from 'autosuggest-highlight/parse';
 //connection to global store
 const connection_to_redux = (state) => {
 
@@ -43,6 +40,20 @@ class Create_groups extends Component {
 
 
     componentDidMount = async (e) => {
+        //store data from local storage to redux
+       const data_to_be_stored={
+           name:localStorage.getItem('name'),
+           emailid:localStorage.getItem('emailid'),
+           UID:localStorage.getItem('UID'),
+           phone_number:localStorage.getItem('phone_number'),
+           profile_photo:localStorage.getItem('profile_photo'),
+           token:localStorage.getItem('token')
+           
+       }
+
+       //dispatch data to redux
+       this.props.dispatch(add_user(data_to_be_stored))
+
         //get all emails
         const data = {
             UID: this.props.user.UID
@@ -133,14 +144,6 @@ class Create_groups extends Component {
     }
 
 
-    // handleOptionONClick=async(e,index)=>{
-    //     this.state.emailid_of_members[index] = e.target.value
-    //     this.setState({
-    //         emailid_of_members: this.state.emailid_of_members,
-    //         show_suggestion: false
-    //     })
-       
-    // }
 
     render() {
 
@@ -201,7 +204,7 @@ class Create_groups extends Component {
                                             <p className="font_class_OWNER">Owner</p>
                                         </div>
                                         <div className="mx-3">
-                                            <input className="inputTextClass1" value={this.props.user.emailid} readonly="readonly" ></input>
+                                            <input className="inputTextClass1" defaultValue={this.props.user.emailid}  ></input>
                                         </div>
                                         <div>
                                             <div className="d-flex flex-row">

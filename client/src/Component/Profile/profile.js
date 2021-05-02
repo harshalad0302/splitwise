@@ -115,6 +115,8 @@ class profile extends Component {
         formData.append('password', this.state.password)
         formData.append('UID', this.props.user.UID)
         formData.append('token', this.props.user.token)
+
+
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'
@@ -129,6 +131,14 @@ class profile extends Component {
 
             response_save.updated_state.token = response_save.token
             await this.props.dispatch(add_user(response_save.updated_state))
+             //set data in local storage 
+              localStorage.setItem('name', response_save.updated_state.name)
+             localStorage.setItem('emailid', response_save.updated_state.emailid)
+             localStorage.setItem('UID', response_save.updated_state.UID)
+             localStorage.setItem('phone_number', response_save.updated_state.phone_number)
+             localStorage.setItem('profile_photo', response_save.updated_state.profile_photo)
+             localStorage.setItem('token', response_save.updated_state.token)
+
             await this.props.history.push("/actual_dashboard")
 
         }
@@ -164,6 +174,20 @@ class profile extends Component {
 
     componentDidMount = (e) => {
 
+        //store data from local storage to redux
+        const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
+
+        }
+
+        //dispatch data to redux
+        this.props.dispatch(add_user(data_to_be_stored))
+
 
         if (this.props.user.profile_photo) {
             this.setState(() => ({ profile_photo: `data:image/png;base64,${Buffer.from(this.props.user.profile_photo, 'base64')}` }))
@@ -175,7 +199,7 @@ class profile extends Component {
             })
         }
 
-     
+
 
 
 
@@ -253,10 +277,10 @@ class profile extends Component {
                                     <div>
                                         <p>Your phone number</p>
                                     </div>
-                                   
+
                                     <div className="d-flex flex-row justify-content-start">
                                         <div className="w-75 ">
-                                       +1 <input type="number" className="inputTextClass_invisible" id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
+                                            +1 <input type="number" className="inputTextClass_invisible" id="edit_phone_number" placeholder={this.props.user.phone_number} readOnly="readonly" onChange={this.OnChange_phone_number_input}></input>
                                         </div>
                                         <div className="w-25">
                                             <a className="text-decoration-none EditTag">
