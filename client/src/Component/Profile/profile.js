@@ -18,7 +18,6 @@ const connection_to_redux = (state) => {
 
 class profile extends Component {
 
-
     constructor(props) {
         super(props);
         this.state = {

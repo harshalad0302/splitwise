@@ -37,17 +37,29 @@ class recent_activities extends Component {
 
     receivedData = async () => {
         const slice = this.state.Array_recent.slice(this.state.offset, this.state.offset + this.state.perPage)
- 
+
         this.setState({
             sliceddata: slice,
-            pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage)    
+            pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage)
         })
-        
+
     }
 
 
 
     componentDidMount = async (e) => {
+
+        const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
+        }
+        //dispatch data to redux
+        this.props.dispatch(add_user(data_to_be_stored))
+
         //get the data of recent activities from backend
         const data = {
             UID: this.props.user.UID,
@@ -74,11 +86,11 @@ class recent_activities extends Component {
         this.setState({
             sliceddata: slice,
             pageCount: Math.ceil(this.state.Array_recent.length / this.state.perPage),
-            selectedPage:1,
-            offset:0
+            selectedPage: 1,
+            offset: 0
         })
 
-        
+
     }
 
     handlePageClick = (e) => {
@@ -133,7 +145,7 @@ class recent_activities extends Component {
                     <div className="my-2 mx-3">
                         <h1 >Recent Activities</h1>
                     </div>
-                   
+
                     <div className="my-2 mx-3">
                         <ReactPaginate
                             previousLabel={"prev"}
@@ -187,7 +199,7 @@ class recent_activities extends Component {
                             <div className="mx-2 justify-content-start">
                                 <select defaultValue="1">
                                     <option value="1">Most Recent First</option>
-                                    <option value="2">Most Recent Last</option>     
+                                    <option value="2">Most Recent Last</option>
                                 </select>
                             </div>
                         </div>

@@ -155,8 +155,10 @@ class actual_dashboard extends Component {
 
     componentDidMount = async (e) => {
 
+
+        console.log("------------------------------- props are ",this.props)
         //store data in redux at the time of refresh
-        
+
 
         const data_to_be_stored={
             name:localStorage.getItem('name'),
@@ -169,20 +171,23 @@ class actual_dashboard extends Component {
         }
  
         //dispatch data to redux
-        this.props.dispatch(add_user(data_to_be_stored))
+     await   this.props.dispatch(add_user(data_to_be_stored))
 
-        const data = {
-            UID: this.state.UID,
-            name: this.state.name
+         const data = {
+            UID: this.props.user.UID,
+            name: this.props.user.name
         }
+
         //send data to backend to get the group invites
         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
 
 
-
+console.log("group_invite_req is ",group_invite_req)
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
                 amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
+
+                
 
             }))
         }
