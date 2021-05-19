@@ -1,19 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import cookie from 'react-cookies';
+import { signupMutation } from '../GraphQL/Mutation'
 import HomeHeader from '../HomeHeader/HomeHeader'
 import { Redirect } from 'react-router';
 import backendServer from '../../../src/WebConfig';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { graphql } from 'react-apollo';
+import { flowRight as compose } from 'lodash';
 import { add_user } from '../../Actions/user_action'
-
-
-const connection_to_redux = (state) => {
-
-    return {
-        user: state.user
-    }
-}
 
 class signup extends Component {
     constructor(props) {
@@ -54,57 +49,110 @@ class signup extends Component {
         })
     }
 
-
-    submitSignUp = async (e) => {
-
+    submitSignUp = (e) => {
         e.preventDefault();
         const data = {
             name: this.state.name,
             password: this.state.password,
             emailid: this.state.emailid
-
-        }
-        //sending to backend
-        const response = await axios.post(`${backendServer}/signup`, data)
-
-        if (response.data.auth_flag === "S") {
-            this.props.dispatch(add_user(response.data))
-            localStorage.setItem('name', response.data.name)
-            localStorage.setItem('emailid', response.data.emailid)
-            localStorage.setItem('UID', response.data.UID)
-            localStorage.setItem('token', response.data.token)
-
-            this.props.history.push("/actual_dashboard");
-           
         }
 
-        if (response.data.auth_flag === "F") {
-            this.setState({
-                auth_flag: true,
-                error_message: <div>
-                    {
-                      
-                        response.data.message.map((error_message, index) => {
-                            return (
-                                <div key={index}>
-                                   <ul list-style-position="inside" >
-                                       <li>{error_message}</li>
-                                       </ul> 
-                                </div>
-                            )
-                        })
+
+        this.props.signupMutation({
+            variables: {
+                emailid: data.emailid,
+                password: data.password,
+                name: data.name
+            }
+
+        }).then(res => {
+            if (res.data.error) {
+                alert("Error")
+            }
+            else {
+                console.log("-----------------------data is ", res.data)
+                    let response = {
+
                     }
-                </div>
+                    response.data = res.data.signup
 
-            })
+                    if (response.data.auth_flag === "S") {
+                        this.props.dispatch(add_user(response.data))
+                        localStorage.setItem('name', response.data.name)
+                        localStorage.setItem('emailid', response.data.emailid)
+                        localStorage.setItem('UID', response.data.UID)
+                        localStorage.setItem('token', response.data.token)
+                        this.props.history.push("/actual_dashboard");
 
-        }
+                    }
 
-       
+                    if (response.data.auth_flag === "F") {
+                        this.setState({
+                            auth_flag: true,
+                            error_message: <div>
+                                {
+
+                                    response.data.message.map((error_message, index) => {
+                                        return (
+                                            <div key={index}>
+                                                <ul list-style-position="inside" >
+                                                    <li>{error_message}</li>
+                                                </ul>
+                                            </div>
+                                        )
+                                    })
+                                }
+                            </div>
+
+                        })
+
+                    }
+            }
+        })
+
+        //sending to backend
+        // const response = await axios.post(`${backendServer}/signup`, data)
+
+        // if (response.data.auth_flag === "S") {
+        //     this.props.dispatch(add_user(response.data))
+        //     localStorage.setItem('name', response.data.name)
+        //     localStorage.setItem('emailid', response.data.emailid)
+        //     localStorage.setItem('UID', response.data.UID)
+        //     localStorage.setItem('token', response.data.token)
+
+        //     this.props.history.push("/actual_dashboard");
+
+        // }
+
+        // if (response.data.auth_flag === "F") {
+        //     this.setState({
+        //         auth_flag: true,
+        //         error_message: <div>
+        //             {
+
+        //                 response.data.message.map((error_message, index) => {
+        //                     return (
+        //                         <div key={index}>
+        //                            <ul list-style-position="inside" >
+        //                                <li>{error_message}</li>
+        //                                </ul> 
+        //                         </div>
+        //                     )
+        //                 })
+        //             }
+        //         </div>
+
+        //     })
+
+        // }
+
+
 
 
     }
-
+    componentDidMount = (e) => {
+        console.log("-----------props are ", this.props)
+    }
 
 
     render() {
@@ -136,5 +184,16 @@ class signup extends Component {
     }
 }
 
+const mapStateToProps = (state) => {
 
-export default connect(connection_to_redux)(signup);
+    return {
+        user: state.user
+    }
+}
+
+
+const createStoryMutation = graphql(signupMutation, {
+    name: 'signupMutation'
+})(signup)
+
+export default connect(mapStateToProps)(createStoryMutation)

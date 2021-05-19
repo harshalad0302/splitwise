@@ -4,12 +4,9 @@ import backendServer from '../../WebConfig';
 import { add_user } from '../../Actions/user_action'
 import { React, Component } from 'react';
 import '../../App.css';
-import axios from 'axios';
-import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import { connect } from 'react-redux';
 import { remove_user } from '../../Actions/user_action'
-
 
 const connection_to_redux = (state) => {
 

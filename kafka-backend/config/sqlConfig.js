@@ -1,4 +1,4 @@
-// const mysql = require('mysql');
+ // const mysql = require('mysql');
 // const sqlDB = mysql.createConnection({
 //     connectionLimit: 100,
 //     host: 'glassdoor1.ct6wnyfm23fl.us-west-1.rds.amazonaws.com',

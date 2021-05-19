@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
-import cookie from 'react-cookies';
+
 import ReactPaginate from 'react-paginate';
 import Login_header from '../Login_header/Login_header'
 import { connect } from 'react-redux';

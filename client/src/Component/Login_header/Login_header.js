@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import axios from 'axios';
-import cookie from 'react-cookies';
 import logo_image from '../../Assests/Img/splitwise_logo.svg'
 import { connect } from 'react-redux';
 import { remove_user } from '../../Actions/user_action'
@@ -22,10 +20,10 @@ class login_header extends Component {
     }
 
     submitLogout = async(e) => {
-
-        await localStorage.clear();
+         localStorage.clear();
+         this.props.dispatch(remove_user())
         this.props.props.history.push("/")
-        this.props.dispatch(remove_user())
+       
 
     }
   

@@ -12,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.5.0",
     "jsonwebtoken": "^8.5.1",
     "jw-paginate": "^1.0.4",
     "kafka-node": "^5.0.0",

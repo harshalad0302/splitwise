@@ -115,7 +115,6 @@ class profile extends Component {
         formData.append('UID', this.props.user.UID)
         formData.append('token', this.props.user.token)
 
-
         const config = {
             headers: {
                 'content-type': 'multipart/form-data'

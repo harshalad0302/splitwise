@@ -8,6 +8,8 @@ import backendServer from '../../../src/WebConfig'
 import avatar_image from '../../Assests/Img/avatar.png'
 import create_group from '../../Assests/Img/create_group.PNG'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
+import { withApollo } from 'react-apollo'
+import { CREATE_GROUP } from '../GraphQL/Queries'
 //connection to global store
 const connection_to_redux = (state) => {
 
@@ -15,7 +17,6 @@ const connection_to_redux = (state) => {
         user: state.user
     }
 }
-
 
 
 class Create_groups extends Component {
@@ -41,18 +42,18 @@ class Create_groups extends Component {
 
     componentDidMount = async (e) => {
         //store data from local storage to redux
-       const data_to_be_stored={
-           name:localStorage.getItem('name'),
-           emailid:localStorage.getItem('emailid'),
-           UID:localStorage.getItem('UID'),
-           phone_number:localStorage.getItem('phone_number'),
-           profile_photo:localStorage.getItem('profile_photo'),
-           token:localStorage.getItem('token')
-           
-       }
+        const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
 
-       //dispatch data to redux
-       this.props.dispatch(add_user(data_to_be_stored))
+        }
+
+        //dispatch data to redux
+        this.props.dispatch(add_user(data_to_be_stored))
 
         //get all emails
         const data = {
@@ -102,29 +103,75 @@ class Create_groups extends Component {
             group_name: this.state.group_name
         }
 
-        const response_create_group = await axios.post(`${backendServer}/Create_group`, data, { headers: { "Authorization": this.props.user.token } })
+        this.props.client.query({
+            query: CREATE_GROUP,
+            variables: {
+                emailid_of_members: data.emailid_of_members,
+                length: data.emailid_of_members.length,
+                owner: data.name,
+                owner_UID: data.UID,
+                group_name: data.group_name
+            }
 
-        if (response_create_group.data.auth_flag === "F") {
-            this.setState({
-                auth_flag: true,
-                error_message: <div>
-                    {
-                        response_create_group.data.message.map((error_message, index) => {
-                            return (
-                                <div key={index}>
-                                    <ul list-style-position="inside" >
-                                        <li>{error_message}</li>
-                                    </ul>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
-            })
-        }
-        else {
-            this.props.history.push("/actual_dashboard")
-        }
+        }).then(res => {
+            if (res.data.error) {
+                alert("Error")
+            }
+            else {
+                
+                let response_create_group = {
+
+                }
+                response_create_group.data = res.data.Create_group
+
+                if (response_create_group.data.auth_flag === "F") {
+                    this.setState({
+                        auth_flag: true,
+                        error_message: <div>
+                            {
+                                response_create_group.data.message.map((error_message, index) => {
+                                    return (
+                                        <div key={index}>
+                                            <ul list-style-position="inside" >
+                                                <li>{error_message}</li>
+                                            </ul>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    })
+                }
+                else {
+                    this.props.history.push("/actual_dashboard")
+                }
+
+            }
+        })
+
+        //  const response_create_group = await axios.post(`${backendServer}/Create_group`, data, { headers: { "Authorization": this.props.user.token } })
+        // if (response_create_group.data.auth_flag === "F") {
+        //     this.setState({
+        //         auth_flag: true,
+        //         error_message: <div>
+        //             {
+        //                 response_create_group.data.message.map((error_message, index) => {
+        //                     return (
+        //                         <div key={index}>
+        //                             <ul list-style-position="inside" >
+        //                                 <li>{error_message}</li>
+        //                             </ul>
+        //                         </div>
+        //                     )
+        //                 })
+        //             }
+        //         </div>
+        //     })
+        // }
+        // else {
+        //     this.props.history.push("/actual_dashboard")
+        // }
+       
 
     }
     HandelOnChange(e, index) {
@@ -258,4 +305,6 @@ class Create_groups extends Component {
 }
 
 
-export default connect(connection_to_redux)(Create_groups);
+//export default connect(connection_to_redux)(Create_groups);
+
+export default withApollo(connect(connection_to_redux)(Create_groups));

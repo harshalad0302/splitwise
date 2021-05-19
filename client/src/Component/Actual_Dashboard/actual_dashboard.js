@@ -8,6 +8,8 @@ import avatar_image from '../../Assests/Img/avatar.png'
 import Left_toggel_bar from '../Left_Toggle_bar/left_toggel_bar'
 import axios from 'axios';
 import Modal from 'react-modal'
+import { withApollo } from 'react-apollo'
+import { GROUP_PAGE_INVITE, group_invite_accept_req } from '../GraphQL/Queries'
 
 const connection_to_redux = (state) => {
 
@@ -58,7 +60,6 @@ class actual_dashboard extends Component {
 
 
     handleOpenModal = async () => {
-
         //display the settle up things 
         const data = {
             UID: this.props.user.UID,
@@ -104,36 +105,38 @@ class actual_dashboard extends Component {
 
 
     update = async (e) => {
-        const data = {
-            UID: this.state.UID,
-            name: this.state.name
+        //copy of component did mount
+        const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
+
         }
+
+        //dispatch data to redux
+        await this.props.dispatch(add_user(data_to_be_stored))
+
+        const data = {
+            UID: this.props.user.UID,
+            name: this.props.user.name
+        }
+
         //send data to backend to get the group invites
-        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
-    
+         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
+
+
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
                 amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
 
             }))
         }
-
-        else {
-            this.setState(() => ({
-                amount_gets: 0
-
-            }))
-
-        }
         if (group_invite_req.data.amount_owes_length !== 0) {
             this.setState(() => ({
                 amount_owes: parseFloat(group_invite_req.data.amount_owes[0].amount_owes).toFixed(2)
-
-            }))
-        }
-        else {
-            this.setState(() => ({
-                amount_owes: 0
 
             }))
         }
@@ -155,39 +158,32 @@ class actual_dashboard extends Component {
 
     componentDidMount = async (e) => {
 
-
-        console.log("------------------------------- props are ",this.props)
         //store data in redux at the time of refresh
+         const data_to_be_stored = {
+            name: localStorage.getItem('name'),
+            emailid: localStorage.getItem('emailid'),
+            UID: localStorage.getItem('UID'),
+            phone_number: localStorage.getItem('phone_number'),
+            profile_photo: localStorage.getItem('profile_photo'),
+            token: localStorage.getItem('token')
 
-
-        const data_to_be_stored={
-            name:localStorage.getItem('name'),
-            emailid:localStorage.getItem('emailid'),
-            UID:localStorage.getItem('UID'),
-            phone_number:localStorage.getItem('phone_number'),
-            profile_photo:localStorage.getItem('profile_photo'),
-            token:localStorage.getItem('token')
-            
         }
- 
-        //dispatch data to redux
-     await   this.props.dispatch(add_user(data_to_be_stored))
 
-         const data = {
+        //dispatch data to redux
+        await this.props.dispatch(add_user(data_to_be_stored))
+
+        const data = {
             UID: this.props.user.UID,
             name: this.props.user.name
         }
 
         //send data to backend to get the group invites
-        const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
+         const group_invite_req = await axios.post(`${backendServer}/group_page_invite`, data, { headers: { "Authorization": this.props.user.token } })
 
 
-console.log("group_invite_req is ",group_invite_req)
         if (group_invite_req.data.amount_gets_length !== 0) {
             this.setState(() => ({
                 amount_gets: parseFloat(group_invite_req.data.amount_gets[0].amount_gets).toFixed(2)
-
-                
 
             }))
         }
@@ -223,46 +219,69 @@ console.log("group_invite_req is ",group_invite_req)
             UID: this.state.UID,
             name: this.state.name
         }
-        const response_accepted_group_req = await axios.post(`${backendServer}/group_invite_accept_req`, data, { headers: { "Authorization": this.props.user.token } })
 
-        if (response_accepted_group_req.data.auth_flag === "F") {
-            this.setState({
-                auth_flag: true,
-                error_message: <div>
-                    {
-                        response_accepted_group_req.data.message.map((error_message, index) => {
-                            return (
-                                <div key={index}>
-                                    <ul list-style-position="inside" >
-                                        <li>{error_message}</li>
-                                    </ul>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
-            })
+        this.props.client.query({
+            query: group_invite_accept_req,
+            variables: {
+                group_name: data.group_name,
+                groupID: data.groupID,
+                UID: this.state.UID,
+                UID: data.UID,
+                name: data.name
+            }
 
-        }
+        }).then(res => {
+            if (res.data.error) {
+                alert("Error")
+            }
+            else {
+                let response_accepted_group_req={
 
-        else {
-            this.setState(() => ({
-                show_toggel: undefined
-            }))
+                }
+                response_accepted_group_req.data=res.data.group_invite_accept_req
 
-            this.state.invites_from_group.splice(index, 1)
-            this.update()
+                if (response_accepted_group_req.data.auth_flag === "F") {
+                    this.setState({
+                        auth_flag: true,
+                        error_message: <div>
+                            {
+                                response_accepted_group_req.data.message.map((error_message, index) => {
+                                    return (
+                                        <div key={index}>
+                                            <ul list-style-position="inside" >
+                                                <li>{error_message}</li>
+                                            </ul>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    })
 
-            this.setState(() => ({
-                show_toggel: true
-            }))
+                }
 
-        }
+                else {
+                    this.setState(() => ({
+                        show_toggel: undefined
+                    }))
 
+                    this.state.invites_from_group.splice(index, 1)
+                    this.update()
+
+                    this.setState(() => ({
+                        show_toggel: true
+                    }))
+
+                }
+
+
+
+            }
+        })
+        //  const response_accepted_group_req = await axios.post(`${backendServer}/group_invite_accept_req`, data, { headers: { "Authorization": this.props.user.token } })
 
 
     }
-
 
     handelRejecteOnClick = async (index) => {
         const data = {
@@ -529,4 +548,5 @@ console.log("group_invite_req is ",group_invite_req)
     }
 }
 
-export default connect(connection_to_redux)(actual_dashboard);
+export default withApollo(connect(connection_to_redux)(actual_dashboard));
+//export default connect(connection_to_redux)(actual_dashboard);

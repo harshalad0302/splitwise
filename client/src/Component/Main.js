@@ -27,9 +27,6 @@ class Main extends Component {
             <Route path="/Create_groups" component={Create_groups}/> 
             <Route path="/recent_activities" component={recent_activities}/> 
             <Route path="/actual_Dashboard" component={Actual_Dashboard}/> 
-         
-          
-          
             </BrowserRouter>
             </div>
 

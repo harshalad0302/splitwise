@@ -48,7 +48,7 @@ router.post('/login', async (req, res) => {
 
 });
 //Api-----Create_group
-router.post('/create_group', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.post('/create_group', async (req, res) => {
   //kafka
   kafka.make_request("user_topic", { "path": "create_group", body: req.body }, function (err, results) {
 
@@ -103,6 +103,7 @@ router.post('/Expense_add', passport.authenticate('jwt', { session: false }), as
 
 //group_page_invite
 router.post('/group_page_invite', async (req, res) => {
+  
   kafka.make_request("user_topic", { "path": "group_page_invite", body: req.body }, function (err, results) {
 
     if (err) {
@@ -128,9 +129,8 @@ router.post('/group_invite_reject_req', passport.authenticate('jwt', { session: 
 
 
 
-router.post('/group_invite_accept_req', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.post('/group_invite_accept_req',  async (req, res) => {
   kafka.make_request("user_topic", { "path": "group_invite_accept_req", body: req.body }, function (err, results) {
-
     if (err) {
       res.status(400).send(results);
     } else {
