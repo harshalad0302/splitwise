@@ -3,10 +3,10 @@ const { Sequelize ,DataTypes} = require('sequelize');
 
 
 
-const sequelize = new Sequelize('splitwise', 'root', '12345678', {
-  host:'localhost',
-  dialect: 'mysql'
-});
+// const sequelize = new Sequelize('splitwise', '****', '***', {
+//   host:'****',
+//   dialect: 'mysql'
+// });
 
 
 try {
