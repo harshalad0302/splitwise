@@ -11,7 +11,7 @@ describe("Splitwise", function () {
       agent
         .post("/Login")
 
-        .send({ emailid: "harshala@splitwise.com", password: "password" })
+        .send({ emailid: "***", password: "password" })
         .then(function (res) {
           expect(res.text).to.equal('{"auth_flag_email_login":"F","error_messgae":"Email id is not present,please sign up"}');
         })
@@ -43,8 +43,8 @@ describe("Splitwise", function () {
       agent
         .post("/signup")
         .send({
-          emailid: "h@gmail.com",
-          password: "123",
+          emailid: "**",
+          password: "**",
           name: "harshala",
         })
         .then(function (res) {
@@ -61,8 +61,8 @@ describe("Splitwise", function () {
     agent
       .post("/signup")
       .send({
-        emailid: "h@gmail.com",
-        password: "1234",
+        emailid: "***",
+        password: "***",
         name: "new_user",
       })
       .then(function (res) {
@@ -83,7 +83,7 @@ describe(" Create Groups Test", function () {
   it("Sucessfully created a group", () => {
     agent
       .post("/Create_group")
-      .set("Autherization", "Bearer eyJhbGciOiJIUzI1NiJ9.NA.EM-abaGrVay-zaqHnVwddUxmN1X_I2H3R0FD_lELdb0")
+      .set("Autherization", "Bearer **")
       .send({
         group_name: "homies"
       })
@@ -104,7 +104,7 @@ describe("Leave Group", function () {
   it("User can leave a group", () => {
     agent
       .post("/leave_group")
-      .set("Autherization", "Bearer eyJhbGciOiJIUzI1NiJ9.NA.EM-abaGrVay-zaqHnVwddUxmN1X_I2H3R0FD_lELdb0")
+      .set("Autherization", "Bearer *******")
       .send({
         UID: 1,
         GroupID: 1
