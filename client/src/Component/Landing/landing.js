@@ -16,8 +16,7 @@ class landing extends Component {
     }
 
     componentDidMount = (e) => {
-
-       
+    
     }
 
 
