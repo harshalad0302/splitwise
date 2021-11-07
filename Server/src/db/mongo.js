@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-mongoose.connect("mongodb+srv://root:root@splitwise-cluster.1ghfx.mongodb.net/Splitwise?retryWrites=true&w=majority", {
+mongoose.connect("***", {
     useUnifiedTopology: true,
     useCreateIndex: true,
     useNewUrlParser: true,
